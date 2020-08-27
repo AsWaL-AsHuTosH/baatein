@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "110357629519",
+    "firebase_url": "https://baatein-7d689.firebaseio.com",
+    "project_id": "baatein-7d689",
+    "storage_bucket": "baatein-7d689.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110357629519:android:e18d04b303dbdc9bd7383a",
+        "android_client_info": {
+          "package_name": "com.aswal.baatein"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "110357629519-04buim174r7lr3c8np0oqoupqdv7c3u6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjUp3GuU0zAQxZY04vuCgSbXejctq8db8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "110357629519-04buim174r7lr3c8np0oqoupqdv7c3u6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
