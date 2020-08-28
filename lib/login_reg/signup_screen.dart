@@ -2,8 +2,10 @@ import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/elivated_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
   static const String routeId = 'sign_up_screen';
@@ -90,6 +92,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               .createUserWithEmailAndPassword(
                                   email: emailController.text,
                                   password: passwordController.text);
+                          String email = FirebaseAuth.instance.currentUser.email;
+                          FirebaseFirestore firestore = FirebaseFirestore.instance;
+                         firestore.collection('users').doc(email).set({'name': email.substring(0, 4)});
+                         firestore.collection('requests').doc(email).set({});    
                           Navigator.pushNamed(context, HomeScreen.routeId);
                         } catch (e) {
                           print('Error');

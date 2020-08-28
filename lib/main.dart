@@ -1,4 +1,5 @@
 import 'package:baatein/chat/home_screen.dart';
+import 'package:baatein/chat/search_screen.dart';
 import 'package:baatein/login_reg/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'login_reg/signin_screen.dart';
@@ -16,6 +17,7 @@ class Baatein extends StatelessWidget {
         SignInScreen.routeId: (context) => SignInScreen(),
         SignUpScreen.routeId: (context) => SignUpScreen(),
         HomeScreen.routeId: (context) => HomeScreen(),
+        SearchScreen.routeId: (context) => SearchScreen(),
       },
       initialRoute: SignInScreen.routeId,
       theme: ThemeData(

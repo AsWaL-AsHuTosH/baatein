@@ -1,6 +1,8 @@
 import 'package:baatein/chat/chat_overview_screen.dart';
 import 'package:baatein/chat/feed_screen.dart';
+import 'package:baatein/chat/search_screen.dart';
 import 'package:baatein/chat/status_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -18,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     loggedInUser = _auth.currentUser;
     print(loggedInUser.email);
+    
   }
 
   @override
@@ -27,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
         appBar: AppBar(
-          elevation: 0,
+          elevation: 5,
           backgroundColor: Theme.of(context).primaryColor,
           automaticallyImplyLeading: false,
           title: Center(
@@ -40,6 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          actions: [
+            Padding(
+              padding: EdgeInsets.all(5.0),
+              child: GestureDetector(
+                onTap: () {
+                  _auth.signOut();
+                  Navigator.pop(context);
+                },
+                child: Icon(Icons.input),
+              ),
+            ),
+          ],
           bottom: TabBar(
             tabs: [
               Tab(text: 'Chats'),
@@ -58,8 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton(
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () {
-            _auth.signOut();
-            Navigator.pop(context);
+            Navigator.pushNamed(context, SearchScreen.routeId);
           },
           child: Icon(
             Icons.message,
