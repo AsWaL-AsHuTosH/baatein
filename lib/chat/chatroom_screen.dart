@@ -45,14 +45,14 @@ class _ChatRoomState extends State<ChatRoom> {
                   .doc(_auth.currentUser.email)
                   .collection('chats')
                   .doc(widget.friendName)
-                  .collection('messages').orderBy('time', descending: false)
+                  .collection('messages').orderBy('time', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 List<Message> messageList = [];
                 if (snapshot.hasData) {
                   final messages = snapshot.data.docs;
                   if (messages.isNotEmpty) {
-                    for (var message in messages.reversed) {
+                    for (var message in messages) {
                       String mess = message.data()['message'];
                       String sender = message.data()['sender'];
                       messageList.add(
