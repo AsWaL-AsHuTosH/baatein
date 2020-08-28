@@ -7,3 +7,8 @@ const String kEmailInUse = "[firebase_auth/email-already-in-use] The email addre
 const String kInvalidUserWarning = 'There is no user record corresponding to provided data!';
 const String kWrongPasswordWarning = 'The password is invalid!';
 const String kEmailInUseWarning = 'The email address is already in use by another account!';
+
+
+String chatIdGenerator(String user1, String user2){
+  return user1.compareTo(user2) > 0 ? user1 + '+' + user2 : user2 + '+' + user1;
+}

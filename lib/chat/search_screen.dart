@@ -18,7 +18,7 @@ class SearchScreen extends StatelessWidget {
             RaisedButton(
               onPressed: (){
                 String myEmail = FirebaseAuth.instance.currentUser.email;
-                FirebaseFirestore.instance.collection('requests').doc(controller.text).collection('request').add({'from': myEmail});
+                FirebaseFirestore.instance.collection('requests').doc(controller.text).collection('request').doc(myEmail).set({'from': myEmail});
               },
               child: Text('SEND'),
             )

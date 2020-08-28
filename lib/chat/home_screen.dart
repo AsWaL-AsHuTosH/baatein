@@ -1,7 +1,7 @@
 import 'package:baatein/chat/chat_overview_screen.dart';
-import 'package:baatein/chat/feed_screen.dart';
+import 'package:baatein/chat/request_screen.dart';
 import 'package:baatein/chat/search_screen.dart';
-import 'package:baatein/chat/status_screen.dart';
+import 'package:baatein/chat/friend_list_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     loggedInUser = _auth.currentUser;
     print(loggedInUser.email);
-    
   }
 
   @override
@@ -58,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           bottom: TabBar(
             tabs: [
               Tab(text: 'Chats'),
-              Tab(text: 'Status'),
+              Tab(text: 'Friends'),
               Tab(text: 'Requests'),
             ],
           ),
@@ -66,19 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
         body: TabBarView(
           children: [
             ChatOverviewScreen(),
-            StatusScreen(),
-            FeedScreen(),
+            FriendListScreen(),
+            RequestScreen(),
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Theme.of(context).primaryColor,
-          onPressed: () {
-            Navigator.pushNamed(context, SearchScreen.routeId);
-          },
-          child: Icon(
-            Icons.message,
-            color: Colors.white,
-          ),
         ),
       ),
     );
