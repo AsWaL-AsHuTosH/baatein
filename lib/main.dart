@@ -18,12 +18,12 @@ class Baatein extends StatelessWidget {
         SignInScreen.routeId: (context) => SignInScreen(),
         SignUpScreen.routeId: (context) => SignUpScreen(),
         HomeScreen.routeId: (context) => HomeScreen(),
-        SearchScreen.routeId: (context) => SearchScreen(),
       },
       initialRoute: SignInScreen.routeId,
       theme: ThemeData(
         primaryColor: Color(0xfff44336),
         accentColor: Colors.white,
+        canvasColor: Colors.transparent,
       ),
     );
   }

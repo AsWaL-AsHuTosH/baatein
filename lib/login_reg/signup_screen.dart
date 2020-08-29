@@ -1,6 +1,7 @@
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/elivated_form.dart';
+import 'package:baatein/customs/sign_up_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +18,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   bool otherEmailError = true;
   String errorMessage;
   final Function passwordValidation = (val) {
     return val.length < 6
         ? "Password should be at least 6 characters long!"
         : null;
+  };
+  final Function nameVaidation = (val){
+    return val.length < 4 ? "Please enter atleast 4 character long name!": null;
   };
   @override
   Widget build(BuildContext context) {
@@ -52,22 +57,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 20),
-                    CircleAvatar(
-                      child: Icon(
-                        Icons.perm_identity,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                      radius: 30,
-                      backgroundColor: Colors.red,
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    ElivatedForm(
+                    SignUpForm(
+                      nameController: nameController,
                       emailController: emailController,
                       passwordController: passwordController,
+                      nameValidataionCallback: nameVaidation,
                       emailValidationCallback: (val) {
                         if (otherEmailError) {
                           otherEmailError = false;
@@ -84,6 +78,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     RoundTextButton(
                       text: 'Sign Up',
+                      icon: Icons.arrow_forward_ios,
+                      margin: 50,
                       color: Colors.red,
                       onPress: () async {
                         if (!_formKey.currentState.validate()) return;
@@ -94,8 +90,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   password: passwordController.text);
                           String email = FirebaseAuth.instance.currentUser.email;
                           FirebaseFirestore firestore = FirebaseFirestore.instance;
-                         firestore.collection('users').doc(email).set({'name': email.substring(0, 4)});
-                         firestore.collection('requests').doc(email).set({});    
+                         await firestore.collection('users').doc(email).set({'name': nameController.text, 'email': email});
                           Navigator.pushNamed(context, HomeScreen.routeId);
                         } catch (e) {
                           print('Error');

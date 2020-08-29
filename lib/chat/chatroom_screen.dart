@@ -1,13 +1,17 @@
+import 'package:baatein/customs/message_text_field.dart';
+import 'package:baatein/customs/round_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_text_field.dart';
 import 'package:baatein/customs/message.dart';
+import 'package:date_time_format/date_time_format.dart';
 
 class ChatRoom extends StatefulWidget {
-  final friendName;
-  ChatRoom({this.friendName});
+  final String friendName;
+  final String friendEmail;
+  ChatRoom({this.friendName, this.friendEmail});
   @override
   _ChatRoomState createState() => _ChatRoomState();
 }
@@ -16,10 +20,45 @@ class _ChatRoomState extends State<ChatRoom> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
+  String myName;
+
+  @override
+  void initState() {
+    super.initState();
+    getName();
+  }
+
+  Future<void> getName() async {
+    myName = await _firesotre
+        .collection('users')
+        .doc(_auth.currentUser.email)
+        .get()
+        .then((doc) => doc.data()['name']);
+  }
+
+  Future<void> setReadFalse() async {
+    var doc = await _firesotre
+        .collection('users')
+        .doc(_auth.currentUser.email)
+        .collection('chats')
+        .doc(widget.friendEmail)
+        .get();
+    Map<String, dynamic> map = doc.data();
+    if(map.isNotEmpty)
+      return;
+    map['new_message'] = false;
+    await _firesotre
+        .collection('users')
+        .doc(_auth.currentUser.email)
+        .collection('chats')
+        .doc(widget.friendEmail)
+        .update(map);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Row(
           children: [
@@ -31,7 +70,7 @@ class _ChatRoomState extends State<ChatRoom> {
             ),
             Text(
               widget.friendName,
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -44,10 +83,12 @@ class _ChatRoomState extends State<ChatRoom> {
                   .collection('users')
                   .doc(_auth.currentUser.email)
                   .collection('chats')
-                  .doc(widget.friendName)
-                  .collection('messages').orderBy('time', descending: true)
+                  .doc(widget.friendEmail)
+                  .collection('messages')
+                  .orderBy('time', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
+                setReadFalse();
                 List<Message> messageList = [];
                 if (snapshot.hasData) {
                   final messages = snapshot.data.docs;
@@ -55,10 +96,13 @@ class _ChatRoomState extends State<ChatRoom> {
                     for (var message in messages) {
                       String mess = message.data()['message'];
                       String sender = message.data()['sender'];
+                      Timestamp stamp = message.data()['time'];
+                      String time = DateTimeFormat.format(stamp.toDate(), format: 'h:i a');
                       messageList.add(
                         Message(
                           message: mess,
                           isMe: sender == _auth.currentUser.email,
+                          time: time,
                         ),
                       );
                     }
@@ -73,36 +117,41 @@ class _ChatRoomState extends State<ChatRoom> {
               },
             ),
             Container(
+              padding: EdgeInsets.all(5),
               child: Row(
                 children: [
                   Expanded(
-                    child: RoundTextField(
-                      color: Colors.black,
+                    child: MessageField(
                       controller: controller,
                     ),
                   ),
                   SizedBox(
                     width: 5.0,
                   ),
-                  RaisedButton(
-                    child: Text('Send'),
-                    onPressed: () {
+                  RoundIconButton(icon: Icons.send, onPress: (){
                       if (controller.text.isEmpty) return;
-                      final time = DateTime.now().millisecondsSinceEpoch;
+                      DateTime time = DateTime.now();
+                      String lastMessage = controller.text.length <= 25 ? controller.text : controller.text.substring(0, 25) + "...";
                       //adding message to current user database
                       _firesotre
                           .collection('users')
                           .doc(_auth.currentUser.email)
                           .collection('chats')
-                          .doc(widget.friendName)
+                          .doc(widget.friendEmail)
                           .set(
-                        {'name': widget.friendName},
+                        {
+                          'email': widget.friendEmail,
+                          'name': widget.friendName,
+                          'last_message': lastMessage,
+                          'new_message': false,
+                          'time': time,
+                        },
                       );
                       _firesotre
                           .collection('users')
                           .doc(_auth.currentUser.email)
                           .collection('chats')
-                          .doc(widget.friendName)
+                          .doc(widget.friendEmail)
                           .collection('messages')
                           .add(
                         {
@@ -114,15 +163,21 @@ class _ChatRoomState extends State<ChatRoom> {
                       //adding message to friend database
                       _firesotre
                           .collection('users')
-                          .doc(widget.friendName)
+                          .doc(widget.friendEmail)
                           .collection('chats')
                           .doc(_auth.currentUser.email)
                           .set(
-                        {'name': _auth.currentUser.email},
+                        {
+                          'email': _auth.currentUser.email,
+                          'name': myName,
+                          'last_message': lastMessage,
+                          'new_message': true,
+                          'time': time,
+                        },
                       );
-                      _firesotre
+                     _firesotre
                           .collection('users')
-                          .doc(widget.friendName)
+                          .doc(widget.friendEmail)
                           .collection('chats')
                           .doc(_auth.currentUser.email)
                           .collection('messages')
@@ -133,10 +188,9 @@ class _ChatRoomState extends State<ChatRoom> {
                           'time': time,
                         },
                       );
-
                       controller.clear();
-                    },
-                  ),
+                    },)
+                
                 ],
               ),
             ),

@@ -3,10 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RequestTile extends StatelessWidget {
-  final String sender;
+  final String senderEmail;
+  final String name;
+  final String day, time;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
-  RequestTile({@required this.sender});
+  RequestTile({@required this.senderEmail, @required this.name, this.day, this.time});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -22,26 +24,75 @@ class RequestTile extends StatelessWidget {
           SizedBox(
             width: 10,
           ),
-          Expanded(
-            child: Text(
-              sender,
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              Text(
+                'ID: $senderEmail',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  letterSpacing: 0.5,
+                  fontSize: 10.0,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              Divider(),
+               Text(
+                day,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  letterSpacing: 0.5,
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+               Text(
+                time,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  letterSpacing: 0.5,
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
           Spacer(),
           GestureDetector(
-            onTap: (){
+            onTap: () async {
+              String myEmail = _auth.currentUser.email;
+              String myName = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(myEmail)
+                  .get()
+                  .then((doc) => doc.data()['name']);
               //adding friend to my list
-              _firesotre.collection('users').doc(_auth.currentUser.email).collection('friends').add({'name' : sender});
+              _firesotre
+                  .collection('users')
+                  .doc(myEmail)
+                  .collection('friends')
+                  .add({'email': senderEmail, 'name': name});
               //adding friend to his/her list
-              _firesotre.collection('users').doc(sender).collection('friends').add({'name' : _auth.currentUser.email});
+              _firesotre
+                  .collection('users')
+                  .doc(senderEmail)
+                  .collection('friends')
+                  .add({'email': myEmail, 'name': myName});
               //removing request
-              _firesotre.collection('requests').doc(_auth.currentUser.email).collection('request').doc(sender).delete();
+              _firesotre
+                  .collection('requests')
+                  .doc(myEmail)
+                  .collection('request')
+                  .doc(senderEmail)
+                  .delete();
             },
             child: CircleAvatar(
               backgroundColor: Colors.green,
@@ -55,9 +106,14 @@ class RequestTile extends StatelessWidget {
             width: 5,
           ),
           GestureDetector(
-            onTap: (){
+            onTap: () {
               //removing request
-              _firesotre.collection('requests').doc(_auth.currentUser.email).collection('request').doc(sender).delete();
+              _firesotre
+                  .collection('requests')
+                  .doc(_auth.currentUser.email)
+                  .collection('request')
+                  .doc(senderEmail)
+                  .delete();
             },
             child: CircleAvatar(
               backgroundColor: Colors.red,

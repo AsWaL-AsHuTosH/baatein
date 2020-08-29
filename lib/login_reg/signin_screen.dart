@@ -57,7 +57,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 50),
+                      SizedBox(height: 10),
                       ElivatedForm(
                         emailController: emailController,
                         passwordController: passwordController,
@@ -85,6 +85,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       RoundTextButton(
                         text: 'Sign In',
+                        icon: Icons.verified_user,
+                        margin: 60,
                         color: Theme.of(context).primaryColor,
                         onPress: () async {
                           if (!_formKey.currentState.validate()) return;
@@ -108,13 +110,12 @@ class _SignInScreenState extends State<SignInScreen> {
                           }
                         },
                       ),
-                      Divider(
-                        color: Colors.transparent,
-                      ),
+                      Divider(color: Colors.transparent,),
                       RoundTextButton(
                         text: 'Create New Account',
+                        icon: Icons.person_add,
                         color: Colors.green,
-                        width: 230,
+                        margin: 20,
                         onPress: () =>
                             Navigator.pushNamed(context, SignUpScreen.routeId),
                       ),

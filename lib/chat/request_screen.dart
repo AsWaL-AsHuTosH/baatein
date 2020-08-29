@@ -13,7 +13,10 @@ class RequestScreen extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, SearchScreen.routeId);
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => SearchScreen(),
+          );
         },
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
@@ -34,10 +37,16 @@ class RequestScreen extends StatelessWidget {
             if (snaps.hasData) {
               final requests = snaps.data.docs;
               for (var req in requests) {
-                final sender = req.data()['from'];
+                final String senderEmail = req.data()['from'];
+                final String name = req.data()['name'];
+                final String time = req.data()['time'];
+                final String day = req.data()['day'];
                 requestList.add(
                   RequestTile(
-                    sender: sender,
+                    senderEmail: senderEmail,
+                    name: name,
+                    time: time,
+                    day: day,
                   ),
                 );
               }

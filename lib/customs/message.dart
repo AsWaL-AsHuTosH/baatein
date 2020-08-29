@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class Message extends StatelessWidget {
   final String message;
   final bool isMe;
-  Message({this.message, this.isMe});
+  final String time;
+  Message({this.message, this.isMe, this.time});
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,6 +35,7 @@ class Message extends StatelessWidget {
           ),
           child: Text(message),
         ),
+        Text(time, style: TextStyle(color: Colors.grey, fontSize: 10),)
       ],
     );
   }

@@ -19,7 +19,8 @@ class FriendListScreen extends StatelessWidget {
             final friends = snaps.data.docs;
             for(var friend in friends){
               String name = friend.data()['name'];
-              friendList.add(FriendTile(friendName: name));
+              String email = friend.data()['email'];
+              friendList.add(FriendTile(friendName: name, friendEmail: email,));
             } 
           }
           return ListView(children: friendList,);
