@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'search_screen.dart';
+import 'package:flushbar/flushbar.dart';
 
 class RequestScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -12,11 +13,35 @@ class RequestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
+        onPressed: () async {
+          bool sent = await showModalBottomSheet(
             context: context,
             builder: (context) => SearchScreen(),
           );
+          if (sent == null) return;
+          if (sent) {
+            Flushbar(
+              message: "Your reuest is sent successfully.",
+              backgroundGradient:
+                  LinearGradient(colors: [Colors.red, Colors.orange]),
+              icon: Icon(
+                Icons.check,
+                color: Colors.green,
+                size: 40,
+              ),
+              margin: EdgeInsets.all(8),
+              borderRadius: 8,
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+              boxShadows: [
+                BoxShadow(
+                  color: Colors.lightBlueAccent,
+                  offset: Offset(0.0, 2.0),
+                  blurRadius: 3.0,
+                )
+              ],
+            ).show(context);
+          }
         },
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
@@ -36,19 +61,21 @@ class RequestScreen extends StatelessWidget {
             List<RequestTile> requestList = [];
             if (snaps.hasData) {
               final requests = snaps.data.docs;
-              for (var req in requests) {
-                final String senderEmail = req.data()['from'];
-                final String name = req.data()['name'];
-                final String time = req.data()['time'];
-                final String day = req.data()['day'];
-                requestList.add(
-                  RequestTile(
-                    senderEmail: senderEmail,
-                    name: name,
-                    time: time,
-                    day: day,
-                  ),
-                );
+              if (requests != null) {
+                for (var req in requests) {
+                  final String senderEmail = req.data()['from'];
+                  final String name = req.data()['name'];
+                  final String time = req.data()['time'];
+                  final String day = req.data()['day'];
+                  requestList.add(
+                    RequestTile(
+                      senderEmail: senderEmail,
+                      name: name,
+                      time: time,
+                      day: day,
+                    ),
+                  );
+                }
               }
             }
             return ListView(children: requestList);

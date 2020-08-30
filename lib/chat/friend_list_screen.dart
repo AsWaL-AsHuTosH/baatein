@@ -12,16 +12,18 @@ class FriendListScreen extends StatelessWidget {
     return Container(
       color: Theme.of(context).accentColor,
       child: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('users').doc(_auth.currentUser.email).collection('friends').snapshots(),
+        stream: _firestore.collection('users').doc(_auth.currentUser.email).collection('friends').orderBy('name', descending: false).snapshots(),
         builder: (context, snaps){
           List<FriendTile> friendList = [];
           if(snaps.hasData){
             final friends = snaps.data.docs;
+            if(friends != null){
             for(var friend in friends){
               String name = friend.data()['name'];
               String email = friend.data()['email'];
               friendList.add(FriendTile(friendName: name, friendEmail: email,));
             } 
+            }
           }
           return ListView(children: friendList,);
         },

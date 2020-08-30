@@ -11,8 +11,12 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  bool otherError = false;
+  String errorMessage;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,6 +37,10 @@ class _SearchScreenState extends State<SearchScreen> {
               controller: controller,
               formKey: _formKey,
               validator: (val) {
+                if (otherError) {
+                  otherError = false;
+                  return errorMessage;
+                }
                 return RegExp(
                             r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                         .hasMatch(val)
@@ -49,6 +57,31 @@ class _SearchScreenState extends State<SearchScreen> {
               icon: Icons.send,
               onPress: () async {
                 if (_formKey.currentState.validate()) {
+                  if (controller.text.trim() == _auth.currentUser.email) {
+                    otherError = true;
+                    errorMessage = 'You can\'t send request to yourself!';
+                  } else if (await _firestore
+                      .collection('users')
+                      .doc(controller.text.trim())
+                      .get()
+                      .then((value) => !value.exists)) {
+                    otherError = true;
+                    errorMessage =
+                        'There is no user record corresponding to provided email!';
+                  } else if (await _firestore
+                      .collection('users')
+                      .doc(_auth.currentUser.email)
+                      .collection('friends')
+                      .doc(controller.text.trim())
+                      .get()
+                      .then((value) => value.exists)) {
+                    otherError = true;
+                    errorMessage = 'You are already friends!';
+                  }
+                  if (otherError) {
+                    _formKey.currentState.validate();
+                    return;
+                  }
                   DateTime stamp = DateTime.now();
                   String day =
                       DateTimeFormat.format(stamp, format: 'D, M d, Y');
@@ -70,7 +103,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     'time': time,
                     'day': day
                   });
-                  Navigator.pop(context);
+                  Navigator.pop(context, true);
                 }
               },
             )

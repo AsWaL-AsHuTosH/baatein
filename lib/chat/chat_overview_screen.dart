@@ -18,13 +18,13 @@ class ChatOverviewScreen extends StatelessWidget {
         stream: _firesotre
             .collection('users')
             .doc(_auth.currentUser.email)
-            .collection('chats')
+            .collection('chats').orderBy('time',descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           List<ChatCard> chatList = [];
           if (snapshot.hasData) {
             final chats = snapshot.data.docs;
-            if (chats.isNotEmpty) {
+            if (chats != null) {
               for (var chat in chats) {
                 String friendName = chat.data()['name'];
                 String lastMessage = chat.data()['last_message'];

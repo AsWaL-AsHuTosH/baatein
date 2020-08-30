@@ -44,7 +44,7 @@ class _ChatRoomState extends State<ChatRoom> {
         .doc(widget.friendEmail)
         .get();
     Map<String, dynamic> map = doc.data();
-    if(map.isNotEmpty)
+    if(map == null)
       return;
     map['new_message'] = false;
     await _firesotre
@@ -92,7 +92,7 @@ class _ChatRoomState extends State<ChatRoom> {
                 List<Message> messageList = [];
                 if (snapshot.hasData) {
                   final messages = snapshot.data.docs;
-                  if (messages.isNotEmpty) {
+                  if (messages != null) {
                     for (var message in messages) {
                       String mess = message.data()['message'];
                       String sender = message.data()['sender'];
