@@ -14,14 +14,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
-  User loggedInUser;
-  @override
-  void initState() {
-    super.initState();
-    loggedInUser = _auth.currentUser;
-    print(loggedInUser.email);
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

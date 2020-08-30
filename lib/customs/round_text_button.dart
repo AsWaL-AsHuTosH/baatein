@@ -33,24 +33,28 @@ class RoundTextButton extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.all(Radius.circular(30)),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Center(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontFamily: 'DancingScript',
+        child: Padding(
+          padding: const EdgeInsets.only(top: 1, bottom : 1, left: 10, right: 10,),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Center(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'DancingScript',
+                  ),
                 ),
               ),
-            ),
-            CircleAvatar(
-              child: Icon(icon, color: Colors.grey),
-              backgroundColor: Colors.white,
-            ),
-          ],
+              CircleAvatar(
+                child: Icon(icon, color: Colors.grey),
+                backgroundColor: Colors.white,
+              ),
+            ],
+          ),
         ),
       ),
     );

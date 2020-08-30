@@ -5,7 +5,7 @@ const String kWrongPassword = "[firebase_auth/wrong-password] The password is in
 const String kEmailInUse = "[firebase_auth/email-already-in-use] The email address is already in use by another account.";
 
 const String kInvalidUserWarning = 'There is no user record corresponding to provided data!';
-const String kWrongPasswordWarning = 'The password is invalid!';
+const String kWrongPasswordWarning = 'Invalid password!';
 const String kEmailInUseWarning = 'The email address is already in use by another account!';
 
 

@@ -126,7 +126,17 @@ class RequestTile extends StatelessWidget {
         ],
       ),
       decoration: BoxDecoration(
-        color: Color(0xffffccbc),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          stops: [0.1, 0.5, 0.7, 0.9],
+          colors: [
+            Colors.teal[300],
+            Colors.red[400],
+            Colors.red[600],
+            Colors.red[800],
+          ],
+        ),
         borderRadius: BorderRadius.all(
           Radius.circular(15),
         ),

@@ -7,30 +7,59 @@ class ChatCard extends StatelessWidget {
   final String friendName;
   final String friendEmail;
   final time;
-  ChatCard({this.friendName,this.newMessage = false, this.lastMessage, this.friendEmail, this.time});
+  ChatCard(
+      {this.friendName,
+      this.newMessage = false,
+      this.lastMessage,
+      this.friendEmail,
+      this.time});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap:  () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatRoom(
-                    friendName: friendName,
-                    friendEmail: friendEmail,
-                  ),
-                ),
-              );
-            },
-          child: Container(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatRoom(
+              friendName: friendName,
+              friendEmail: friendEmail,
+            ),
+          ),
+        );
+      },
+      child: Container(
         decoration: BoxDecoration(
-          color: newMessage ? Color(0xffffccbc) : Colors.white,
+          gradient: newMessage
+              ? LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  stops: [0.1, 0.5, 0.7, 0.9],
+                  colors: [
+                    Colors.green[500],
+                    Colors.green[600],
+                    Colors.green[700],
+                    Colors.green[800],
+                  ],
+                )
+              : LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  stops: [0.1, 0.5, 0.7, 0.9],
+                  colors: [
+                    Colors.red[300],
+                    Colors.red[300],
+                    Colors.red[300],
+                    Colors.red[300],
+                  ],
+                ),
           borderRadius: BorderRadius.all(
             Radius.circular(15),
           ),
-           boxShadow: <BoxShadow>[
+          boxShadow: <BoxShadow>[
             BoxShadow(
-              blurRadius: 1.0,color: Colors.black, offset: Offset(0.0, 1.0),
+              blurRadius: 1.0,
+              color: Colors.black,
+              offset: Offset(0.0, 1.0),
             )
           ],
         ),
@@ -59,9 +88,9 @@ class ChatCard extends StatelessWidget {
                 Text(
                   lastMessage,
                   style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Colors.black45,
                       fontSize: 15,
-                      fontWeight: FontWeight.bold),
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
@@ -73,13 +102,16 @@ class ChatCard extends StatelessWidget {
                   Text(
                     time,
                     style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.black45,
                         fontSize: 10,
                         fontWeight: FontWeight.bold),
                   ),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Icon(
                     newMessage ? Icons.sms : null,
-                    color: Colors.red,
+                    color: Colors.white,
                   ),
                 ],
               ),
