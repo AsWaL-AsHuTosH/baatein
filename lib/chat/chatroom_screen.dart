@@ -60,10 +60,27 @@ class _ChatRoomState extends State<ChatRoom> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        elevation: 10,
         title: Row(
           children: [
-            CircleAvatar(
-              child: Icon(Icons.person),
+           StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('profile_pic')
+                  .doc(widget.friendEmail)
+                  .collection('image')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                String url;
+                if (snapshot.hasData) {
+                  final image = snapshot.data.docs;
+                  url = image[0].data()['url'];
+                }
+                return CircleAvatar(
+                  child: url != null ? null : Icon(Icons.person),
+                  backgroundImage: url != null ? NetworkImage(url) : null,
+                  radius: 25,
+                );
+              },
             ),
             SizedBox(
               width: 10,
