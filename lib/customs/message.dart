@@ -13,7 +13,7 @@ class Message extends StatelessWidget {
       children: [
         Container(
           padding: EdgeInsets.all(10),
-          margin: EdgeInsets.all(5.0),
+          margin: EdgeInsets.only(top: 5, bottom: 5, left: isMe? 20 : 5, right:  isMe? 5: 20),
           decoration: BoxDecoration(
             color: isMe? Colors.lightBlueAccent : Colors.grey,
             borderRadius: isMe? BorderRadius.only(

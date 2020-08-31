@@ -18,6 +18,8 @@ class MessageField extends StatelessWidget {
             ],
       ),
       child: TextFormField(
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
         controller: controller,
         decoration: InputDecoration(
           errorStyle: TextStyle(

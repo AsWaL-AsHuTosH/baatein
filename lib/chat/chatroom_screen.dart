@@ -129,9 +129,9 @@ class _ChatRoomState extends State<ChatRoom> {
                     width: 5.0,
                   ),
                   RoundIconButton(icon: Icons.send, onPress: (){
-                      if (controller.text.isEmpty) return;
+                      if (controller.text.trim().isEmpty)return;
                       DateTime time = DateTime.now();
-                      String lastMessage = controller.text.length <= 25 ? controller.text : controller.text.substring(0, 25) + "...";
+                      String lastMessage = controller.text.trim().length <= 25 ? controller.text.trim() : controller.text.substring(0, 25) + "...";
                       //adding message to current user database
                       _firesotre
                           .collection('users')

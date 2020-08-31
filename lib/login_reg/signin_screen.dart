@@ -8,7 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SignInScreen extends StatefulWidget {
   static const routeId = 'log_in_screen';
@@ -24,31 +23,13 @@ class _SignInScreenState extends State<SignInScreen> {
   bool otherEmailError = false;
   bool otherPasswordError = false;
   String errorMessage;
-  bool checkingLastUser = true;
-  @override
-  void initState() {
-    super.initState();
-    checkLastUser();
-  }
 
-  void checkLastUser() async {
-    await Firebase.initializeApp();
-    setState(() {
-      checkingLastUser = false;
-    });
-    if (FirebaseAuth.instance.currentUser != null) {
-      Navigator.pushNamed(context, HomeScreen.routeId);
-    }
-  }
+
+  
 
   @override
   Widget build(BuildContext context) {
-    return checkingLastUser
-        ? SpinKitFadingCircle(
-            color: Colors.white,
-            size: 50.0,
-          )
-        : Scaffold(
+    return  Scaffold(
             backgroundColor: Theme.of(context).primaryColor,
             body: ModalProgressHUD(
               inAsyncCall: spin,

@@ -1,5 +1,6 @@
 import 'package:baatein/chat/chatroom_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
+import 'package:baatein/chat/loading_screen.dart';
 import 'package:baatein/chat/search_screen.dart';
 import 'package:baatein/login_reg/signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,9 @@ class Baatein extends StatelessWidget {
         SignInScreen.routeId: (context) => SignInScreen(),
         SignUpScreen.routeId: (context) => SignUpScreen(),
         HomeScreen.routeId: (context) => HomeScreen(),
+        LoadingScreen.routeId: (context) => LoadingScreen(),
       },
-      initialRoute: SignInScreen.routeId,
+      initialRoute: LoadingScreen.routeId,
       theme: ThemeData(
         primaryColor: Color(0xfff44336),
         accentColor: Colors.white,
