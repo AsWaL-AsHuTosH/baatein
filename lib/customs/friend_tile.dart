@@ -1,14 +1,14 @@
-// import 'package:baatein/constants/constants.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:baatein/constants/constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/chat/chatroom_screen.dart';
 
 class FriendTile extends StatelessWidget {
   final String friendName;
   final String friendEmail;
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
-  // final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
   FriendTile({@required this.friendName, this.friendEmail});
   @override
   Widget build(BuildContext context) {
@@ -30,10 +30,25 @@ class FriendTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              child: Icon(Icons.person),
-              radius: 30,
-            ),
+            StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('profile_pic')
+                    .doc(friendEmail)
+                    .collection('image')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  String url;
+                  if (snapshot.hasData) {
+                    final image = snapshot.data.docs;
+                    url = image != null ? image[0].data()['url'] : null;
+                  }
+                  return CircleAvatar(
+                    child: url != null ? null : Icon(Icons.person),
+                    backgroundImage: url != null ? NetworkImage(url) : null,
+                    radius: 30,
+                  );
+                },
+              ),
             SizedBox(
               width: 10,
             ),

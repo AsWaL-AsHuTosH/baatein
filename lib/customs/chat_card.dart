@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/chat/chatroom_screen.dart';
 
@@ -7,6 +8,7 @@ class ChatCard extends StatelessWidget {
   final String friendName;
   final String friendEmail;
   final time;
+
   ChatCard(
       {this.friendName,
       this.newMessage = false,
@@ -68,9 +70,24 @@ class ChatCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              child: Icon(Icons.person),
-              radius: 30,
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('profile_pic')
+                  .doc(friendEmail)
+                  .collection('image')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                String url;
+                if (snapshot.hasData) {
+                  final image = snapshot.data.docs;
+                  url = image[0].data()['url'];
+                }
+                return CircleAvatar(
+                  child: url != null ? null : Icon(Icons.person),
+                  backgroundImage: url != null ? NetworkImage(url) : null,
+                  radius: 30,
+                );
+              },
             ),
             SizedBox(
               width: 10,
@@ -100,7 +117,7 @@ class ChatCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    time,
+                   time,
                     style: TextStyle(
                         color: Colors.black45,
                         fontSize: 10,

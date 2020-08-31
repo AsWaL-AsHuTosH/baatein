@@ -10,33 +10,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   static const routeId = 'home_screen';
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  String profileUrl;
-  @override
-  void initState() {
-    super.initState();
-    getProfilePic();
-  }
-
-  void getProfilePic() async {
-    String temp = await _firestore
-        .collection('profile_pic')
-        .doc(_auth.currentUser.email)
-        .get()
-        .then((value) => value.exists ? value.data()['image_url'] : null);
-    setState(() {
-      profileUrl = temp;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -51,8 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final ImagePicker picker = ImagePicker();
                 final PickedFile pickedImage =
                     await picker.getImage(source: ImageSource.gallery);
-                if(pickedImage == null)
-                  return;
+                if (pickedImage == null) return;
                 final ref = FirebaseStorage.instance
                     .ref()
                     .child(FirebaseAuth.instance.currentUser.email + '.jpg');
@@ -63,15 +39,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 await _firestore
                     .collection('profile_pic')
                     .doc(_auth.currentUser.email)
-                    .set({'image_url': url});
-                
-                getProfilePic();
+                    .collection('image')
+                    .doc('image_url')
+                    .set({'url': url});
               },
-              child: CircleAvatar(
-                child: profileUrl != null ? null : Icon(Icons.person),
-                backgroundImage:
-                    profileUrl != null ? NetworkImage(profileUrl) : null,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('profile_pic')
+                    .doc(_auth.currentUser.email)
+                    .collection('image')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  String url;
+                  if (snapshot.hasData) {
+                    final image = snapshot.data.docs;
+                    url = image[0].data()['url'];
+                  }
+                  return CircleAvatar(
+                    child: url != null ? null : Icon(Icons.person),
+                    backgroundImage: url != null ? NetworkImage(url) : null,
                     radius: 30,
+                  );
+                },
               ),
             ),
           ),

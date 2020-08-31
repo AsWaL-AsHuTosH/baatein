@@ -17,10 +17,25 @@ class RequestTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CircleAvatar(
-            child: Icon(Icons.person),
-            radius: 30,
-          ),
+          StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('profile_pic')
+                  .doc(senderEmail)
+                  .collection('image')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                String url;
+                if (snapshot.hasData) {
+                  final image = snapshot.data.docs;
+                  url = image[0].data()['url'];
+                }
+                return CircleAvatar(
+                  child: url != null ? null : Icon(Icons.person),
+                  backgroundImage: url != null ? NetworkImage(url) : null,
+                  radius: 30,
+                );
+              },
+            ),
           SizedBox(
             width: 10,
           ),
