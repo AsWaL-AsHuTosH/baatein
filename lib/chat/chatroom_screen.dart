@@ -7,6 +7,12 @@ import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_text_field.dart';
 import 'package:baatein/customs/message.dart';
 import 'package:date_time_format/date_time_format.dart';
+import 'package:image_picker/image_picker.dart';
+import 'image_preview.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:baatein/customs/photo_message.dart';
+import 'package:uuid/uuid.dart';
+import 'dart:io';
 
 class ChatRoom extends StatefulWidget {
   final String friendName;
@@ -18,8 +24,10 @@ class ChatRoom extends StatefulWidget {
 
 class _ChatRoomState extends State<ChatRoom> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
+  final TextEditingController imageMessageController = TextEditingController();
+
   String myName;
 
   @override
@@ -29,7 +37,7 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   Future<void> getName() async {
-    myName = await _firesotre
+    myName = await _firestore
         .collection('users')
         .doc(_auth.currentUser.email)
         .get()
@@ -37,17 +45,16 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   Future<void> setReadFalse() async {
-    var doc = await _firesotre
+    var doc = await _firestore
         .collection('users')
         .doc(_auth.currentUser.email)
         .collection('chats')
         .doc(widget.friendEmail)
         .get();
     Map<String, dynamic> map = doc.data();
-    if(map == null)
-      return;
+    if (map == null) return;
     map['new_message'] = false;
-    await _firesotre
+    await _firestore
         .collection('users')
         .doc(_auth.currentUser.email)
         .collection('chats')
@@ -63,7 +70,7 @@ class _ChatRoomState extends State<ChatRoom> {
         elevation: 10,
         title: Row(
           children: [
-           StreamBuilder<QuerySnapshot>(
+            StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('profile_pic')
                   .doc(widget.friendEmail)
@@ -96,7 +103,7 @@ class _ChatRoomState extends State<ChatRoom> {
         child: Column(
           children: [
             StreamBuilder<QuerySnapshot>(
-              stream: _firesotre
+              stream: _firestore
                   .collection('users')
                   .doc(_auth.currentUser.email)
                   .collection('chats')
@@ -106,7 +113,7 @@ class _ChatRoomState extends State<ChatRoom> {
                   .snapshots(),
               builder: (context, snapshot) {
                 setReadFalse();
-                List<Message> messageList = [];
+                List<Widget> messageList = [];
                 if (snapshot.hasData) {
                   final messages = snapshot.data.docs;
                   if (messages != null) {
@@ -114,14 +121,27 @@ class _ChatRoomState extends State<ChatRoom> {
                       String mess = message.data()['message'];
                       String sender = message.data()['sender'];
                       Timestamp stamp = message.data()['time'];
-                      String time = DateTimeFormat.format(stamp.toDate(), format: 'h:i a');
-                      messageList.add(
-                        Message(
-                          message: mess,
-                          isMe: sender == _auth.currentUser.email,
-                          time: time,
-                        ),
-                      );
+                      String time = DateTimeFormat.format(stamp.toDate(),
+                          format: 'h:i a');
+                      if (message.data()['type'] == 'txt') {
+                        messageList.add(
+                          Message(
+                            message: mess,
+                            isMe: sender == _auth.currentUser.email,
+                            time: time,
+                          ),
+                        );
+                      }else{
+                        String url = message.data()['image_url'];
+                         messageList.add(
+                          PhotoMessage(
+                            message: mess,
+                            isMe: sender == _auth.currentUser.email,
+                            time: time,
+                            photoUrl: url,
+                          ),
+                        );
+                      }
                     }
                   }
                 }
@@ -140,17 +160,122 @@ class _ChatRoomState extends State<ChatRoom> {
                   Expanded(
                     child: MessageField(
                       controller: controller,
+                      imageButtonCallback: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final PickedFile pickedImage =
+                            await picker.getImage(source: ImageSource.gallery);
+                        if (pickedImage == null) return;
+                        final File imageFile = File(pickedImage.path);
+                        bool send = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImagePreviewScreen(
+                              imageFile: imageFile,
+                              controller: imageMessageController,
+                            ),
+                          ),
+                        );
+                        if (send != null && send == true) {
+
+                          String imageId = Uuid().v4();
+                          final ref =
+                              FirebaseStorage.instance.ref().child(imageId + '.jpg');
+                          StorageUploadTask task = ref.putFile(imageFile);
+                          StorageTaskSnapshot taskSnapshot =
+                              await task.onComplete;
+                          String url = await taskSnapshot.ref.getDownloadURL();
+                          String lastMessage;
+                          DateTime time = DateTime.now();
+                          if (imageMessageController.text == null ||
+                              imageMessageController.text.trim().isEmpty) {
+                            lastMessage = '';
+                          } else {
+                            lastMessage =
+                                imageMessageController.text.trim().length <= 25
+                                    ? imageMessageController.text.trim()
+                                    : imageMessageController.text
+                                            .substring(0, 25) +
+                                        "...";
+                          }
+                          _firestore
+                              .collection('users')
+                              .doc(_auth.currentUser.email)
+                              .collection('chats')
+                              .doc(widget.friendEmail)
+                              .set(
+                            {
+                              'email': widget.friendEmail,
+                              'name': widget.friendName,
+                              'last_message': lastMessage,
+                              'new_message': false,
+                              'time': time,
+                              'type': 'img',
+                            },
+                          );
+                          _firestore
+                              .collection('users')
+                              .doc(_auth.currentUser.email)
+                              .collection('chats')
+                              .doc(widget.friendEmail)
+                              .collection('messages')
+                              .add(
+                            {
+                              'message': imageMessageController.text.trim(),
+                              'sender': _auth.currentUser.email,
+                              'time': time,
+                              'type': 'img',
+                              'image_url': url,
+                            },
+                          );
+                          //adding message to friend database
+                          _firestore
+                              .collection('users')
+                              .doc(widget.friendEmail)
+                              .collection('chats')
+                              .doc(_auth.currentUser.email)
+                              .set(
+                            {
+                              'email': _auth.currentUser.email,
+                              'name': myName,
+                              'last_message': lastMessage,
+                              'new_message': true,
+                              'time': time,
+                              'type': 'img',
+                            },
+                          );
+                          _firestore
+                              .collection('users')
+                              .doc(widget.friendEmail)
+                              .collection('chats')
+                              .doc(_auth.currentUser.email)
+                              .collection('messages')
+                              .add(
+                            {
+                              'message': imageMessageController.text.trim(),
+                              'sender': _auth.currentUser.email,
+                              'time': time,
+                              'type': 'img',
+                              'image_url': url,
+                            },
+                          );
+                          imageMessageController.clear();
+                        }
+                      },
                     ),
                   ),
                   SizedBox(
                     width: 5.0,
                   ),
-                  RoundIconButton(icon: Icons.send, onPress: (){
-                      if (controller.text.trim().isEmpty)return;
+                  RoundIconButton(
+                    icon: Icons.send,
+                    onPress: () {
+                      if (controller.text.trim().isEmpty) return;
                       DateTime time = DateTime.now();
-                      String lastMessage = controller.text.trim().length <= 25 ? controller.text.trim() : controller.text.substring(0, 25) + "...";
+                      String lastMessage = controller.text.trim().length <= 25
+                          ? controller.text.trim()
+                          : controller.text.substring(0, 25) + "...";
                       //adding message to current user database
-                      _firesotre
+                      _firestore
                           .collection('users')
                           .doc(_auth.currentUser.email)
                           .collection('chats')
@@ -162,9 +287,10 @@ class _ChatRoomState extends State<ChatRoom> {
                           'last_message': lastMessage,
                           'new_message': false,
                           'time': time,
+                          'type': 'txt',
                         },
                       );
-                      _firesotre
+                      _firestore
                           .collection('users')
                           .doc(_auth.currentUser.email)
                           .collection('chats')
@@ -172,13 +298,14 @@ class _ChatRoomState extends State<ChatRoom> {
                           .collection('messages')
                           .add(
                         {
-                          'message': controller.text,
+                          'message': controller.text.trim(),
                           'sender': _auth.currentUser.email,
                           'time': time,
+                          'type': 'txt',
                         },
                       );
                       //adding message to friend database
-                      _firesotre
+                      _firestore
                           .collection('users')
                           .doc(widget.friendEmail)
                           .collection('chats')
@@ -190,9 +317,10 @@ class _ChatRoomState extends State<ChatRoom> {
                           'last_message': lastMessage,
                           'new_message': true,
                           'time': time,
+                          'type': 'txt',
                         },
                       );
-                     _firesotre
+                      _firestore
                           .collection('users')
                           .doc(widget.friendEmail)
                           .collection('chats')
@@ -200,14 +328,15 @@ class _ChatRoomState extends State<ChatRoom> {
                           .collection('messages')
                           .add(
                         {
-                          'message': controller.text,
+                          'message': controller.text.trim(),
                           'sender': _auth.currentUser.email,
                           'time': time,
+                          'type': 'txt',
                         },
                       );
                       controller.clear();
-                    },)
-                
+                    },
+                  )
                 ],
               ),
             ),

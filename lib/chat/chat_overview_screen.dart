@@ -31,9 +31,10 @@ class ChatOverviewScreen extends StatelessWidget {
                 bool newMessage = chat.data()['new_message'];
                 String friendEmail = chat.data()['email'];
                 Timestamp stamp = chat.data()['time'];
+                bool imageMessage = chat.data()['type'] == 'img';
                 String time = DateTimeFormat.format(stamp.toDate(), format: 'h:i a');
                 chatList.add(
-                  ChatCard(newMessage: newMessage, friendName: friendName, lastMessage : lastMessage, friendEmail: friendEmail, time : time),
+                  ChatCard(newMessage: newMessage, friendName: friendName, lastMessage : lastMessage, friendEmail: friendEmail, time : time, isImage: imageMessage),
                 );
               }
             }

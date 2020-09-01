@@ -55,7 +55,7 @@ class RequestScreen extends StatelessWidget {
           stream: _firestore
               .collection('requests')
               .doc(_auth.currentUser.email)
-              .collection('request')
+              .collection('request').orderBy('day')
               .snapshots(),
           builder: (context, snaps) {
             List<RequestTile> requestList = [];

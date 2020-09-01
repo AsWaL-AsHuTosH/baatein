@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:baatein/chat/chatroom_screen.dart';
 
 class ChatCard extends StatelessWidget {
-  final bool newMessage;
+  final bool newMessage, isImage;
   final String lastMessage;
   final String friendName;
   final String friendEmail;
@@ -14,7 +14,19 @@ class ChatCard extends StatelessWidget {
       this.newMessage = false,
       this.lastMessage,
       this.friendEmail,
-      this.time});
+      this.time,
+      this.isImage});
+  Widget message() {
+    return isImage
+        ? Icon(Icons.image)
+        : Text(
+            lastMessage,
+            style: TextStyle(
+                color: Colors.black45,
+                fontSize: 15,
+                fontWeight: FontWeight.normal),
+          );
+  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -102,13 +114,7 @@ class ChatCard extends StatelessWidget {
                 SizedBox(
                   height: 5,
                 ),
-                Text(
-                  lastMessage,
-                  style: TextStyle(
-                      color: Colors.black45,
-                      fontSize: 15,
-                      fontWeight: FontWeight.normal),
-                ),
+                message(),
               ],
             ),
             Expanded(
@@ -117,7 +123,7 @@ class ChatCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                   time,
+                    time,
                     style: TextStyle(
                         color: Colors.black45,
                         fontSize: 10,

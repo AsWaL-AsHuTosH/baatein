@@ -29,7 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         : null;
   };
   final Function nameVaidation = (val){
-    return val.length < 4 ? "Please enter atleast 4 character long name!": null;
+    return val.length < 3 ? "Please enter atleast 3 character long name!": null;
   };
   @override
   Widget build(BuildContext context) {

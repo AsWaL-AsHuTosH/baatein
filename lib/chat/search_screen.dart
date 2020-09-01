@@ -77,6 +77,15 @@ class _SearchScreenState extends State<SearchScreen> {
                       .then((value) => value.exists)) {
                     otherError = true;
                     errorMessage = 'You are already friends!';
+                  } else if (await _firestore
+                      .collection('requests')
+                      .doc(FirebaseAuth.instance.currentUser.email)
+                      .collection('request')
+                      .doc(controller.text.trim())
+                      .get()
+                      .then((value) => value.exists ? true : false)) {
+                    otherError = true;
+                    errorMessage = 'You have a request from same email!';
                   }
                   if (otherError) {
                     _formKey.currentState.validate();
