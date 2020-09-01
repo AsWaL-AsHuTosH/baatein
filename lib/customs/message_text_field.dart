@@ -1,4 +1,4 @@
-import 'package:baatein/chat/image_preview.dart';
+import 'package:baatein/chat/image_preview_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

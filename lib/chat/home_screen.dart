@@ -154,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             title: Text(
                               name,
                               style: TextStyle(
-                                color: Colors.grey,
+                                color: Colors.black54,
                                 fontSize: 10,
                                 fontFamily: 'Source Sans Pro',
                                 letterSpacing: 5.0,
@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             title: Text(
                               _auth.currentUser.email,
                               style: TextStyle(
-                                color: Colors.grey,
+                                color: Colors.black54,
                                 fontSize: 10,
                                 fontFamily: 'Source Sans Pro',
                                 letterSpacing: 2.0,

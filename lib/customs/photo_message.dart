@@ -1,4 +1,4 @@
-import 'package:baatein/chat/image_screen.dart';
+import 'package:baatein/chat/image_view_screen.dart';
 import 'package:flutter/material.dart';
 
 class PhotoMessage extends StatelessWidget {
@@ -20,16 +20,16 @@ class PhotoMessage extends StatelessWidget {
             color: isMe ? Colors.lightBlueAccent : Colors.grey,
             borderRadius: isMe
                 ? BorderRadius.only(
-                    topLeft: Radius.circular(30.0),
-                    topRight: Radius.circular(30.0),
-                    bottomLeft: Radius.circular(30.0),
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
                     bottomRight: Radius.circular(0.0),
                   )
                 : BorderRadius.only(
-                    topLeft: Radius.circular(30.0),
-                    topRight: Radius.circular(30.0),
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
                     bottomLeft: Radius.circular(0.0),
-                    bottomRight: Radius.circular(30.0),
+                    bottomRight: Radius.circular(20.0),
                   ),
             boxShadow: <BoxShadow>[
               BoxShadow(
@@ -39,6 +39,7 @@ class PhotoMessage extends StatelessWidget {
             ],
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               GestureDetector(
                 onTap: () {
@@ -57,6 +58,7 @@ class PhotoMessage extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(height: 5,),
               Text(message, textAlign: TextAlign.start,),
             ],
           ),

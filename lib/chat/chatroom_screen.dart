@@ -8,7 +8,7 @@ import 'package:baatein/customs/round_text_field.dart';
 import 'package:baatein/customs/message.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:image_picker/image_picker.dart';
-import 'image_preview.dart';
+import 'image_preview_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:baatein/customs/photo_message.dart';
 import 'package:uuid/uuid.dart';
