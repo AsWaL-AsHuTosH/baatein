@@ -44,7 +44,7 @@ class _ChatRoomState extends State<ChatRoom> {
         .then((doc) => doc.data()['name']);
   }
 
-  Future<void> setReadFalse() async {
+  Future<void> setNewMessageFalse() async {
     var doc = await _firestore
         .collection('users')
         .doc(_auth.currentUser.email)
@@ -112,7 +112,7 @@ class _ChatRoomState extends State<ChatRoom> {
                   .orderBy('time', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                setReadFalse();
+                setNewMessageFalse();
                 List<Widget> messageList = [];
                 if (snapshot.hasData) {
                   final messages = snapshot.data.docs;
