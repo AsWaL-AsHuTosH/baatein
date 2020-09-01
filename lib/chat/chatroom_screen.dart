@@ -176,7 +176,6 @@ class _ChatRoomState extends State<ChatRoom> {
                           ),
                         );
                         if (send != null && send == true) {
-
                           String imageId = Uuid().v4();
                           final ref =
                               FirebaseStorage.instance.ref().child(imageId + '.jpg');
