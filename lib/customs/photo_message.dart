@@ -20,16 +20,16 @@ class PhotoMessage extends StatelessWidget {
             color: isMe ? Colors.lightBlueAccent : Colors.grey,
             borderRadius: isMe
                 ? BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0),
-                    bottomLeft: Radius.circular(20.0),
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0),
                     bottomRight: Radius.circular(0.0),
                   )
                 : BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0),
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
                     bottomLeft: Radius.circular(0.0),
-                    bottomRight: Radius.circular(20.0),
+                    bottomRight: Radius.circular(10.0),
                   ),
             boxShadow: <BoxShadow>[
               BoxShadow(

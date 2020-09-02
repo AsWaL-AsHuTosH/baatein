@@ -12,6 +12,7 @@ import 'image_preview_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:baatein/customs/photo_message.dart';
 import 'package:uuid/uuid.dart';
+import 'package:baatein/chat/profile_view.dart';
 import 'dart:io';
 
 class ChatRoom extends StatefulWidget {
@@ -70,24 +71,35 @@ class _ChatRoomState extends State<ChatRoom> {
         elevation: 10,
         title: Row(
           children: [
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('profile_pic')
-                  .doc(widget.friendEmail)
-                  .collection('image')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                String url;
-                if (snapshot.hasData) {
-                  final image = snapshot.data.docs;
-                  url = image[0].data()['url'];
-                }
-                return CircleAvatar(
-                  child: url != null ? null : Icon(Icons.person),
-                  backgroundImage: url != null ? NetworkImage(url) : null,
-                  radius: 25,
-                );
-              },
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileView(
+                    friendEmail: widget.friendEmail,
+                    friendName: widget.friendName,
+                  ),
+                ),
+              ),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('profile_pic')
+                    .doc(widget.friendEmail)
+                    .collection('image')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  String url;
+                  if (snapshot.hasData) {
+                    final image = snapshot.data.docs;
+                    url = image[0].data()['url'];
+                  }
+                  return CircleAvatar(
+                    child: url != null ? null : Icon(Icons.person),
+                    backgroundImage: url != null ? NetworkImage(url) : null,
+                    radius: 25,
+                  );
+                },
+              ),
             ),
             SizedBox(
               width: 10,
@@ -131,9 +143,9 @@ class _ChatRoomState extends State<ChatRoom> {
                             time: time,
                           ),
                         );
-                      }else{
+                      } else {
                         String url = message.data()['image_url'];
-                         messageList.add(
+                        messageList.add(
                           PhotoMessage(
                             message: mess,
                             isMe: sender == _auth.currentUser.email,
@@ -177,8 +189,9 @@ class _ChatRoomState extends State<ChatRoom> {
                         );
                         if (send != null && send == true) {
                           String imageId = Uuid().v4();
-                          final ref =
-                              FirebaseStorage.instance.ref().child(imageId + '.jpg');
+                          final ref = FirebaseStorage.instance
+                              .ref()
+                              .child(imageId + '.jpg');
                           StorageUploadTask task = ref.putFile(imageFile);
                           StorageTaskSnapshot taskSnapshot =
                               await task.onComplete;

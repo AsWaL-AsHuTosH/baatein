@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'profile_pic_edit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flushbar/flushbar.dart';
@@ -73,53 +74,76 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.only(top : 5),
+                      padding: EdgeInsets.only(top: 5),
                       color: Colors.white,
                       child: Column(
                         children: [
                           GestureDetector(
                             onTap: () async {
-                              final ImagePicker picker = ImagePicker();
-                              final PickedFile pickedImage = await picker
-                                  .getImage(source: ImageSource.gallery);
-                              if (pickedImage == null) return;
-                              final ref = FirebaseStorage.instance.ref().child(
-                                  FirebaseAuth.instance.currentUser.email +
-                                      '.jpg');
-                              final File file = File(pickedImage.path);
-                              StorageUploadTask task = ref.putFile(file);
-                              StorageTaskSnapshot taskSnapshot =
-                                  await task.onComplete;
-                              String url =
-                                  await taskSnapshot.ref.getDownloadURL();
-                              _firestore
+                              String url = await FirebaseFirestore.instance
                                   .collection('profile_pic')
                                   .doc(_auth.currentUser.email)
                                   .collection('image')
                                   .doc('image_url')
-                                  .set({'url': url});
-                              Flushbar(
-                                message:
-                                    "Your profile picture is uploaded successfully.",
-                                backgroundGradient: LinearGradient(
-                                    colors: [Colors.red, Colors.orange]),
-                                icon: Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 40,
+                                  .get()
+                                  .then((value) => value.data()['url']);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfileEditScreen(
+                                    editButtonCallback: () async {
+                                      final ImagePicker picker = ImagePicker();
+                                      final PickedFile pickedImage =
+                                          await picker.getImage(
+                                              source: ImageSource.gallery);
+                                      if (pickedImage == null) return;
+                                      final ref = FirebaseStorage.instance
+                                          .ref()
+                                          .child(FirebaseAuth
+                                                  .instance.currentUser.email +
+                                              '.jpg');
+                                      final File file = File(pickedImage.path);
+                                      StorageUploadTask task =
+                                          ref.putFile(file);
+                                      StorageTaskSnapshot taskSnapshot =
+                                          await task.onComplete;
+                                      String url = await taskSnapshot.ref
+                                          .getDownloadURL();
+                                      _firestore
+                                          .collection('profile_pic')
+                                          .doc(_auth.currentUser.email)
+                                          .collection('image')
+                                          .doc('image_url')
+                                          .set({'url': url});
+                                      Flushbar(
+                                        message:
+                                            "Your profile picture is uploaded successfully.",
+                                        backgroundGradient: LinearGradient(
+                                            colors: [
+                                              Colors.red,
+                                              Colors.orange
+                                            ]),
+                                        icon: Icon(
+                                          Icons.check,
+                                          color: Colors.green,
+                                          size: 40,
+                                        ),
+                                        margin: EdgeInsets.all(8),
+                                        borderRadius: 8,
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                        boxShadows: [
+                                          BoxShadow(
+                                            color: Colors.lightBlueAccent,
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 3.0,
+                                          )
+                                        ],
+                                      ).show(context);
+                                    },
+                                  ),
                                 ),
-                                margin: EdgeInsets.all(8),
-                                borderRadius: 8,
-                                backgroundColor: Colors.red,
-                                duration: Duration(seconds: 3),
-                                boxShadows: [
-                                  BoxShadow(
-                                    color: Colors.lightBlueAccent,
-                                    offset: Offset(0.0, 2.0),
-                                    blurRadius: 3.0,
-                                  )
-                                ],
-                              ).show(context);
+                              );
                             },
                             child: StreamBuilder<QuerySnapshot>(
                               stream: FirebaseFirestore.instance
@@ -138,18 +162,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       url != null ? null : Icon(Icons.person),
                                   backgroundImage:
                                       url != null ? NetworkImage(url) : null,
-                                  radius: 30,
+                                  radius: 50,
                                 );
                               },
                             ),
                           ),
                           ListTile(
-                            leading: Padding(
-                              padding: const EdgeInsets.only(top: 7.0),
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.black,
-                              ),
+                            leading: Icon(
+                              Icons.person,
+                              color: Colors.black,
                             ),
                             title: Text(
                               name,
@@ -179,6 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(
                             child: Divider(
                               color: Colors.grey,
+                              indent: 15,
+                              endIndent: 15,
                             ),
                           ),
                         ],
@@ -259,43 +282,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-// onTap: () async {
-//   final ImagePicker picker = ImagePicker();
-//   final PickedFile pickedImage =
-//       await picker.getImage(source: ImageSource.gallery);
-//   if (pickedImage == null) return;
-//   final ref = FirebaseStorage.instance
-//       .ref()
-//       .child(FirebaseAuth.instance.currentUser.email + '.jpg');
-//   final File file = File(pickedImage.path);
-//   StorageUploadTask task = ref.putFile(file);
-//   StorageTaskSnapshot taskSnapshot = await task.onComplete;
-//   String url = await taskSnapshot.ref.getDownloadURL();
-//   _firestore
-//       .collection('profile_pic')
-//       .doc(_auth.currentUser.email)
-//       .collection('image')
-//       .doc('image_url')
-//       .set({'url': url});
-//   Flushbar(
-//     message: "Your profile picture is uploaded successfully.",
-//     backgroundGradient:
-//         LinearGradient(colors: [Colors.red, Colors.orange]),
-//     icon: Icon(
-//       Icons.check,
-//       color: Colors.green,
-//       size: 40,
-//     ),
-//     margin: EdgeInsets.all(8),
-//     borderRadius: 8,
-//     backgroundColor: Colors.red,
-//     duration: Duration(seconds: 3),
-//     boxShadows: [
-//       BoxShadow(
-//         color: Colors.lightBlueAccent,
-//         offset: Offset(0.0, 2.0),
-//         blurRadius: 3.0,
-//       )
-//     ],
-//   ).show(context);
-// },

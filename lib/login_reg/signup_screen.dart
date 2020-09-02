@@ -119,7 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               String email = FirebaseAuth.instance.currentUser.email;
                               FirebaseFirestore firestore = FirebaseFirestore.instance;
                              await firestore.collection('users').doc(email).set({'name': nameController.text, 'email': email});
-                             await firestore.collection('profile_pic').doc(email).collection('image').doc('image_url').set({'url': null});
+                             await firestore.collection('profile_pic').doc(email).collection('image').doc('image_url').set({'url': kNoProfilePic});
                              setState(() {
                                spin = false;
                              });

@@ -64,13 +64,13 @@ class RequestScreen extends StatelessWidget {
               if (requests != null) {
                 for (var req in requests) {
                   final String senderEmail = req.data()['from'];
-                  final String name = req.data()['name'];
+                  final String senderName = req.data()['name'];
                   final String time = req.data()['time'];
                   final String day = req.data()['day'];
                   requestList.add(
                     RequestTile(
                       senderEmail: senderEmail,
-                      name: name,
+                      senderName: senderName,
                       time: time,
                       day: day,
                     ),

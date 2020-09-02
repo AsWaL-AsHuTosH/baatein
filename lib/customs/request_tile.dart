@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:baatein/chat/profile_view.dart';
 
 class RequestTile extends StatelessWidget {
   final String senderEmail;
-  final String name;
+  final String senderName;
   final String day, time;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
-  RequestTile({@required this.senderEmail, @required this.name, this.day, this.time});
+  RequestTile(
+      {@required this.senderEmail, @required this.senderName, this.day, this.time});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -17,7 +19,17 @@ class RequestTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          StreamBuilder<QuerySnapshot>(
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileView(
+                  friendEmail: senderEmail,
+                  friendName: senderName,
+                ),
+              ),
+            ),
+            child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('profile_pic')
                   .doc(senderEmail)
@@ -36,6 +48,7 @@ class RequestTile extends StatelessWidget {
                 );
               },
             ),
+          ),
           SizedBox(
             width: 10,
           ),
@@ -43,7 +56,7 @@ class RequestTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                name,
+                senderName,
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 15.0,
@@ -60,7 +73,7 @@ class RequestTile extends StatelessWidget {
                 ),
               ),
               Divider(),
-               Text(
+              Text(
                 day,
                 textAlign: TextAlign.left,
                 style: TextStyle(
@@ -69,7 +82,7 @@ class RequestTile extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                 ),
               ),
-               Text(
+              Text(
                 time,
                 textAlign: TextAlign.left,
                 style: TextStyle(
@@ -93,13 +106,15 @@ class RequestTile extends StatelessWidget {
               _firesotre
                   .collection('users')
                   .doc(myEmail)
-                  .collection('friends').doc(senderEmail)
-                  .set({'email': senderEmail, 'name': name});
+                  .collection('friends')
+                  .doc(senderEmail)
+                  .set({'email': senderEmail, 'name': senderName});
               //adding friend to his/her list
               _firesotre
                   .collection('users')
                   .doc(senderEmail)
-                  .collection('friends').doc(myEmail)
+                  .collection('friends')
+                  .doc(myEmail)
                   .set({'email': myEmail, 'name': myName});
               //removing request
               _firesotre
