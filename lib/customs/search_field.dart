@@ -6,7 +6,9 @@ class SearchField extends StatelessWidget {
   final Color color = Colors.white;
   final TextEditingController controller;
   final GlobalKey<FormState> formKey;
-  SearchField({this.controller, this.formKey, this.validator});
+  final String labelText, hintText;
+  final Function onChangeCallback;
+  SearchField({this.onChangeCallback,this.controller, this.formKey, this.validator, this.hintText = 'Enter friends email.', this.labelText = 'Freind\'s Email'});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,15 +25,16 @@ class SearchField extends StatelessWidget {
           child: Padding(
           padding: EdgeInsets.symmetric(vertical: 4),
           child: TextFormField(
+            onChanged: onChangeCallback,
             validator: validator,
             controller: controller,
             decoration: InputDecoration(
               errorStyle: TextStyle(
                 fontSize: 10,
               ),
-              hintText: 'Enter friends email.',
+              hintText: hintText,
               hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-              labelText: 'Freind\'s Email',
+              labelText: labelText,
               labelStyle: TextStyle(
                 fontSize: 15,
                   color: Colors.grey, backgroundColor: Colors.transparent),

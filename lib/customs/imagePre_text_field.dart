@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 
 class MessageFieldIP extends StatelessWidget {
   // final Function validator;
+  final String hintText;
   final Color color = Colors.white;
   final TextEditingController controller;
-  MessageFieldIP({this.controller});
+  final Function onChangeCallback;
+  MessageFieldIP(
+      {this.controller,
+      this.hintText = 'Type message here',
+      this.onChangeCallback});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -20,6 +25,7 @@ class MessageFieldIP extends StatelessWidget {
       child: Container(
         constraints: BoxConstraints(maxHeight: 100),
         child: TextFormField(
+          onChanged: onChangeCallback,
           keyboardType: TextInputType.multiline,
           maxLines: null,
           controller: controller,
@@ -27,7 +33,7 @@ class MessageFieldIP extends StatelessWidget {
             errorStyle: TextStyle(
               fontSize: 10,
             ),
-            hintText: 'Type message here',
+            hintText: hintText,
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             labelStyle: TextStyle(
                 fontSize: 15,

@@ -1,3 +1,4 @@
+import 'package:baatein/constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class ProfileEditScreen extends StatelessWidget {
                     final image = snapshot.data.docs;
                     url = image[0].data()['url'];
                   }
+                  if (url == null) url = kNoProfilePic;
                   return PhotoView(
                     imageProvider: NetworkImage(url),
                   );

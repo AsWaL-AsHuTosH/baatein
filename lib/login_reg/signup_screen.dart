@@ -26,8 +26,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ? "Password should be at least 6 characters long!"
         : null;
   };
-  final Function nameVaidation = (val){
-    return val.length < 3 ? "Please enter atleast 3 character long name!": null;
+  final Function nameVaidation = (val) {
+    return val.length < 3
+        ? "Please enter atleast 3 character long name!"
+        : null;
   };
   @override
   Widget build(BuildContext context) {
@@ -35,21 +37,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       backgroundColor: Theme.of(context).primaryColor,
       body: ModalProgressHUD(
         inAsyncCall: spin,
-              child: SafeArea(
+        child: SafeArea(
           child: Container(
-             decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          stops: [0.1, 0.5, 0.7, 0.9],
-          colors: [
-            Colors.red[800],
-            Colors.yellow[700],
-            Colors.yellow[600],
-            Colors.yellow[400],
-          ],
-        ),
-      ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                stops: [0.1, 0.5, 0.7, 0.9],
+                colors: [
+                  Colors.red[800],
+                  Colors.yellow[700],
+                  Colors.yellow[600],
+                  Colors.yellow[400],
+                ],
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -83,7 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               otherEmailError = false;
                               return errorMessage;
                             }
-                            if(val == null || val.isEmpty)
+                            if (val == null || val.isEmpty)
                               return "Please enter a valid email address!";
                             return RegExp(
                                         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
@@ -112,25 +114,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             try {
                               await FirebaseAuth.instance
                                   .createUserWithEmailAndPassword(
-                                      email: emailController.text,
+                                      email: emailController.text.trim(),
                                       password: passwordController.text);
-                              String email = FirebaseAuth.instance.currentUser.email;
-                              FirebaseFirestore firestore = FirebaseFirestore.instance;
-                             await firestore.collection('users').doc(email).set({'name': nameController.text, 'email': email});
-                             await firestore.collection('profile_pic').doc(email).collection('image').doc('image_url').set({'url': kNoProfilePic});
-                             setState(() {
-                               spin = false;
-                             });
-                             nameController.clear();
-                             emailController.clear();
-                             passwordController.clear();
+                              String email =
+                                  FirebaseAuth.instance.currentUser.email;
+                              FirebaseFirestore firestore =
+                                  FirebaseFirestore.instance;
+                              await firestore
+                                  .collection('users')
+                                  .doc(email)
+                                  .set({
+                                'name': nameController.text.trim(),
+                                'search_name':
+                                    nameController.text.trim().toLowerCase(),
+                                'email': email
+                              });
+                              await firestore
+                                  .collection('profile_pic')
+                                  .doc(email)
+                                  .collection('image')
+                                  .doc('image_url')
+                                  .set({'url': kNoProfilePic});
+                              setState(() {
+                                spin = false;
+                              });
+                              nameController.clear();
+                              emailController.clear();
+                              passwordController.clear();
                               Navigator.pushNamed(context, HomeScreen.routeId);
-                              
                             } catch (e) {
-                              if(e.toString() == kEmailInUse){
+                              if (e.toString() == kEmailInUse) {
                                 otherEmailError = true;
                                 errorMessage = kEmailInUseWarning;
-                              }else assert(false);
+                              } else
+                                assert(false);
                               setState(() {
                                 spin = false;
                               });

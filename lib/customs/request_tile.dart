@@ -108,14 +108,14 @@ class RequestTile extends StatelessWidget {
                   .doc(myEmail)
                   .collection('friends')
                   .doc(senderEmail)
-                  .set({'email': senderEmail, 'name': senderName});
+                  .set({'email': senderEmail, 'name': senderName, 'search_name': senderName.toLowerCase()});
               //adding friend to his/her list
               _firesotre
                   .collection('users')
                   .doc(senderEmail)
                   .collection('friends')
                   .doc(myEmail)
-                  .set({'email': myEmail, 'name': myName});
+                  .set({'email': myEmail, 'name': myName, 'search_name': myName.toLowerCase()});
               //removing request
               _firesotre
                   .collection('requests')

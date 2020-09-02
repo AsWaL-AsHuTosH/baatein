@@ -216,6 +216,7 @@ class _ChatRoomState extends State<ChatRoom> {
                             {
                               'email': widget.friendEmail,
                               'name': widget.friendName,
+                              'search_name': widget.friendName.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': false,
                               'time': time,
@@ -247,6 +248,7 @@ class _ChatRoomState extends State<ChatRoom> {
                             {
                               'email': _auth.currentUser.email,
                               'name': myName,
+                              'search_name': myName.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': true,
                               'time': time,
@@ -294,6 +296,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         {
                           'email': widget.friendEmail,
                           'name': widget.friendName,
+                          'search_name': widget.friendName.toLowerCase(),
                           'last_message': lastMessage,
                           'new_message': false,
                           'time': time,
@@ -324,6 +327,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         {
                           'email': _auth.currentUser.email,
                           'name': myName,
+                          'search_name': myName.toLowerCase(),
                           'last_message': lastMessage,
                           'new_message': true,
                           'time': time,

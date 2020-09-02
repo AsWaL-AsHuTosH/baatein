@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchSheet extends StatefulWidget {
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  _SearchSheetState createState() => _SearchSheetState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchSheetState extends State<SearchSheet> {
   bool otherError = false, spin = false;
   String errorMessage;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -24,7 +24,7 @@ class _SearchScreenState extends State<SearchScreen> {
       color: Colors.transparent,
       child: ModalProgressHUD(
         inAsyncCall: spin,
-              child: Container(
+        child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
@@ -118,6 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         .set({
                       'from': myEmail,
                       'name': myName,
+                      'search_name': myName.toLowerCase(),
                       'time': time,
                       'day': day
                     });
@@ -125,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       spin = false;
                     });
                     Navigator.pop(context, true);
-                  }else{
+                  } else {
                     setState(() {
                       spin = false;
                     });
