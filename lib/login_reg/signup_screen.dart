@@ -1,9 +1,7 @@
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/constants/constants.dart';
-import 'package:baatein/customs/elivated_form.dart';
 import 'package:baatein/customs/sign_up_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

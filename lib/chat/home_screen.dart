@@ -1,6 +1,5 @@
 import 'package:baatein/chat/chat_overview_screen.dart';
 import 'package:baatein/chat/request_screen.dart';
-import 'package:baatein/chat/search_screen.dart';
 import 'package:baatein/chat/friend_list_screen.dart';
 import 'package:baatein/login_reg/signin_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,13 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           GestureDetector(
                             onTap: () async {
-                              String url = await FirebaseFirestore.instance
-                                  .collection('profile_pic')
-                                  .doc(_auth.currentUser.email)
-                                  .collection('image')
-                                  .doc('image_url')
-                                  .get()
-                                  .then((value) => value.data()['url']);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

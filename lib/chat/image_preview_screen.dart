@@ -1,10 +1,7 @@
 import 'dart:io';
 import 'package:baatein/customs/imagePre_text_field.dart';
-import 'package:baatein/customs/message.dart';
-import 'package:baatein/customs/message_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
 
 class ImagePreviewScreen extends StatelessWidget {
   final TextEditingController controller;

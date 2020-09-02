@@ -1,14 +1,10 @@
-import 'package:baatein/constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/chat/chatroom_screen.dart';
 import 'package:baatein/chat/profile_view.dart';
 class FriendTile extends StatelessWidget {
   final String friendName;
   final String friendEmail;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
   FriendTile({@required this.friendName, this.friendEmail});
   @override
   Widget build(BuildContext context) {

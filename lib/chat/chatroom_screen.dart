@@ -3,8 +3,6 @@ import 'package:baatein/customs/round_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baatein/constants/constants.dart';
-import 'package:baatein/customs/round_text_field.dart';
 import 'package:baatein/customs/message.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:image_picker/image_picker.dart';

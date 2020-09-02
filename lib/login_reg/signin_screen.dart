@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'signup_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/constants/constants.dart';
