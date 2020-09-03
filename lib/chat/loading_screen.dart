@@ -26,7 +26,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       Navigator.popAndPushNamed(context, SignInScreen.routeId);
   }
 
-  //TODO Improve Loading UI
   @override
   Widget build(BuildContext context) {
     return SpinKitFadingCircle(

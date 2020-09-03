@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FreindSearchScreen extends StatefulWidget {
+  static const String routeId = 'friend_search_screen';
   @override
-  _ChatSearchScreenState createState() => _ChatSearchScreenState();
+  _FreindSearchScreenState createState() => _FreindSearchScreenState();
 }
 
-class _ChatSearchScreenState extends State<FreindSearchScreen> {
-  Stream<QuerySnapshot> myStream;
+class _FreindSearchScreenState extends State<FreindSearchScreen> {
   String data1;
   String data2;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,7 +26,7 @@ class _ChatSearchScreenState extends State<FreindSearchScreen> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: SearchField(
-                hintText: 'Search......',
+                hintText: 'Type your friend name......',
                 labelText: null,
                 onChangeCallback: (value) {
                   setState(() {

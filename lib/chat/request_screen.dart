@@ -14,12 +14,7 @@ class RequestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RequestSearchScreen(),
-          ),
-        ),
+        onPressed: () => Navigator.pushNamed(context, RequestSearchScreen.routeId),
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
           Icons.search,

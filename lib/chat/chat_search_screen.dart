@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:date_time_format/date_time_format.dart';
 
 class ChatSearchScreen extends StatefulWidget {
+  static const String routeId = 'chat_search_screen';
   @override
   _ChatSearchScreenState createState() => _ChatSearchScreenState();
 }
@@ -27,7 +28,7 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: SearchField(
-                hintText: 'Search......',
+                hintText: 'Search a chat by name......',
                 labelText: null,
                 onChangeCallback: (value) {
                   setState(() {

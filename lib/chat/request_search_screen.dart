@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RequestSearchScreen extends StatefulWidget {
+  static const String routeId = 'request_search_screen';
   @override
   _RequestSearchScreenState createState() => _RequestSearchScreenState();
 }
@@ -26,7 +27,7 @@ class _RequestSearchScreenState extends State<RequestSearchScreen> {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: SearchField(
-                hintText: 'Search......',
+                hintText: 'Search for existing request by name......',
                 labelText: null,
                 onChangeCallback: (value) {
                   setState(() {

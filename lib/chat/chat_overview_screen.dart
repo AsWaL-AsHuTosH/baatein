@@ -1,5 +1,6 @@
 import 'package:baatein/chat/chat_search_screen.dart';
 import 'package:baatein/customs/chat_card.dart';
+import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,12 +15,7 @@ class ChatOverviewScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.search, color: Colors.white),
         backgroundColor: Theme.of(context).primaryColor,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatSearchScreen(),
-          ),
-        ),
+        onPressed: () => Navigator.pushNamed(context, ChatSearchScreen.routeId),
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 1.0),
