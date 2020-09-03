@@ -11,14 +11,12 @@ class FriendSelectionCard extends StatefulWidget {
   final String friendEmail;
   final bool isSelected;
   final MaterialColor color;
-  final StreamBuilder<QuerySnapshot> data;
 
   FriendSelectionCard({
     @required this.friendName,
     this.friendEmail,
     this.isSelected,
     this.color,
-    this.data,
   });
 
   @override
@@ -48,7 +46,6 @@ class _FriendSelectionCardState extends State<FriendSelectionCard> {
         }
         ref.addSelection(
           email: widget.friendEmail,
-          data: widget.data,
         );
 
         await FirebaseFirestore.instance

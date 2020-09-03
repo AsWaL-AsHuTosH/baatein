@@ -1,3 +1,4 @@
+import 'package:baatein/chat/group_setup_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
@@ -5,6 +6,7 @@ import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -55,6 +57,7 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
             Provider.of<SelectedUser>(context, listen: true).isEmpty
                 ? Container()
                 : Container(
+                    margin: EdgeInsets.all(4),
                     height: 60,
                     child: Consumer<SelectedUser>(
                       builder: (context, value, child) {
@@ -76,7 +79,6 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                                 url = image[0].data()['url'];
                               }
                               if (url == null) url = kNoProfilePic;
-
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 2.0),
@@ -91,6 +93,16 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                       },
                     ),
                   ),
+            Provider.of<SelectedUser>(context, listen: true).isEmpty
+                ? Divider(
+                    color: Colors.transparent,
+                    height: 0,
+                  )
+                : Divider(
+                    color: Colors.grey,
+                    endIndent: 10,
+                    indent: 10,
+                  ),
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('users')
@@ -104,33 +116,75 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                 List<FriendSelectionCard> friendList = [];
                 if (snapshot.hasData) {
                   final friends = snapshot.data.docs;
-                  for (var friend in friends) {
-                    String name = friend.data()['name'];
-                    String email = friend.data()['email'];
-                    bool isSelected = friend.data()['selected'];
-                    print(email);
-                    print(isSelected);
-                    friendList.add(
-                      FriendSelectionCard(
-                        friendName: name,
-                        friendEmail: email,
-                        isSelected: isSelected,
-                        color: isSelected ? Colors.green : Colors.red,
-                      ),
-                    );
+                  if (friends != null) {
+                    for (var friend in friends) {
+                      String name = friend.data()['name'];
+                      String email = friend.data()['email'];
+                      bool isSelected = friend.data()['selected'];
+                      friendList.add(
+                        FriendSelectionCard(
+                          friendName: name,
+                          friendEmail: email,
+                          isSelected: isSelected,
+                          color: isSelected ? Colors.green : Colors.red,
+                        ),
+                      );
+                    }
                   }
                 }
                 return Expanded(
-                    child: ListView(
-                  children: friendList,
-                ));
+                  child: ListView(
+                    children: friendList,
+                  ),
+                );
               },
             ),
             Padding(
               padding: const EdgeInsets.all(30.0),
               child: RoundTextButton(
-                text: 'Create Group',
+                text: 'Setup Group',
                 icon: Icons.group,
+                onPress: () async {
+                  if( Provider.of<SelectedUser>(context, listen: false).isEmpty){
+                    Flushbar(
+                      title: 'Error',
+                      message: "You haven't selected any member.",
+                      backgroundGradient:
+                          LinearGradient(colors: [Colors.grey, Colors.grey]),
+                      icon: Icon(
+                        Icons.error,
+                        color: Colors.red[800],
+                        size: 20,
+                      ),
+                      margin: EdgeInsets.all(8),
+                      borderRadius: 8,
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                      boxShadows: [
+                        BoxShadow(
+                          color: Colors.lightBlueAccent,
+                          offset: Offset(0.0, 2.0),
+                          blurRadius: 3.0,
+                        )
+                      ],
+                    ).show(context);
+                    return;
+                  }
+                  bool ok = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GroupSetup(
+                          selected:
+                              Provider.of<SelectedUser>(context, listen: false)
+                                  .getList()),
+                    ),
+                  );
+                  if(ok == null || ok == false){
+                    Navigator.pop(context, false);
+                  }else{
+                    Navigator.pop(context, true);
+                  }
+                },
               ),
             )
           ],

@@ -1,6 +1,5 @@
 import 'package:baatein/chat/friends_search_screen.dart';
 import 'package:baatein/chat/group_selection_screen.dart';
-import 'package:baatein/chat/search_sheet.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -10,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
-class FriendListScreen extends StatelessWidget {
+class GroupChatScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
@@ -27,23 +26,23 @@ class FriendListScreen extends StatelessWidget {
           children: [
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
-                  .collection('users')
-                  .doc(_auth.currentUser.email)
-                  .collection('friends')
-                  .orderBy('name', descending: false)
+                  .collection('groups')
+                  .where('members', arrayContains: _auth.currentUser.email)
                   .snapshots(),
               builder: (context, snaps) {
                 List<FriendTile> friendList = [];
                 if (snaps.hasData) {
-                  final friends = snaps.data.docs;
-                  if (friends != null) {
-                    for (var friend in friends) {
-                      String name = friend.data()['name'];
-                      String email = friend.data()['email'];
-                      friendList.add(FriendTile(
-                        friendName: name,
-                        friendEmail: email,
-                      ));
+                  final groups = snaps.data.docs;
+                  if (groups != null) {
+                    for (var group in groups) {
+                      String name = group.data()['name'];
+                      String email = group.data()['admin'];
+                      friendList.add(
+                        FriendTile(
+                          friendName: name,
+                          friendEmail: email,
+                        ),
+                      );
                     }
                   }
                 }
@@ -57,17 +56,14 @@ class FriendListScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 80.0, bottom: 18),
               child: RoundTextButton(
-                text: 'Add Friend',
-                icon: Icons.person_add,
+                text: 'Create Group',
+                icon: Icons.group,
                 onPress: () async {
-                  bool sent = await showModalBottomSheet(
-                    context: context,
-                    builder: (context) => SearchSheet(),
-                  );
-                  if (sent == null) return;
-                  if (sent) {
+                  var ok = await Navigator.pushNamed(
+                      context, GroupSelectionScreen.routeId);
+                  if (ok != null && ok == true) {
                     Flushbar(
-                      message: "Your reuest is sent successfully.",
+                      message: "Group created successfully.",
                       backgroundGradient:
                           LinearGradient(colors: [Colors.red, Colors.orange]),
                       icon: Icon(
@@ -87,7 +83,12 @@ class FriendListScreen extends StatelessWidget {
                         )
                       ],
                     ).show(context);
+                    return;
                   }
+                  for(String email in Provider.of<SelectedUser>(context, listen: false).getList()){
+                    await _firestore.collection('users').doc(_auth.currentUser.email).collection('friends').doc(email).update({'selected': false});
+                  }
+                  Provider.of<SelectedUser>(context, listen: false).clear();     
                 },
               ),
             ),

@@ -27,7 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         : null;
   };
   final Function nameVaidation = (val) {
-    return val.length < 3
+    return val.trim().length < 3
         ? "Please enter atleast 3 character long name!"
         : null;
   };

@@ -10,20 +10,23 @@ class RequestTile extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
   RequestTile(
-      {@required this.senderEmail, @required this.senderName, this.day, this.time});
+      {@required this.senderEmail,
+      @required this.senderName,
+      this.day,
+      this.time});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProfileView(
-                  friendEmail: senderEmail,
-                  friendName: senderName,
-                ),
-              ),
-            ),
-          child: Container(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileView(
+            friendEmail: senderEmail,
+            friendName: senderName,
+          ),
+        ),
+      ),
+      child: Container(
         margin: EdgeInsets.all(1.0),
         padding: EdgeInsets.all(10),
         child: Row(
@@ -107,14 +110,24 @@ class RequestTile extends StatelessWidget {
                     .doc(myEmail)
                     .collection('friends')
                     .doc(senderEmail)
-                    .set({'email': senderEmail, 'name': senderName, 'search_name': senderName.toLowerCase()});
+                    .set({
+                  'email': senderEmail,
+                  'name': senderName,
+                  'search_name': senderName.toLowerCase(),
+                  'selected': false,
+                });
                 //adding friend to his/her list
                 _firesotre
                     .collection('users')
                     .doc(senderEmail)
                     .collection('friends')
                     .doc(myEmail)
-                    .set({'email': myEmail, 'name': myName, 'search_name': myName.toLowerCase()});
+                    .set({
+                  'email': myEmail,
+                  'name': myName,
+                  'search_name': myName.toLowerCase(),
+                  'selected': false,
+                });
                 //removing request
                 _firesotre
                     .collection('requests')

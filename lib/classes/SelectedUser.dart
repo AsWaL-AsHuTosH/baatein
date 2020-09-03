@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class SelectedUser with ChangeNotifier {
   Set<String> selected = {};
 
-  void addSelection({String email, StreamBuilder<QuerySnapshot> data}) {
+  void addSelection({String email}) {
     selected.add(email);
     notifyListeners();
   }

@@ -1,5 +1,4 @@
 import 'package:baatein/chat/chat_search_screen.dart';
-import 'package:baatein/chat/friend_list_screen.dart';
 import 'package:baatein/chat/friends_search_screen.dart';
 import 'package:baatein/chat/group_selection_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
