@@ -1,10 +1,8 @@
 import 'package:baatein/chat/group_chat_room.dart';
 import 'package:baatein/chat/group_profile_view.dart';
-import 'package:baatein/chat/profile_view.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:baatein/chat/chatroom_screen.dart';
 
 class GroupChatCard extends StatelessWidget {
   final bool newMessage, isImage;

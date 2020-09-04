@@ -5,10 +5,13 @@ import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:io';
 
 class GroupSetup extends StatefulWidget {
   final List<String> selected;
@@ -27,10 +30,11 @@ class _GroupSetupState extends State<GroupSetup> {
         ? "Please enter atleast 3 character long name!"
         : null;
   };
+  bool spin = false;
 
+  File imageFile;
   @override
   Widget build(BuildContext context) {
-    bool spin = false;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -53,12 +57,28 @@ class _GroupSetupState extends State<GroupSetup> {
             SizedBox(
               height: 10,
             ),
-            CircleAvatar(
-              child: Icon(
-                Icons.photo_camera,
-                size: 30,
-              ),
-              radius: 50,
+            GestureDetector(
+              onTap: () async {
+                final ImagePicker picker = ImagePicker();
+                final PickedFile pickedImage =
+                    await picker.getImage(source: ImageSource.gallery);
+                if (pickedImage == null) return;
+                setState(() {
+                  imageFile = File(pickedImage.path);
+                });
+              },
+              child: imageFile == null
+                  ? CircleAvatar(
+                      child: Icon(
+                        Icons.photo_camera,
+                        size: 30,
+                      ),
+                      radius: 50,
+                    )
+                  : CircleAvatar(
+                      backgroundImage: AssetImage(imageFile.path),
+                      radius: 50,
+                    ),
             ),
             SizedBox(
               height: 10,
@@ -127,27 +147,48 @@ class _GroupSetupState extends State<GroupSetup> {
                         Provider.of<SelectedUser>(context, listen: false)
                             .getList();
                     list.add(_auth.currentUser.email);
-                    List<Map<String, String>> nameList = Provider.of<SelectedUser>(context, listen: false)
+                    List<Map<String, String>> nameList =
+                        Provider.of<SelectedUser>(context, listen: false)
                             .getNameList();
-                             String myName = await FirebaseFirestore.instance
+                    String myName = await FirebaseFirestore.instance
                         .collection('users')
                         .doc(FirebaseAuth.instance.currentUser.email)
                         .get()
                         .then((doc) => doc.data()['name']);
-                    nameList.add({FirebaseAuth.instance.currentUser.email: myName});
+                    nameList
+                        .add({FirebaseAuth.instance.currentUser.email: myName});
                     await _firestore.collection('groups').doc(id).set({
                       'name': controller.text.trim(),
                       'search_name': controller.text.trim().toLowerCase(),
                       'admin': _auth.currentUser.email,
                       'members': list,
-                      'members_name':nameList,
+                      'members_name': nameList,
                       'id': id,
                       'last_message': null,
                       'read': null,
                       'type': null,
-                      'time':null,
+                      'time': null,
                     });
-                    await _firestore.collection('profile_pic').doc(id).collection('image').doc('image_url').set({'url': kNoGroupPic});
+                    if (imageFile != null) {
+                      final ref =
+                          FirebaseStorage.instance.ref().child(id + '.jpg');
+                      StorageUploadTask task = ref.putFile(imageFile);
+                      StorageTaskSnapshot taskSnapshot = await task.onComplete;
+                      String url = await taskSnapshot.ref.getDownloadURL();
+                      _firestore
+                          .collection('profile_pic')
+                          .doc(id)
+                          .collection('image')
+                          .doc('image_url')
+                          .set({'url': url});
+                    } else {
+                      await _firestore
+                          .collection('profile_pic')
+                          .doc(id)
+                          .collection('image')
+                          .doc('image_url')
+                          .set({'url': kNoGroupPic});
+                    }
                     for (String email
                         in Provider.of<SelectedUser>(context, listen: false)
                             .getList()) {
@@ -164,7 +205,7 @@ class _GroupSetupState extends State<GroupSetup> {
                     });
                     Navigator.pop(context, true);
                   } else {
-                    setState(() {
+                    this.setState(() {
                       spin = false;
                     });
                   }

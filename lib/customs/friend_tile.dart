@@ -8,10 +8,12 @@ class FriendTile extends StatelessWidget {
   final String friendName;
   final String friendEmail;
   final bool disableMainOnTap;
+  final bool special;
   FriendTile(
       {@required this.friendName,
       this.friendEmail,
-      this.disableMainOnTap = false});
+      this.disableMainOnTap = false,
+      this.special = false});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -91,6 +93,14 @@ class FriendTile extends StatelessWidget {
                 ],
               ),
             ),
+            special
+                ? Icon(
+                    Icons.person_pin,
+                  )
+                : Container(
+                    width: 0,
+                    height: 0,
+                  ),
           ],
         ),
         decoration: BoxDecoration(
