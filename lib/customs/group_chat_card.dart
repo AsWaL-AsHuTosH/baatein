@@ -109,7 +109,7 @@ class GroupChatCard extends StatelessWidget {
                       groupId: groupId,
                       groupName: groupName,
                       groupAdmin: groupAdmin,
-                      memebers: members,
+                      members: members,
                       membersName: membersName,
                     ),
                   ),

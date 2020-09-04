@@ -54,9 +54,8 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                 .doc(widget.groupId)
                 .get()
                 .then((value) => value.data()['members_name']);
-            Map<String,dynamic> membersName = {};
-            for(var map in mapList)
-                membersName.addAll(map);
+            Map<String, dynamic> membersName = {};
+            for (var map in mapList) membersName.addAll(map);
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -64,7 +63,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                   groupId: widget.groupId,
                   groupName: widget.groupName,
                   groupAdmin: widget.admin,
-                  memebers: members,
+                  members: members,
                   membersName: membersName,
                 ),
               ),

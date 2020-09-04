@@ -9,11 +9,16 @@ class FriendTile extends StatelessWidget {
   final String friendEmail;
   final bool readOnly;
   final bool special;
-  FriendTile(
-      {@required this.friendName,
-      this.friendEmail,
-      this.readOnly = false,
-      this.special = false});
+  final bool kick;
+  final Function kickCallback;
+  FriendTile({
+    @required this.friendName,
+    this.friendEmail,
+    this.readOnly = false,
+    this.special = false,
+    this.kick = false,
+    this.kickCallback,
+  });
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -104,6 +109,15 @@ class FriendTile extends StatelessWidget {
             special
                 ? Icon(
                     Icons.person_pin,
+                  )
+                : Container(
+                    width: 0,
+                    height: 0,
+                  ),
+            kick
+                ? GestureDetector(
+                    onTap: kickCallback,
+                    child: Icon(Icons.exit_to_app),
                   )
                 : Container(
                     width: 0,
