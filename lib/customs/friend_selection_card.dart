@@ -46,6 +46,7 @@ class _FriendSelectionCardState extends State<FriendSelectionCard> {
         }
         ref.addSelection(
           email: widget.friendEmail,
+          name: widget.friendName,
         );
 
         await FirebaseFirestore.instance

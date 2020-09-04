@@ -55,9 +55,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                SizedBox(
-                  height: 50,
-                ),
                 Padding(
                   padding: EdgeInsets.only(right: 10, bottom: 5),
                   child: Text(
@@ -96,64 +93,68 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           passwordValidationCallback: passwordValidation,
                           formKey: _formKey,
                         ),
-                        RoundTextButton(
-                          text: 'Sign Up',
-                          icon: Icons.arrow_forward_ios,
-                          margin: 50,
-                          color: Colors.red,
-                          onPress: () async {
-                            setState(() {
-                              spin = true;
-                            });
-                            if (!_formKey.currentState.validate()) {
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: RoundTextButton(
+                            text: 'Sign Up',
+                            icon: Icons.arrow_forward_ios,
+                            margin: 50,
+                            color: Colors.red,
+                            onPress: () async {
                               setState(() {
-                                spin = false;
+                                spin = true;
                               });
-                              return;
-                            }
-                            try {
-                              await FirebaseAuth.instance
-                                  .createUserWithEmailAndPassword(
-                                      email: emailController.text.trim(),
-                                      password: passwordController.text);
-                              String email =
-                                  FirebaseAuth.instance.currentUser.email;
-                              FirebaseFirestore firestore =
-                                  FirebaseFirestore.instance;
-                              await firestore
-                                  .collection('users')
-                                  .doc(email)
-                                  .set({
-                                'name': nameController.text.trim(),
-                                'search_name':
-                                    nameController.text.trim().toLowerCase(),
-                                'email': email
-                              });
-                              await firestore
-                                  .collection('profile_pic')
-                                  .doc(email)
-                                  .collection('image')
-                                  .doc('image_url')
-                                  .set({'url': kNoProfilePic});
-                              setState(() {
-                                spin = false;
-                              });
-                              nameController.clear();
-                              emailController.clear();
-                              passwordController.clear();
-                              Navigator.pushNamed(context, HomeScreen.routeId);
-                            } catch (e) {
-                              if (e.toString() == kEmailInUse) {
-                                otherEmailError = true;
-                                errorMessage = kEmailInUseWarning;
-                              } else
-                                assert(false);
-                              setState(() {
-                                spin = false;
-                              });
-                              _formKey.currentState.validate();
-                            }
-                          },
+                              if (!_formKey.currentState.validate()) {
+                                setState(() {
+                                  spin = false;
+                                });
+                                return;
+                              }
+                              try {
+                                await FirebaseAuth.instance
+                                    .createUserWithEmailAndPassword(
+                                        email: emailController.text.trim(),
+                                        password: passwordController.text);
+                                String email =
+                                    FirebaseAuth.instance.currentUser.email;
+                                FirebaseFirestore firestore =
+                                    FirebaseFirestore.instance;
+                                await firestore
+                                    .collection('users')
+                                    .doc(email)
+                                    .set({
+                                  'name': nameController.text.trim(),
+                                  'search_name':
+                                      nameController.text.trim().toLowerCase(),
+                                  'email': email
+                                });
+                                await firestore
+                                    .collection('profile_pic')
+                                    .doc(email)
+                                    .collection('image')
+                                    .doc('image_url')
+                                    .set({'url': kNoProfilePic});
+                                setState(() {
+                                  spin = false;
+                                });
+                                nameController.clear();
+                                emailController.clear();
+                                passwordController.clear();
+                                Navigator.pushNamed(
+                                    context, HomeScreen.routeId);
+                              } catch (e) {
+                                if (e.toString() == kEmailInUse) {
+                                  otherEmailError = true;
+                                  errorMessage = kEmailInUseWarning;
+                                } else
+                                  assert(false);
+                                setState(() {
+                                  spin = false;
+                                });
+                                _formKey.currentState.validate();
+                              }
+                            },
+                          ),
                         )
                       ],
                     ),

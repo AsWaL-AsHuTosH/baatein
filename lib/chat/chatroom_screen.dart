@@ -1,3 +1,4 @@
+import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/message_text_field.dart';
 import 'package:baatein/customs/round_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -44,21 +45,12 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   Future<void> setNewMessageFalse() async {
-    var doc = await _firestore
-        .collection('users')
-        .doc(_auth.currentUser.email)
-        .collection('chats')
-        .doc(widget.friendEmail)
-        .get();
-    Map<String, dynamic> map = doc.data();
-    if (map == null) return;
-    map['new_message'] = false;
     await _firestore
         .collection('users')
         .doc(_auth.currentUser.email)
         .collection('chats')
         .doc(widget.friendEmail)
-        .update(map);
+        .update({'new_message': false});
   }
 
   @override
@@ -67,19 +59,19 @@ class _ChatRoomState extends State<ChatRoom> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 10,
-        title: Row(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileView(
-                    friendEmail: widget.friendEmail,
-                    friendName: widget.friendName,
-                  ),
-                ),
+        title: GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfileView(
+                friendEmail: widget.friendEmail,
+                friendName: widget.friendName,
               ),
-              child: StreamBuilder<QuerySnapshot>(
+            ),
+          ),
+          child: Row(
+            children: [
+              StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')
                     .doc(widget.friendEmail)
@@ -91,22 +83,22 @@ class _ChatRoomState extends State<ChatRoom> {
                     final image = snapshot.data.docs;
                     url = image[0].data()['url'];
                   }
+                  if (url == null) url = kNoProfilePic;
                   return CircleAvatar(
-                    child: url != null ? null : Icon(Icons.person),
-                    backgroundImage: url != null ? NetworkImage(url) : null,
+                    backgroundImage: NetworkImage(url),
                     radius: 25,
                   );
                 },
               ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              widget.friendName,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-          ],
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                widget.friendName,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
       ),
       body: SafeArea(

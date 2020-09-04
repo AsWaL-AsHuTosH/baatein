@@ -1,11 +1,13 @@
 import 'package:baatein/chat/image_view_screen.dart';
 import 'package:flutter/material.dart';
 
-class PhotoMessage extends StatelessWidget {
+class GroupPhotoMessage extends StatelessWidget {
   final String photoUrl, message;
   final bool isMe;
   final String time;
-  PhotoMessage({this.message, this.photoUrl, this.isMe, this.time});
+  final String senderName;
+  final String senderEmail;
+  GroupPhotoMessage({this.message, this.photoUrl, this.isMe, this.time, this.senderName, this.senderEmail});
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -41,6 +43,8 @@ class PhotoMessage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              isMe ? Container(width: 0, height: 0) : Text(senderName),
+              isMe ? Container(width: 0,height: 0): FractionallySizedBox(child: Divider(color: Colors.white),),
               GestureDetector(
                 onTap: () {
                   Navigator.push(

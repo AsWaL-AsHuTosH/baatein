@@ -123,19 +123,31 @@ class _GroupSetupState extends State<GroupSetup> {
                     FirebaseFirestore _firestore = FirebaseFirestore.instance;
                     FirebaseAuth _auth = FirebaseAuth.instance;
                     String id = Uuid().v4();
-                    final List<String> list =
+                    List<String> list =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getList();
                     list.add(_auth.currentUser.email);
+                    List<Map<String, String>> nameList = Provider.of<SelectedUser>(context, listen: false)
+                            .getNameList();
+                             String myName = await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser.email)
+                        .get()
+                        .then((doc) => doc.data()['name']);
+                    nameList.add({FirebaseAuth.instance.currentUser.email: myName});
                     await _firestore.collection('groups').doc(id).set({
                       'name': controller.text.trim(),
                       'search_name': controller.text.trim().toLowerCase(),
                       'admin': _auth.currentUser.email,
                       'members': list,
+                      'members_name':nameList,
                       'id': id,
-                      'lastMessage': null,
+                      'last_message': null,
                       'read': null,
+                      'type': null,
+                      'time':null,
                     });
+                    await _firestore.collection('profile_pic').doc(id).collection('image').doc('image_url').set({'url': kNoGroupPic});
                     for (String email
                         in Provider.of<SelectedUser>(context, listen: false)
                             .getList()) {

@@ -1,22 +1,24 @@
+import 'package:baatein/chat/group_profile_view.dart';
+import 'package:baatein/constants/constants.dart';
+import 'package:baatein/customs/group_message.dart';
+import 'package:baatein/customs/group_photo_message.dart';
 import 'package:baatein/customs/message_text_field.dart';
 import 'package:baatein/customs/round_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baatein/customs/message.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:image_picker/image_picker.dart';
 import 'image_preview_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:baatein/customs/photo_message.dart';
 import 'package:uuid/uuid.dart';
-import 'package:baatein/chat/profile_view.dart';
 import 'dart:io';
 
 class GroupChatRoom extends StatefulWidget {
-  final String friendName;
-  final String friendEmail;
-  GroupChatRoom({this.friendName, this.friendEmail});
+  final String groupId;
+  final String groupName;
+  final String admin;
+  GroupChatRoom({this.groupName, this.groupId, this.admin});
   @override
   _GroupChatScreenState createState() => _GroupChatScreenState();
 }
@@ -27,38 +29,10 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
   final TextEditingController controller = TextEditingController();
   final TextEditingController imageMessageController = TextEditingController();
 
-  String myName;
-
-  @override
-  void initState() {
-    super.initState();
-    getName();
-  }
-
-  Future<void> getName() async {
-    myName = await _firestore
-        .collection('users')
-        .doc(_auth.currentUser.email)
-        .get()
-        .then((doc) => doc.data()['name']);
-  }
-
-  Future<void> setNewMessageFalse() async {
-    var doc = await _firestore
-        .collection('users')
-        .doc(_auth.currentUser.email)
-        .collection('chats')
-        .doc(widget.friendEmail)
-        .get();
-    Map<String, dynamic> map = doc.data();
-    if (map == null) return;
-    map['new_message'] = false;
-    await _firestore
-        .collection('users')
-        .doc(_auth.currentUser.email)
-        .collection('chats')
-        .doc(widget.friendEmail)
-        .update(map);
+  Future<void> setLastMessageRead() async {
+    await _firestore.collection('groups').doc(widget.groupId).update({
+      'read': FieldValue.arrayUnion([_auth.currentUser.email])
+    });
   }
 
   @override
@@ -67,22 +41,41 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 10,
-        title: Row(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileView(
-                    friendEmail: widget.friendEmail,
-                    friendName: widget.friendName,
-                  ),
+        title: GestureDetector(
+          onTap: () async {
+            List<String> members = List.from(await _firestore
+                .collection('groups')
+                .doc(widget.groupId)
+                .get()
+                .then((value) => value.data()['members']));
+
+            List<dynamic> mapList = await _firestore
+                .collection('groups')
+                .doc(widget.groupId)
+                .get()
+                .then((value) => value.data()['members_name']);
+            Map<String,dynamic> membersName = {};
+            for(var map in mapList)
+                membersName.addAll(map);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GroupProfileView(
+                  groupId: widget.groupId,
+                  groupName: widget.groupName,
+                  groupAdmin: widget.admin,
+                  memebers: members,
+                  membersName: membersName,
                 ),
               ),
-              child: StreamBuilder<QuerySnapshot>(
+            );
+          },
+          child: Row(
+            children: [
+              StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')
-                    .doc(widget.friendEmail)
+                    .doc(widget.groupId)
                     .collection('image')
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -91,22 +84,22 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                     final image = snapshot.data.docs;
                     url = image[0].data()['url'];
                   }
+                  if (url == null) url = kNoGroupPic;
                   return CircleAvatar(
-                    child: url != null ? null : Icon(Icons.person),
-                    backgroundImage: url != null ? NetworkImage(url) : null,
+                    backgroundImage: NetworkImage(url),
                     radius: 25,
                   );
                 },
               ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              widget.friendName,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-          ],
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                widget.groupName,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
       ),
       body: SafeArea(
@@ -114,41 +107,44 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
           children: [
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
-                  .collection('users')
-                  .doc(_auth.currentUser.email)
-                  .collection('chats')
-                  .doc(widget.friendEmail)
+                  .collection('groups')
+                  .doc(widget.groupId)
                   .collection('messages')
                   .orderBy('time', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                setNewMessageFalse();
+                setLastMessageRead();
                 List<Widget> messageList = [];
                 if (snapshot.hasData) {
                   final messages = snapshot.data.docs;
                   if (messages != null) {
                     for (var message in messages) {
                       String mess = message.data()['message'];
-                      String sender = message.data()['sender'];
+                      String senderEmail = message.data()['sender'];
+                      String senderName = message.data()['name'];
                       Timestamp stamp = message.data()['time'];
                       String time = DateTimeFormat.format(stamp.toDate(),
                           format: 'h:i a');
                       if (message.data()['type'] == 'txt') {
                         messageList.add(
-                          Message(
+                          GroupMessage(
                             message: mess,
-                            isMe: sender == _auth.currentUser.email,
+                            isMe: senderEmail == _auth.currentUser.email,
                             time: time,
+                            senderName: senderName,
+                            senderEmail: senderEmail,
                           ),
                         );
                       } else {
                         String url = message.data()['image_url'];
                         messageList.add(
-                          PhotoMessage(
+                          GroupPhotoMessage(
                             message: mess,
-                            isMe: sender == _auth.currentUser.email,
+                            isMe: senderEmail == _auth.currentUser.email,
                             time: time,
                             photoUrl: url,
+                            senderEmail: senderEmail,
+                            senderName: senderName,
                           ),
                         );
                       }
@@ -168,111 +164,82 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
               child: Row(
                 children: [
                   Expanded(
-                    child: MessageField(
-                      controller: controller,
-                      imageButtonCallback: () async {
-                        final ImagePicker picker = ImagePicker();
-                        final PickedFile pickedImage =
-                            await picker.getImage(source: ImageSource.gallery);
-                        if (pickedImage == null) return;
-                        final File imageFile = File(pickedImage.path);
-                        bool send = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ImagePreviewScreen(
-                              imageFile: imageFile,
-                              controller: imageMessageController,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: MessageField(
+                        controller: controller,
+                        imageButtonCallback: () async {
+                          final ImagePicker picker = ImagePicker();
+                          final PickedFile pickedImage = await picker.getImage(
+                              source: ImageSource.gallery);
+                          if (pickedImage == null) return;
+                          final File imageFile = File(pickedImage.path);
+                          bool send = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ImagePreviewScreen(
+                                imageFile: imageFile,
+                                controller: imageMessageController,
+                              ),
                             ),
-                          ),
-                        );
-                        if (send != null && send == true) {
-                          String imageId = Uuid().v4();
-                          final ref = FirebaseStorage.instance
-                              .ref()
-                              .child(imageId + '.jpg');
-                          StorageUploadTask task = ref.putFile(imageFile);
-                          StorageTaskSnapshot taskSnapshot =
-                              await task.onComplete;
-                          String url = await taskSnapshot.ref.getDownloadURL();
-                          String lastMessage;
-                          DateTime time = DateTime.now();
-                          if (imageMessageController.text == null ||
-                              imageMessageController.text.trim().isEmpty) {
-                            lastMessage = '';
-                          } else {
-                            lastMessage =
-                                imageMessageController.text.trim().length <= 25
-                                    ? imageMessageController.text.trim()
-                                    : imageMessageController.text
-                                            .substring(0, 25) +
-                                        "...";
+                          );
+                          if (send != null && send == true) {
+                            String imageId = Uuid().v4();
+                            final ref = FirebaseStorage.instance
+                                .ref()
+                                .child(imageId + '.jpg');
+                            StorageUploadTask task = ref.putFile(imageFile);
+                            StorageTaskSnapshot taskSnapshot =
+                                await task.onComplete;
+                            String url =
+                                await taskSnapshot.ref.getDownloadURL();
+                            String lastMessage;
+                            DateTime time = DateTime.now();
+                            if (imageMessageController.text == null ||
+                                imageMessageController.text.trim().isEmpty) {
+                              lastMessage = '';
+                            } else {
+                              lastMessage =
+                                  imageMessageController.text.trim().length <=
+                                          25
+                                      ? imageMessageController.text.trim()
+                                      : imageMessageController.text
+                                              .substring(0, 25) +
+                                          "...";
+                            }
+                            String myName = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(_auth.currentUser.email)
+                                .get()
+                                .then((doc) => doc.data()['name']);
+                            _firestore
+                                .collection('groups')
+                                .doc(widget.groupId)
+                                .update(
+                              {
+                                'last_message': lastMessage,
+                                'read': [_auth.currentUser.email],
+                                'type': 'img',
+                              },
+                            );
+                            _firestore
+                                .collection('groups')
+                                .doc(widget.groupId)
+                                .collection('messages')
+                                .add(
+                              {
+                                'message': imageMessageController.text.trim(),
+                                'sender': _auth.currentUser.email,
+                                'time': time,
+                                'type': 'img',
+                                'image_url': url,
+                                'name': myName,
+                              },
+                            );
+                            imageMessageController.clear();
                           }
-                          _firestore
-                              .collection('users')
-                              .doc(_auth.currentUser.email)
-                              .collection('chats')
-                              .doc(widget.friendEmail)
-                              .set(
-                            {
-                              'email': widget.friendEmail,
-                              'name': widget.friendName,
-                              'search_name': widget.friendName.toLowerCase(),
-                              'last_message': lastMessage,
-                              'new_message': false,
-                              'time': time,
-                              'type': 'img',
-                            },
-                          );
-                          _firestore
-                              .collection('users')
-                              .doc(_auth.currentUser.email)
-                              .collection('chats')
-                              .doc(widget.friendEmail)
-                              .collection('messages')
-                              .add(
-                            {
-                              'message': imageMessageController.text.trim(),
-                              'sender': _auth.currentUser.email,
-                              'time': time,
-                              'type': 'img',
-                              'image_url': url,
-                            },
-                          );
-                          //adding message to friend database
-                          _firestore
-                              .collection('users')
-                              .doc(widget.friendEmail)
-                              .collection('chats')
-                              .doc(_auth.currentUser.email)
-                              .set(
-                            {
-                              'email': _auth.currentUser.email,
-                              'name': myName,
-                              'search_name': myName.toLowerCase(),
-                              'last_message': lastMessage,
-                              'new_message': true,
-                              'time': time,
-                              'type': 'img',
-                            },
-                          );
-                          _firestore
-                              .collection('users')
-                              .doc(widget.friendEmail)
-                              .collection('chats')
-                              .doc(_auth.currentUser.email)
-                              .collection('messages')
-                              .add(
-                            {
-                              'message': imageMessageController.text.trim(),
-                              'sender': _auth.currentUser.email,
-                              'time': time,
-                              'type': 'img',
-                              'image_url': url,
-                            },
-                          );
-                          imageMessageController.clear();
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -280,34 +247,30 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                   ),
                   RoundIconButton(
                     icon: Icons.send,
-                    onPress: () {
+                    onPress: () async {
                       if (controller.text.trim().isEmpty) return;
                       DateTime time = DateTime.now();
                       String lastMessage = controller.text.trim().length <= 25
                           ? controller.text.trim()
                           : controller.text.substring(0, 25) + "...";
-                      //adding message to current user database
-                      _firestore
+                      String myName = await FirebaseFirestore.instance
                           .collection('users')
                           .doc(_auth.currentUser.email)
-                          .collection('chats')
-                          .doc(widget.friendEmail)
-                          .set(
+                          .get()
+                          .then((doc) => doc.data()['name']);
+                      _firestore
+                          .collection('groups')
+                          .doc(widget.groupId)
+                          .update(
                         {
-                          'email': widget.friendEmail,
-                          'name': widget.friendName,
-                          'search_name': widget.friendName.toLowerCase(),
                           'last_message': lastMessage,
-                          'new_message': false,
-                          'time': time,
+                          'read': [_auth.currentUser.email],
                           'type': 'txt',
                         },
                       );
                       _firestore
-                          .collection('users')
-                          .doc(_auth.currentUser.email)
-                          .collection('chats')
-                          .doc(widget.friendEmail)
+                          .collection('groups')
+                          .doc(widget.groupId)
                           .collection('messages')
                           .add(
                         {
@@ -315,37 +278,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                           'sender': _auth.currentUser.email,
                           'time': time,
                           'type': 'txt',
-                        },
-                      );
-                      //adding message to friend database
-                      _firestore
-                          .collection('users')
-                          .doc(widget.friendEmail)
-                          .collection('chats')
-                          .doc(_auth.currentUser.email)
-                          .set(
-                        {
-                          'email': _auth.currentUser.email,
                           'name': myName,
-                          'search_name': myName.toLowerCase(),
-                          'last_message': lastMessage,
-                          'new_message': true,
-                          'time': time,
-                          'type': 'txt',
-                        },
-                      );
-                      _firestore
-                          .collection('users')
-                          .doc(widget.friendEmail)
-                          .collection('chats')
-                          .doc(_auth.currentUser.email)
-                          .collection('messages')
-                          .add(
-                        {
-                          'message': controller.text.trim(),
-                          'sender': _auth.currentUser.email,
-                          'time': time,
-                          'type': 'txt',
                         },
                       );
                       controller.clear();

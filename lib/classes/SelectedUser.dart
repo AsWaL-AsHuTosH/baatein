@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SelectedUser with ChangeNotifier {
   Set<String> selected = {};
+  Map<String, String> selecteName = {};
 
-  void addSelection({String email}) {
+  void addSelection({String email, String name}) {
     selected.add(email);
+    selecteName[email] = name;
     notifyListeners();
   }
 
@@ -20,13 +21,21 @@ class SelectedUser with ChangeNotifier {
     return list;
   }
 
+  List<Map<String, String>> getNameList(){
+    List<Map<String, String>> list = [];
+    selecteName.forEach((key, value) {list.add({key : value});});
+    return list;
+  }
+
   void deSelect({String email}){
     selected.remove(email);
+    selecteName.remove(email);
     notifyListeners();
   }
 
   void clear() {
     selected.clear();
+    selecteName.clear();
     notifyListeners();
   }
 

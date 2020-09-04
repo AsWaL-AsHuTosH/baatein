@@ -1,22 +1,26 @@
+import 'package:baatein/chat/group_chat_room.dart';
+import 'package:baatein/chat/group_profile_view.dart';
 import 'package:baatein/chat/profile_view.dart';
+import 'package:baatein/constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/chat/chatroom_screen.dart';
 
-class ChatCard extends StatelessWidget {
+class GroupChatCard extends StatelessWidget {
   final bool newMessage, isImage;
   final String lastMessage;
-  final String friendName;
-  final String friendEmail;
+  final String groupName;
+  final String groupId;
+  final String groupAdmin;
   final time;
-
-  ChatCard(
-      {@required this.friendName,
+  GroupChatCard(
+      {@required this.groupName,
       @required this.newMessage,
       @required this.lastMessage,
-      @required this.friendEmail,
+      @required this.groupId,
       @required this.time,
-      @required this.isImage});
+      @required this.isImage,
+      @required this.groupAdmin});
   Widget message() {
     return isImage
         ? Icon(Icons.image)
@@ -36,9 +40,10 @@ class ChatCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatRoom(
-              friendName: friendName,
-              friendEmail: friendEmail,
+            builder: (context) => GroupChatRoom(
+              admin: groupAdmin,
+              groupId: groupId,
+              groupName: groupName,
             ),
           ),
         );
@@ -85,19 +90,37 @@ class ChatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileView(
-                    friendEmail: friendEmail,
-                    friendName: friendName,
+              onTap: () async {
+                List<String> members = List.from(await FirebaseFirestore
+                    .instance
+                    .collection('groups')
+                    .doc(groupId)
+                    .get()
+                    .then((value) => value.data()['members']));
+                List<dynamic> mapList = await FirebaseFirestore.instance
+                    .collection('groups')
+                    .doc(groupId)
+                    .get()
+                    .then((value) => value.data()['members_name']);
+                Map<String, dynamic> membersName = {};
+                for (var map in mapList) membersName.addAll(map);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GroupProfileView(
+                      groupId: groupId,
+                      groupName: groupName,
+                      groupAdmin: groupAdmin,
+                      memebers: members,
+                      membersName: membersName,
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')
-                    .doc(friendEmail)
+                    .doc(groupId)
                     .collection('image')
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -106,9 +129,9 @@ class ChatCard extends StatelessWidget {
                     final image = snapshot.data.docs;
                     url = image[0].data()['url'];
                   }
+                  if (url == null) url = kNoGroupPic;
                   return CircleAvatar(
-                    child: url != null ? null : Icon(Icons.person),
-                    backgroundImage: url != null ? NetworkImage(url) : null,
+                    backgroundImage: NetworkImage(url),
                     radius: 30,
                   );
                 },
@@ -121,7 +144,7 @@ class ChatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  friendName,
+                  groupName,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(

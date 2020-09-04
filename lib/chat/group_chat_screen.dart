@@ -1,9 +1,10 @@
 import 'package:baatein/chat/friends_search_screen.dart';
 import 'package:baatein/chat/group_selection_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/customs/friend_tile.dart';
+import 'package:baatein/customs/group_chat_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_time_format/date_time_format.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,17 +31,37 @@ class GroupChatScreen extends StatelessWidget {
                   .where('members', arrayContains: _auth.currentUser.email)
                   .snapshots(),
               builder: (context, snaps) {
-                List<FriendTile> friendList = [];
+                List<GroupChatCard> groupList = [];
                 if (snaps.hasData) {
                   final groups = snaps.data.docs;
                   if (groups != null) {
                     for (var group in groups) {
                       String name = group.data()['name'];
-                      String email = group.data()['admin'];
-                      friendList.add(
-                        FriendTile(
-                          friendName: name,
-                          friendEmail: email,
+                      String admin = group.data()['admin'];
+                      String id = group.data()['id'];
+                      bool isImage = group.data()['type'] == 'img';
+                      String lastMessage = group.data()['last_message'];
+                      Timestamp stamp = group.data()['time'];
+                      String time;
+                        if(stamp != null)
+                             time  =  DateTimeFormat.format(stamp.toDate(), format: 'h:i a');
+                        else 
+                            time = '';
+                      bool newMessage;
+                      var data = group.data()['read'];
+                      if(data == null)
+                        newMessage = true;
+                      else
+                        newMessage = !List.from(data).contains(_auth.currentUser.email);
+                      groupList.add(
+                        GroupChatCard(
+                          groupAdmin: admin,
+                          groupId: id,
+                          groupName: name,
+                          isImage: isImage,
+                          lastMessage: lastMessage == null ? '' : lastMessage,
+                          newMessage: newMessage,
+                          time: time,
                         ),
                       );
                     }
@@ -48,7 +69,7 @@ class GroupChatScreen extends StatelessWidget {
                 }
                 return Expanded(
                   child: ListView(
-                    children: friendList,
+                    children: groupList,
                   ),
                 );
               },
