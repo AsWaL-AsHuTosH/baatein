@@ -130,6 +130,7 @@ class GroupChatCard extends StatelessWidget {
                   if (url == null) url = kNoGroupPic;
                   return CircleAvatar(
                     backgroundImage: NetworkImage(url),
+                    backgroundColor: Colors.grey,
                     radius: 30,
                   );
                 },

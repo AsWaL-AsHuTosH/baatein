@@ -11,12 +11,14 @@ class FriendSelectionCard extends StatefulWidget {
   final String friendEmail;
   final bool isSelected;
   final MaterialColor color;
+  final bool disableSelection;
 
   FriendSelectionCard({
     @required this.friendName,
     this.friendEmail,
     this.isSelected,
     this.color,
+    this.disableSelection = false,
   });
 
   @override
@@ -27,7 +29,7 @@ class _FriendSelectionCardState extends State<FriendSelectionCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
+      onTap: widget.disableSelection? null : () async {
         SelectedUser ref = Provider.of<SelectedUser>(context, listen: false);
         if (ref.isAlreadySelected(email: widget.friendEmail)) {
           ref.deSelect(email: widget.friendEmail);

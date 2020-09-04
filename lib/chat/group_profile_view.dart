@@ -1,3 +1,4 @@
+import 'package:baatein/chat/add_member_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
 import 'package:baatein/customs/friend_tile.dart';
@@ -75,6 +76,7 @@ class GroupProfileView extends StatelessWidget {
                     if (url == null) url = kNoGroupPic;
                     return CircleAvatar(
                       backgroundImage: NetworkImage(url),
+                      backgroundColor: Colors.grey,
                       radius: 80,
                     );
                   },
@@ -129,14 +131,14 @@ class GroupProfileView extends StatelessWidget {
                     if (memebers[index] == groupAdmin) {
                       return FriendTile(
                         friendName: membersName[memebers[index]],
-                        disableMainOnTap: true,
+                        readOnly: true,
                         friendEmail: memebers[index],
                         special: true,
                       );
                     }
                     return FriendTile(
                       friendName: membersName[memebers[index]],
-                      disableMainOnTap: true,
+                      readOnly: true,
                       friendEmail: memebers[index],
                     );
                   },
@@ -197,7 +199,117 @@ class GroupProfileView extends StatelessWidget {
                               context, ModalRoute.withName(HomeScreen.routeId));
                         },
                       ),
+                    ),
+              FirebaseAuth.instance.currentUser.email == groupAdmin
+                  ? Padding(
+                      padding:
+                          const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
+                      child: RoundTextButton(
+                        text: 'Add Members',
+                        icon: Icons.person_add,
+                        onPress: () async {
+                          Set<String> memberSet = {};
+                          memebers.forEach((element) {
+                            memberSet.add(element);
+                          });
+                          bool ok = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddMemberScreen(
+                                already: memberSet,
+                                groupId: groupId,
+                              ),
+                            ),
+                          );
+
+                          if (ok != null || ok == true) {
+                            await Flushbar(
+                              message:
+                                  "New members added successfully.",
+                              backgroundGradient: LinearGradient(
+                                  colors: [Colors.red, Colors.orange]),
+                              icon: Icon(
+                                Icons.check,
+                                color: Colors.green,
+                                size: 40,
+                              ),
+                              margin: EdgeInsets.all(8),
+                              borderRadius: 8,
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                              boxShadows: [
+                                BoxShadow(
+                                  color: Colors.lightBlueAccent,
+                                  offset: Offset(0.0, 2.0),
+                                  blurRadius: 3.0,
+                                )
+                              ],
+                            ).show(context);
+                            Navigator.pop(context);
+                          }
+                        },
+                      ),
                     )
+                  : Container(
+                      width: 0,
+                      height: 0,
+                    ),
+              FirebaseAuth.instance.currentUser.email == groupAdmin
+                  ? Padding(
+                      padding:
+                          const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
+                      child: RoundTextButton(
+                        text: 'Delete Group',
+                        icon: Icons.delete,
+                        color: Colors.red,
+                        onPress: () async {
+                          String email =
+                              FirebaseAuth.instance.currentUser.email;
+                          await FirebaseFirestore.instance
+                              .collection('groups')
+                              .doc(groupId)
+                              .update({
+                            'members': FieldValue.arrayRemove([email])
+                          });
+                          await FirebaseFirestore.instance
+                              .collection('groups')
+                              .doc(groupId)
+                              .update({
+                            'members_name': FieldValue.arrayRemove([
+                              {email: membersName[email]}
+                            ])
+                          });
+                          await Flushbar(
+                            message:
+                                "You are no longer a memeber of $groupName.",
+                            backgroundGradient: LinearGradient(
+                                colors: [Colors.red, Colors.orange]),
+                            icon: Icon(
+                              Icons.directions_walk,
+                              color: Colors.green,
+                              size: 40,
+                            ),
+                            margin: EdgeInsets.all(8),
+                            borderRadius: 8,
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 1),
+                            boxShadows: [
+                              BoxShadow(
+                                color: Colors.lightBlueAccent,
+                                offset: Offset(0.0, 2.0),
+                                blurRadius: 3.0,
+                              )
+                            ],
+                          ).show(context);
+                          Navigator.popUntil(
+                              context, ModalRoute.withName(HomeScreen.routeId));
+                        },
+                      ),
+                    )
+                  : Container(
+                      width: 0,
+                      height: 0,
+                    ),
             ],
           ),
         ));

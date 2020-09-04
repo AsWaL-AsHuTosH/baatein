@@ -8,7 +8,8 @@ class SearchField extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final String labelText, hintText;
   final Function onChangeCallback;
-  SearchField({this.onChangeCallback,this.controller, this.formKey, this.validator, this.hintText = 'Enter friends email.', this.labelText = 'Freind\'s Email'});
+  final int maxLength;
+  SearchField({this.onChangeCallback,this.controller, this.formKey, this.validator, this.hintText = 'Enter friends email.', this.labelText = 'Freind\'s Email', this.maxLength });
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -25,6 +26,7 @@ class SearchField extends StatelessWidget {
           child: Padding(
           padding: EdgeInsets.symmetric(vertical: 4),
           child: TextFormField(
+            maxLength: maxLength,
             onChanged: onChangeCallback,
             validator: validator,
             controller: controller,

@@ -87,6 +87,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                   if (url == null) url = kNoGroupPic;
                   return CircleAvatar(
                     backgroundImage: NetworkImage(url),
+                    backgroundColor: Colors.grey,
                     radius: 25,
                   );
                 },
@@ -218,8 +219,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                 .update(
                               {
                                 'last_message': lastMessage,
-                                'read': [_auth.currentUser.email],
+                                'read': [],
                                 'type': 'img',
+                                'time': time,
                               },
                             );
                             _firestore
@@ -264,8 +266,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                           .update(
                         {
                           'last_message': lastMessage,
-                          'read': [_auth.currentUser.email],
+                          'read': [],
                           'type': 'txt',
+                          'time': time,
                         },
                       );
                       _firestore

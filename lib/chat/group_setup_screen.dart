@@ -91,6 +91,7 @@ class _GroupSetupState extends State<GroupSetup> {
                 controller: controller,
                 validator: validator,
                 formKey: _key,
+                maxLength: 25,
               ),
             ),
             Divider(
@@ -117,7 +118,7 @@ class _GroupSetupState extends State<GroupSetup> {
                         FriendTile(
                           friendName: name,
                           friendEmail: email,
-                          disableMainOnTap: true,
+                          readOnly: true,
                         ),
                       );
                     }

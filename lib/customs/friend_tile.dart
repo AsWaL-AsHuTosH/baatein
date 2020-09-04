@@ -7,18 +7,26 @@ import 'package:baatein/chat/profile_view.dart';
 class FriendTile extends StatelessWidget {
   final String friendName;
   final String friendEmail;
-  final bool disableMainOnTap;
+  final bool readOnly;
   final bool special;
   FriendTile(
       {@required this.friendName,
       this.friendEmail,
-      this.disableMainOnTap = false,
+      this.readOnly = false,
       this.special = false});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: disableMainOnTap
-          ? null
+      onTap: readOnly
+          ? () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileView(
+                    friendEmail: friendEmail,
+                    friendName: friendName,
+                  ),
+                ),
+              )
           : () {
               Navigator.push(
                 context,

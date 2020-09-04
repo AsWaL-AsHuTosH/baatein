@@ -39,6 +39,7 @@ class SignUpForm extends StatelessWidget {
               labelText: 'Name',
               validator: nameValidataionCallback,
               controller: nameController,
+              maxLength: 25,
             ),
             Divider(),
             RoundTextField(

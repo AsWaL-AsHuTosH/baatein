@@ -2,7 +2,6 @@ import 'package:baatein/chat/group_setup_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
-import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -147,8 +146,7 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                 onPress: () async {
                   if( Provider.of<SelectedUser>(context, listen: false).isEmpty){
                     Flushbar(
-                      title: 'Error',
-                      message: "You haven't selected any member.",
+                      message: "No member selected!",
                       backgroundGradient:
                           LinearGradient(colors: [Colors.grey, Colors.grey]),
                       icon: Icon(

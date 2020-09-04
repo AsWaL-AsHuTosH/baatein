@@ -8,6 +8,7 @@ class RoundTextField extends StatelessWidget {
   final bool obscureText;
   final Function validator;
   final TextEditingController controller;
+  final int maxLength;
   RoundTextField({
     this.labelText,
     this.radius = 10,
@@ -15,12 +16,14 @@ class RoundTextField extends StatelessWidget {
     this.color = Colors.white,
     this.obscureText = false,
     this.controller,
+    this.maxLength,
   });
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5),
       child: TextFormField(
+        maxLength: maxLength,
         validator: validator,
         controller: controller,
         obscureText: obscureText,
