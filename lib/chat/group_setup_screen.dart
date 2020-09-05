@@ -158,6 +158,7 @@ class _GroupSetupState extends State<GroupSetup> {
                         .then((doc) => doc.data()['name']);
                     nameList
                         .add({FirebaseAuth.instance.currentUser.email: myName});
+                        DateTime time = DateTime.now();
                     await _firestore.collection('groups').doc(id).set({
                       'name': controller.text.trim(),
                       'search_name': controller.text.trim().toLowerCase(),
@@ -168,7 +169,7 @@ class _GroupSetupState extends State<GroupSetup> {
                       'last_message': null,
                       'read': null,
                       'type': null,
-                      'time': null,
+                      'time': time,
                     });
                     if (imageFile != null) {
                       final ref =

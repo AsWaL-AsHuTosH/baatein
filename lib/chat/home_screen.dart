@@ -88,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ProfileEditScreen(
+                                  docId: _auth.currentUser.email,
                                   editButtonCallback: () async {
                                     final ImagePicker picker = ImagePicker();
                                     final PickedFile pickedImage = await picker
@@ -109,10 +110,10 @@ class _HomeScreenState extends State<HomeScreen>
                                         .doc(_auth.currentUser.email)
                                         .collection('image')
                                         .doc('image_url')
-                                        .set({'url': url});
+                                        .update({'url': url});
                                     Flushbar(
                                       message:
-                                          "Your profile picture is uploaded successfully.",
+                                          "Your profile picture is updated successfully.",
                                       backgroundGradient: LinearGradient(
                                           colors: [Colors.red, Colors.orange]),
                                       icon: Icon(

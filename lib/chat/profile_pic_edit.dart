@@ -6,7 +6,8 @@ import 'package:photo_view/photo_view.dart';
 
 class ProfileEditScreen extends StatelessWidget {
   final Function editButtonCallback;
-  ProfileEditScreen({this.editButtonCallback});
+  final String docId;
+  ProfileEditScreen({this.editButtonCallback, @required this.docId});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +18,7 @@ class ProfileEditScreen extends StatelessWidget {
             child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')
-                    .doc(FirebaseAuth.instance.currentUser.email)
+                    .doc(docId)
                     .collection('image')
                     .snapshots(),
                 builder: (context, snapshot) {

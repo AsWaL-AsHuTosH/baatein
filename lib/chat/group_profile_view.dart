@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:baatein/chat/add_member_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
+import 'package:baatein/chat/profile_pic_edit.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baatein/constants/constants.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class GroupProfileView extends StatefulWidget {
@@ -52,23 +57,79 @@ class _GroupProfileViewState extends State<GroupProfileView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () async {
-                  String url = await FirebaseFirestore.instance
-                      .collection('profile_pic')
-                      .doc(widget.groupId)
-                      .collection('image')
-                      .doc('image_url')
-                      .get()
-                      .then((value) => value.data()['url']);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ImageViewScreen(
-                        url: url,
-                      ),
-                    ),
-                  );
-                },
+                onTap:
+                    FirebaseAuth.instance.currentUser.email == widget.groupAdmin
+                        ? () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfileEditScreen(
+                                  docId: widget.groupId,
+                                  editButtonCallback: () async {
+                                    final ImagePicker picker = ImagePicker();
+                                    final PickedFile pickedImage = await picker
+                                        .getImage(source: ImageSource.gallery);
+                                    if (pickedImage == null) return;
+                                    final ref = FirebaseStorage.instance
+                                        .ref()
+                                        .child(widget.groupId +
+                                            '.jpg');
+                                    final File file = File(pickedImage.path);
+                                    StorageUploadTask task = ref.putFile(file);
+                                    StorageTaskSnapshot taskSnapshot =
+                                        await task.onComplete;
+                                    String url =
+                                        await taskSnapshot.ref.getDownloadURL();
+                                    FirebaseFirestore.instance
+                                        .collection('profile_pic')
+                                        .doc(widget.groupId)
+                                        .collection('image')
+                                        .doc('image_url')
+                                        .update({'url': url});
+                                    Flushbar(
+                                      message:
+                                          "Group profile picture is updated successfully.",
+                                      backgroundGradient: LinearGradient(
+                                          colors: [Colors.red, Colors.orange]),
+                                      icon: Icon(
+                                        Icons.check,
+                                        color: Colors.green,
+                                        size: 40,
+                                      ),
+                                      margin: EdgeInsets.all(8),
+                                      borderRadius: 8,
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 2),
+                                      boxShadows: [
+                                        BoxShadow(
+                                          color: Colors.lightBlueAccent,
+                                          offset: Offset(0.0, 2.0),
+                                          blurRadius: 3.0,
+                                        )
+                                      ],
+                                    ).show(context);
+                                  },
+                                ),
+                              ),
+                            );
+                          }
+                        : () async {
+                            String url = await FirebaseFirestore.instance
+                                .collection('profile_pic')
+                                .doc(widget.groupId)
+                                .collection('image')
+                                .doc('image_url')
+                                .get()
+                                .then((value) => value.data()['url']);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ImageViewScreen(
+                                  url: url,
+                                ),
+                              ),
+                            );
+                          },
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('profile_pic')
@@ -246,7 +307,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                     )
                   : Padding(
                       padding:
-                          const EdgeInsets.only(bottom: 8.0, left: 8, right: 8),
+                          const EdgeInsets.only(bottom: 8.0, left: 10, right: 10),
                       child: RoundTextButton(
                         text: 'Leave Group',
                         icon: Icons.directions_walk,

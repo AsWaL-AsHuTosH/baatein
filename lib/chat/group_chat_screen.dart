@@ -42,17 +42,17 @@ class GroupChatScreen extends StatelessWidget {
                       bool isImage = group.data()['type'] == 'img';
                       String lastMessage = group.data()['last_message'];
                       Timestamp stamp = group.data()['time'];
-                      String time;
-                        if(stamp != null)
-                             time  =  DateTimeFormat.format(stamp.toDate(), format: 'h:i a');
-                        else 
-                            time = '';
+
+                      String time = DateTimeFormat.format(stamp.toDate(),
+                          format: 'h:i a');
+
                       bool newMessage;
                       var data = group.data()['read'];
-                      if(data == null)
+                      if (data == null)
                         newMessage = true;
                       else
-                        newMessage = !List.from(data).contains(_auth.currentUser.email);
+                        newMessage =
+                            !List.from(data).contains(_auth.currentUser.email);
                       groupList.add(
                         GroupChatCard(
                           groupAdmin: admin,
@@ -106,10 +106,17 @@ class GroupChatScreen extends StatelessWidget {
                     ).show(context);
                     return;
                   }
-                  for(String email in Provider.of<SelectedUser>(context, listen: false).getList()){
-                    await _firestore.collection('users').doc(_auth.currentUser.email).collection('friends').doc(email).update({'selected': false});
+                  for (String email
+                      in Provider.of<SelectedUser>(context, listen: false)
+                          .getList()) {
+                    await _firestore
+                        .collection('users')
+                        .doc(_auth.currentUser.email)
+                        .collection('friends')
+                        .doc(email)
+                        .update({'selected': false});
                   }
-                  Provider.of<SelectedUser>(context, listen: false).clear();     
+                  Provider.of<SelectedUser>(context, listen: false).clear();
                 },
               ),
             ),
