@@ -6,14 +6,14 @@ class Message extends StatelessWidget {
   final String time;
   final String id;
   final Function onLongpressCallback;
-  final Function onTap;
+  final Function onTapCallback;
   
-  Message({this.message, this.isMe, this.time, @required this.id, this.onLongpressCallback, this.onTap, this.isSelected = false});
+  Message({this.message, this.isMe, this.time, @required this.id, this.onLongpressCallback, this.onTapCallback, this.isSelected = false});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: onLongpressCallback,
-      onTap: onTap,
+      onTap: onTapCallback,
           child: Column(
         crossAxisAlignment:
             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,

@@ -1,6 +1,6 @@
 import 'package:baatein/chat/group_setup_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/classes/time_message_pair.dart';
+import 'package:baatein/classes/message_info.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class ForwardSelectionScreen extends StatefulWidget {
-  final List<TimeMessagePair> selectedMessage;
+  final List<MessageInfo> selectedMessage;
   ForwardSelectionScreen({this.selectedMessage});
 
   @override
@@ -200,73 +200,153 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                             .getMap();
                     String myEmail = _auth.currentUser.email;
                     for (String friendEmail in receiver) {
-                      widget.selectedMessage.forEach((element) {
-                        DateTime time = DateTime.now();
-                        String messageId = Uuid().v4();
-                        _firestore
-                            .collection('users')
-                            .doc(myEmail)
-                            .collection('chats')
-                            .doc(friendEmail)
-                            .set(
-                          {
-                            'email': friendEmail,
-                            'name': nameOf[friendEmail],
-                            'search_name': nameOf[friendEmail].toLowerCase(),
-                            'last_message': element.message,
-                            'new_message': false,
-                            'time': time,
-                            'type': 'txt',
-                          },
-                        );
-                        _firestore
-                            .collection('users')
-                            .doc(myEmail)
-                            .collection('chats')
-                            .doc(friendEmail)
-                            .collection('messages')
-                            .add(
-                          {
-                            'message': element.message,
-                            'sender': myEmail,
-                            'time': time,
-                            'type': 'txt',
-                            'id': messageId,
-                          },
-                        );
-                        //adding message to friend database
-                        _firestore
-                            .collection('users')
-                            .doc(friendEmail)
-                            .collection('chats')
-                            .doc(myEmail)
-                            .set(
-                          {
-                            'email': myEmail,
-                            'name': myName,
-                            'search_name': myName.toLowerCase(),
-                            'last_message': element.message,
-                            'new_message': true,
-                            'time': time,
-                            'type': 'txt',
-                          },
-                        );
-                        _firestore
-                            .collection('users')
-                            .doc(friendEmail)
-                            .collection('chats')
-                            .doc(myEmail)
-                            .collection('messages')
-                            .add(
-                          {
-                            'message': element.message,
-                            'sender': myEmail,
-                            'time': time,
-                            'type': 'txt',
-                            'id': messageId,
-                          },
-                        );
-                      });
+                      widget.selectedMessage.forEach(
+                        (element) {
+                          if (element.type == 'txt') {
+                            String lastMessage = element.message.length <= 25
+                                ? element.message
+                                : element.message.substring(0, 25) + '...';
+                            DateTime time = DateTime.now();
+                            String messageId = Uuid().v4();
+                            _firestore
+                                .collection('users')
+                                .doc(myEmail)
+                                .collection('chats')
+                                .doc(friendEmail)
+                                .set(
+                              {
+                                'email': friendEmail,
+                                'name': nameOf[friendEmail],
+                                'search_name':
+                                    nameOf[friendEmail].toLowerCase(),
+                                'last_message': lastMessage,
+                                'new_message': false,
+                                'time': time,
+                                'type': 'txt',
+                              },
+                            );
+                            _firestore
+                                .collection('users')
+                                .doc(myEmail)
+                                .collection('chats')
+                                .doc(friendEmail)
+                                .collection('messages').doc(messageId)
+                                .set(
+                              {
+                                'message': element.message,
+                                'sender': myEmail,
+                                'time': time,
+                                'type': 'txt',
+                                'id': messageId,
+                              },
+                            );
+                            //adding message to friend database
+                            _firestore
+                                .collection('users')
+                                .doc(friendEmail)
+                                .collection('chats')
+                                .doc(myEmail)
+                                .set(
+                              {
+                                'email': myEmail,
+                                'name': myName,
+                                'search_name': myName.toLowerCase(),
+                                'last_message': lastMessage,
+                                'new_message': true,
+                                'time': time,
+                                'type': 'txt',
+                              },
+                            );
+                            _firestore
+                                .collection('users')
+                                .doc(friendEmail)
+                                .collection('chats')
+                                .doc(myEmail)
+                                .collection('messages').doc(messageId)
+                                .set(
+                              {
+                                'message': element.message,
+                                'sender': myEmail,
+                                'time': time,
+                                'type': 'txt',
+                                'id': messageId,
+                              },
+                            );
+                          } else {
+                            String lastMessage = element.message.length <= 25
+                                ? element.message
+                                : element.message.substring(0, 25) + '...';
+                            DateTime time = DateTime.now();
+                            String messageId = Uuid().v4();
+                            _firestore
+                                .collection('users')
+                                .doc(myEmail)
+                                .collection('chats')
+                                .doc(friendEmail)
+                                .set(
+                              {
+                                'email': friendEmail,
+                                'name': nameOf[friendEmail],
+                                'search_name':
+                                    nameOf[friendEmail].toLowerCase(),
+                                'last_message': lastMessage,
+                                'new_message': false,
+                                'time': time,
+                                'type': 'img',
+                              },
+                            );
+                            _firestore
+                                .collection('users')
+                                .doc(myEmail)
+                                .collection('chats')
+                                .doc(friendEmail)
+                                .collection('messages').doc(messageId)
+                                .set(
+                              {
+                                'message': element.message,
+                                'sender': myEmail,
+                                'time': time,
+                                'type': 'img',
+                                'id': messageId,
+                                'image_url': element.url,
+                              },
+                            );
+                            //adding message to friend database
+                            _firestore
+                                .collection('users')
+                                .doc(friendEmail)
+                                .collection('chats')
+                                .doc(myEmail)
+                                .set(
+                              {
+                                'email': myEmail,
+                                'name': myName,
+                                'search_name': myName.toLowerCase(),
+                                'last_message': lastMessage,
+                                'new_message': true,
+                                'time': time,
+                                'type': 'img',
+                              },
+                            );
+                            _firestore
+                                .collection('users')
+                                .doc(friendEmail)
+                                .collection('chats')
+                                .doc(myEmail)
+                                .collection('messages').doc(messageId)
+                                .set(
+                              {
+                                'message': element.message,
+                                'sender': myEmail,
+                                'time': time,
+                                'type': 'img',
+                                'id': messageId,
+                                'image_url': element.url,
+                              },
+                            );
+                          }
+                        },
+                      );
                     }
                     await Flushbar(
                       message: "sending.....",
