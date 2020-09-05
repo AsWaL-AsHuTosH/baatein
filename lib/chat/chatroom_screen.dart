@@ -1,3 +1,6 @@
+import 'package:baatein/chat/forward_selection_screen.dart';
+import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/classes/time_message_pair.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/message_text_field.dart';
 import 'package:baatein/customs/round_icon_button.dart';
@@ -7,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baatein/customs/message.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'image_preview_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:baatein/customs/photo_message.dart';
@@ -27,7 +31,8 @@ class _ChatRoomState extends State<ChatRoom> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
   final TextEditingController imageMessageController = TextEditingController();
-
+  Map<String, TimeMessagePair> selectedMessage = {};
+  bool selectionMode = false;
   String myName;
 
   @override
@@ -57,50 +62,106 @@ class _ChatRoomState extends State<ChatRoom> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 10,
-        title: GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProfileView(
-                friendEmail: widget.friendEmail,
-                friendName: widget.friendName,
+      appBar: selectionMode
+          ? AppBar(
+              automaticallyImplyLeading: false,
+              elevation: 10,
+              title: Padding(
+                padding: const EdgeInsets.only(left: 50),
+                child: Text('${selectedMessage.length} selected'),
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.cancel),
+                  onPressed: () {
+                    setState(() {
+                      selectedMessage.clear();
+                      selectionMode = false;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed: () async {
+                    List<TimeMessagePair> list = [];
+                    selectedMessage.forEach((key, value) {list.add(value);});
+                    list.sort(comp);
+                    bool ok = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForwardSelectionScreen(
+                            selectedMessage: list),
+                      ),
+                    );
+                    if (ok != null && ok == true)
+                      setState(() {
+                        selectedMessage.clear();
+                        selectionMode = false;
+                      });
+                    for (String email
+                        in Provider.of<SelectedUser>(context, listen: false)
+                            .getList()) {
+                      await _firestore
+                          .collection('users')
+                          .doc(_auth.currentUser.email)
+                          .collection('friends')
+                          .doc(email)
+                          .update({'selected': false});
+                    }
+                    Provider.of<SelectedUser>(context, listen: false).clear();
+                  },
+                ),
+              ],
+            )
+          : AppBar(
+              elevation: 10,
+              title: GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileView(
+                      friendEmail: widget.friendEmail,
+                      friendName: widget.friendName,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('profile_pic')
+                          .doc(widget.friendEmail)
+                          .collection('image')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        String url;
+                        if (snapshot.hasData) {
+                          final image = snapshot.data.docs;
+                          url = image[0].data()['url'];
+                        }
+                        if (url == null) url = kNoProfilePic;
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(url),
+                          radius: 25,
+                        );
+                      },
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      widget.friendName,
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          child: Row(
-            children: [
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('profile_pic')
-                    .doc(widget.friendEmail)
-                    .collection('image')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  String url;
-                  if (snapshot.hasData) {
-                    final image = snapshot.data.docs;
-                    url = image[0].data()['url'];
-                  }
-                  if (url == null) url = kNoProfilePic;
-                  return CircleAvatar(
-                    backgroundImage: NetworkImage(url),
-                    radius: 25,
-                  );
-                },
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Text(
-                widget.friendName,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -125,14 +186,48 @@ class _ChatRoomState extends State<ChatRoom> {
                       Timestamp stamp = message.data()['time'];
                       String time = DateTimeFormat.format(stamp.toDate(),
                           format: 'h:i a');
+                      String messageId = message.data()['id'];
                       if (message.data()['type'] == 'txt') {
-                        messageList.add(
-                          Message(
-                            message: mess,
-                            isMe: sender == _auth.currentUser.email,
-                            time: time,
-                          ),
-                        );
+                        if (selectionMode == false) {
+                          messageList.add(
+                            Message(
+                              message: mess,
+                              isMe: sender == _auth.currentUser.email,
+                              time: time,
+                              id: messageId,
+                              onLongpressCallback: () {
+                                selectedMessage.addAll({messageId: TimeMessagePair(message: mess, time: stamp.toDate())});
+                                setState(() {
+                                  selectionMode = true;
+                                });
+                              },
+                            ),
+                          );
+                        } else {
+                          messageList.add(
+                            Message(
+                              message: mess,
+                              isMe: sender == _auth.currentUser.email,
+                              time: time,
+                              id: messageId,
+                              onTap: () {
+                                if (selectedMessage.containsKey(messageId)) {
+                                  setState(() {
+                                    selectedMessage.remove(messageId);
+                                    if (selectedMessage.isEmpty)
+                                      selectionMode = false;
+                                  });
+                                } else {
+                                  setState(() {
+                                    selectedMessage.addAll({messageId: TimeMessagePair(message: mess, time: stamp.toDate())});
+                                  });
+                                }
+                              },
+                              isSelected:
+                                  selectedMessage.containsKey(messageId),
+                            ),
+                          );
+                        }
                       } else {
                         String url = message.data()['image_url'];
                         messageList.add(
@@ -278,6 +373,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       String lastMessage = controller.text.trim().length <= 25
                           ? controller.text.trim()
                           : controller.text.substring(0, 25) + "...";
+                      String messageId = Uuid().v4();
                       //adding message to current user database
                       _firestore
                           .collection('users')
@@ -307,6 +403,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           'sender': _auth.currentUser.email,
                           'time': time,
                           'type': 'txt',
+                          'id': messageId,
                         },
                       );
                       //adding message to friend database
@@ -338,6 +435,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           'sender': _auth.currentUser.email,
                           'time': time,
                           'type': 'txt',
+                          'id': messageId,
                         },
                       );
                       controller.clear();

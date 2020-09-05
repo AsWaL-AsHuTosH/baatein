@@ -27,6 +27,10 @@ class SelectedUser with ChangeNotifier {
     return list;
   }
 
+  Map<String, String> getMap(){
+    return _selectedName;
+  }
+
   void deSelect({String email}){
     _selected.remove(email);
     _selectedName.remove(email);
