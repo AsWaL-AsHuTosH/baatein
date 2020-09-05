@@ -201,8 +201,9 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                     String myEmail = _auth.currentUser.email;
                     for (String friendEmail in receiver) {
                       widget.selectedMessage.forEach(
-                        (element) {
+                        (element) async {
                           if (element.type == 'txt') {
+                            //text type
                             String lastMessage = element.message.length <= 25
                                 ? element.message
                                 : element.message.substring(0, 25) + '...';
@@ -230,7 +231,8 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 .doc(myEmail)
                                 .collection('chats')
                                 .doc(friendEmail)
-                                .collection('messages').doc(messageId)
+                                .collection('messages')
+                                .doc(messageId)
                                 .set(
                               {
                                 'message': element.message,
@@ -262,7 +264,8 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 .doc(friendEmail)
                                 .collection('chats')
                                 .doc(myEmail)
-                                .collection('messages').doc(messageId)
+                                .collection('messages')
+                                .doc(messageId)
                                 .set(
                               {
                                 'message': element.message,
@@ -273,6 +276,20 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                               },
                             );
                           } else {
+                            //image type
+
+                            int count = await _firestore
+                                .collection('shared_images')
+                                .doc(element.imageName)
+                                .get()
+                                .then((value) => value.data()['count']);
+
+                            count += 2;
+                            _firestore
+                                .collection('shared_images')
+                                .doc(element.imageName)
+                                .update({'count': count});
+
                             String lastMessage = element.message.length <= 25
                                 ? element.message
                                 : element.message.substring(0, 25) + '...';
@@ -300,7 +317,8 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 .doc(myEmail)
                                 .collection('chats')
                                 .doc(friendEmail)
-                                .collection('messages').doc(messageId)
+                                .collection('messages')
+                                .doc(messageId)
                                 .set(
                               {
                                 'message': element.message,
@@ -309,6 +327,7 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 'type': 'img',
                                 'id': messageId,
                                 'image_url': element.url,
+                                'image_name': element.imageName,
                               },
                             );
                             //adding message to friend database
@@ -333,7 +352,8 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 .doc(friendEmail)
                                 .collection('chats')
                                 .doc(myEmail)
-                                .collection('messages').doc(messageId)
+                                .collection('messages')
+                                .doc(messageId)
                                 .set(
                               {
                                 'message': element.message,
@@ -342,6 +362,7 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 'type': 'img',
                                 'id': messageId,
                                 'image_url': element.url,
+                                'image_name': element.imageName,
                               },
                             );
                           }

@@ -99,7 +99,32 @@ class _ChatRoomState extends State<ChatRoom> {
                                 spin = true;
                               });
                               selectedMessage.forEach(
-                                (key, value) {
+                                (key, value) async {
+                                  if (value.type == 'img') {
+                                    String imageName = value.imageName;
+                                    int count = await _firestore
+                                        .collection('shared_images')
+                                        .doc(imageName)
+                                        .get()
+                                        .then((value) => value.data()['count']);
+                                    if (count == 1) {
+                                      //last link of image => delete image + its count document.
+                                      FirebaseStorage.instance
+                                          .ref()
+                                          .child(imageName)
+                                          .delete();
+                                      _firestore
+                                          .collection('shared_images')
+                                          .doc(imageName)
+                                          .delete();
+                                    } else {
+                                      --count;
+                                      _firestore
+                                          .collection('shared_images')
+                                          .doc(imageName)
+                                          .update({'count': count});
+                                    }
+                                  }
                                   _firestore
                                       .collection('users')
                                       .doc(_auth.currentUser.email)
@@ -110,6 +135,12 @@ class _ChatRoomState extends State<ChatRoom> {
                                       .delete();
                                 },
                               );
+                              _firestore
+                                  .collection('users')
+                                  .doc(_auth.currentUser.email)
+                                  .collection('chats')
+                                  .doc(widget.friendEmail)
+                                  .update({'last_message': ''});
                               setState(() {
                                 spin = false;
                               });
@@ -316,6 +347,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           }
                         } else {
                           String url = message.data()['image_url'];
+                          String imageName = message.data()['image_name'];
                           if (selectionMode) {
                             messageList.add(
                               PhotoMessage(
@@ -333,9 +365,10 @@ class _ChatRoomState extends State<ChatRoom> {
                                             message: mess,
                                             time: stamp.toDate(),
                                             type: 'img',
-                                            url: url)
-                                      });
-                                    });
+                                            imageName: imageName,
+                                            url: url),
+                                      },);
+                                    },);
                                   }
                                 },
                                 isSelected:
@@ -356,6 +389,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                           message: mess,
                                           time: stamp.toDate(),
                                           type: 'img',
+                                          imageName: imageName,
                                           url: url)
                                     });
 
@@ -430,6 +464,15 @@ class _ChatRoomState extends State<ChatRoom> {
                                               .substring(0, 25) +
                                           "...";
                             }
+
+                            // setting image_share count
+                            String imageName = imageId + '.jpg';
+                            _firestore
+                                .collection('shared_images')
+                                .doc(imageName)
+                                .set({'count': 2});
+
+                            //adding message to current user database
                             _firestore
                                 .collection('users')
                                 .doc(_auth.currentUser.email)
@@ -461,6 +504,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                 'type': 'img',
                                 'image_url': url,
                                 'id': messageId,
+                                'image_name': imageName,
                               },
                             );
                             //adding message to friend database
@@ -495,6 +539,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                 'type': 'img',
                                 'image_url': url,
                                 'id': messageId,
+                                'image_name': imageName,
                               },
                             );
                             imageMessageController.clear();
