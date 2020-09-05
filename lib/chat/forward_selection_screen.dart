@@ -209,6 +209,7 @@ class _ForwardSelectionScreenState extends State<ForwardSelectionScreen> {
                                 : element.message.substring(0, 25) + '...';
                             DateTime time = DateTime.now();
                             String messageId = Uuid().v4();
+                            //adding to current user database
                             _firestore
                                 .collection('users')
                                 .doc(myEmail)
