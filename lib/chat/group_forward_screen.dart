@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/classes/message_info.dart';
 import 'package:baatein/constants/constants.dart';
-import 'package:baatein/customs/friend_selection_card.dart';
 import 'package:baatein/customs/group_selection_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/customs/search_field.dart';
@@ -499,13 +496,13 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                         )
                       ],
                     ).show(context);
-                    setState(() {
-                      spin = false;
-                    });
                     await Provider.of<SelectedUser>(context, listen: false)
                         .clearChat();
                     await Provider.of<SelectedUser>(context, listen: false)
                         .clearGroup();
+                    setState(() {
+                      spin = false;
+                    });
                     Navigator.pop(context, true);
                   },
                 ),

@@ -1,14 +1,11 @@
 import 'package:baatein/chat/friends_search_screen.dart';
-import 'package:baatein/chat/group_selection_screen.dart';
 import 'package:baatein/chat/search_sheet.dart';
-import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 
 class FriendListScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

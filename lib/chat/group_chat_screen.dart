@@ -1,4 +1,3 @@
-import 'package:baatein/chat/friends_search_screen.dart';
 import 'package:baatein/chat/group_search_screen.dart';
 import 'package:baatein/chat/group_selection_screen.dart';
 import 'package:baatein/customs/group_chatcard_builder.dart';

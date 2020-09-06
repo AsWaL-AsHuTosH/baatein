@@ -493,13 +493,14 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                         )
                       ],
                     ).show(context);
-                    setState(() {
-                      spin = false;
-                    });
                     await Provider.of<SelectedUser>(context, listen: false)
                         .clearChat();
                     await Provider.of<SelectedUser>(context, listen: false)
                         .clearGroup();
+                    setState(() {
+                      spin = false;
+                    });
+
                     Navigator.pop(context, true);
                   },
                 ),

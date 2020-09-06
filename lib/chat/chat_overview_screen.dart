@@ -1,6 +1,5 @@
 import 'package:baatein/chat/chat_search_screen.dart';
 import 'package:baatein/customs/chat_card.dart';
-import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';

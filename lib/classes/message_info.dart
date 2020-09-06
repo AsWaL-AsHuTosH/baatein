@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 class MessageInfo {
   final DateTime time;
   final String message;

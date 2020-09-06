@@ -1,4 +1,3 @@
-import 'package:baatein/chat/group_setup_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
@@ -188,7 +187,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       return;
                     }else{
                       FirebaseFirestore _firestore = FirebaseFirestore.instance;
-                      FirebaseAuth _auth = FirebaseAuth.instance;
                       final List<String> memberList =
                           Provider.of<SelectedUser>(context, listen: false)
                               .getListChat();
