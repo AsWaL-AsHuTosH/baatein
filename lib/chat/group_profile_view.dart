@@ -557,7 +557,8 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   ),
                                 ],
                               ),
-                            );
+                            ); 
+                            
                             if (ok != null && ok == true) {
                               await Flushbar(
                                 message:
