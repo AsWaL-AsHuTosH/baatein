@@ -227,6 +227,9 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   FlatButton(
                                     child: Text('Kick'),
                                     onPressed: () async {
+                                      setState(() {
+                                        spin = true;
+                                      });
                                       String email = widget.members[index];
                                       int size = await FirebaseFirestore
                                           .instance
@@ -251,6 +254,15 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                         'members_name': FieldValue.arrayRemove([
                                           {email: widget.membersName[email]}
                                         ])
+                                      });
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(email)
+                                          .collection('groups')
+                                          .doc(widget.groupId)
+                                          .delete();
+                                      setState(() {
+                                        spin = false;
                                       });
                                       Navigator.pop(context, true);
                                     },
@@ -363,6 +375,23 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                           .collection('groups')
                                           .doc(widget.groupId)
                                           .delete();
+
+                                      int size = await FirebaseFirestore
+                                          .instance
+                                          .collection('groups')
+                                          .doc(widget.groupId)
+                                          .get()
+                                          .then(
+                                              (value) => value.data()['size']);
+                                      --size;
+                                      await FirebaseFirestore.instance
+                                          .collection('groups')
+                                          .doc(widget.groupId)
+                                          .update({
+                                        'members':
+                                            FieldValue.arrayRemove([email]),
+                                        'size': size,
+                                      });
                                       setState(() {
                                         spin = false;
                                       });
