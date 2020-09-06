@@ -12,8 +12,9 @@ import 'package:provider/provider.dart';
 
 class AddMemberScreen extends StatefulWidget {
   final Set<String> already;
-  final String groupId;
-  AddMemberScreen({this.already, @required this.groupId});
+  final String groupId, groupName, groupAdmin;
+  AddMemberScreen(
+      {this.already, @required this.groupId, this.groupName, this.groupAdmin});
   @override
   _AddMemberScreenState createState() => _AddMemberScreenState();
 }
@@ -29,8 +30,8 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).accentColor,
       body: ModalProgressHUD(
-          inAsyncCall: spin,
-              child: SafeArea(
+        inAsyncCall: spin,
+        child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -84,8 +85,8 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                                 }
                                 if (url == null) url = kNoProfilePic;
                                 return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 2.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 2.0),
                                   child: CircleAvatar(
                                     backgroundImage: NetworkImage(url),
                                     radius: 30,
@@ -127,7 +128,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         bool isSelected = friend.data()['selected'];
                         bool disableSelection = widget.already.contains(email);
                         MaterialColor color;
-                        if(disableSelection)
+                        if (disableSelection)
                           color = Colors.grey;
                         else
                           color = isSelected ? Colors.green : Colors.red;
@@ -159,7 +160,8 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                     setState(() {
                       spin = true;
                     });
-                    if( Provider.of<SelectedUser>(context, listen: false).isEmpty){
+                    if (Provider.of<SelectedUser>(context, listen: false)
+                        .isEmpty) {
                       Flushbar(
                         message: "No member selected!",
                         backgroundGradient:
@@ -185,22 +187,43 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         spin = false;
                       });
                       return;
-                    }else{
+                    } else {
                       FirebaseFirestore _firestore = FirebaseFirestore.instance;
                       final List<String> memberList =
                           Provider.of<SelectedUser>(context, listen: false)
                               .getListChat();
-                      int size = await _firestore.collection('groups').doc(widget.groupId).get().then((value) => value.data()['size']);
+                      int size = await _firestore
+                          .collection('groups')
+                          .doc(widget.groupId)
+                          .get()
+                          .then((value) => value.data()['size']);
                       size += memberList.length;
                       final List<Map<String, String>> nameList =
                           Provider.of<SelectedUser>(context, listen: false)
                               .getNameList();
-                      await _firestore.collection('groups').doc(widget.groupId).update({
+                      await _firestore
+                          .collection('groups')
+                          .doc(widget.groupId)
+                          .update({
                         'members': FieldValue.arrayUnion(memberList),
                         'members_name': FieldValue.arrayUnion(nameList),
-                        'size':size,
+                        'size': size,
                       });
-                      await Provider.of<SelectedUser>(context, listen: false).clearChat();
+                      for (String email in memberList)
+                        await _firestore
+                            .collection('users')
+                            .doc(email)
+                            .collection('groups')
+                            .doc(widget.groupId)
+                            .set({
+                          'name': widget.groupName,
+                          'search_name': widget.groupName.toLowerCase(),
+                          'id': widget.groupId,
+                          'selected': false,
+                          'admin': widget.groupAdmin,
+                        });
+                      await Provider.of<SelectedUser>(context, listen: false)
+                          .clearChat();
                       setState(() {
                         spin = false;
                       });
