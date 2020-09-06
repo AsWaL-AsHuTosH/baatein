@@ -376,10 +376,6 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                       }
                     }
 
-                    //SENDING TO GROUPS
-
-                    //under construction
-
                     for (String groupId in groups) {
                       for (MessageInfo element in widget.selectedMessage) {
                         if (element.type == 'txt') {

@@ -378,11 +378,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                         }
                       }
                     }
-
-                    //SENDING TO GROUPS
-
-                    //under construction
-
+                    
                     for (String groupId in groups) {
                       for (MessageInfo element in widget.selectedMessage) {
                         if (element.type == 'txt') {
