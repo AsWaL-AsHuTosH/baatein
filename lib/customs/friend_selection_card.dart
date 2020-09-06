@@ -29,40 +29,37 @@ class _FriendSelectionCardState extends State<FriendSelectionCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.disableSelection? null : () async {
-        SelectedUser ref = Provider.of<SelectedUser>(context, listen: false);
-        if (ref.isAlreadySelected(email: widget.friendEmail)) {
-          ref.deSelect(email: widget.friendEmail);
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(FirebaseAuth.instance.currentUser.email)
-              .collection('friends')
-              .doc(widget.friendEmail)
-              .set({
-            'email': widget.friendEmail,
-            'name': widget.friendName,
-            'search_name': widget.friendName.toLowerCase(),
-            'selected': false,
-          });
-          return;
-        }
-        ref.addSelection(
-          email: widget.friendEmail,
-          name: widget.friendName,
-        );
+      onTap: widget.disableSelection
+          ? null
+          : () async {
+              SelectedUser ref =
+                  Provider.of<SelectedUser>(context, listen: false);
+              if (ref.isAlreadySelected(email: widget.friendEmail)) {
+                ref.deSelectChat(email: widget.friendEmail);
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser.email)
+                    .collection('friends')
+                    .doc(widget.friendEmail)
+                    .update({
+                  'selected': false,
+                });
+                return;
+              }
+              ref.addSelection(
+                email: widget.friendEmail,
+                name: widget.friendName,
+              );
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser.email)
-            .collection('friends')
-            .doc(widget.friendEmail)
-            .set({
-          'email': widget.friendEmail,
-          'name': widget.friendName,
-          'search_name': widget.friendName.toLowerCase(),
-          'selected': true,
-        });
-      },
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser.email)
+                  .collection('friends')
+                  .doc(widget.friendEmail)
+                  .update({
+                'selected': true,
+              });
+            },
       child: Container(
         margin: EdgeInsets.all(3.0),
         padding: EdgeInsets.all(10),

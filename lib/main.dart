@@ -1,5 +1,6 @@
 import 'package:baatein/chat/chat_search_screen.dart';
 import 'package:baatein/chat/friends_search_screen.dart';
+import 'package:baatein/chat/group_search_screen.dart';
 import 'package:baatein/chat/group_selection_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/loading_screen.dart';
@@ -30,6 +31,7 @@ class Baatein extends StatelessWidget {
           FreindSearchScreen.routeId: (context) => FreindSearchScreen(),
           RequestSearchScreen.routeId: (context) => RequestSearchScreen(),
           GroupSelectionScreen.routeId: (context) => GroupSelectionScreen(),
+          GroupSearchScreen.routeId: (context) => GroupSearchScreen(),
         },
         initialRoute: LoadingScreen.routeId,
         theme: ThemeData(

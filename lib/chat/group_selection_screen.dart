@@ -60,7 +60,7 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                     height: 60,
                     child: Consumer<SelectedUser>(
                       builder: (context, value, child) {
-                        List<String> list = value.getList();
+                        List<String> list = value.getListChat();
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: list.length,
@@ -174,7 +174,7 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                       builder: (context) => GroupSetup(
                           selected:
                               Provider.of<SelectedUser>(context, listen: false)
-                                  .getList()),
+                                  .getListChat()),
                     ),
                   );
                   if(ok == null || ok == false){

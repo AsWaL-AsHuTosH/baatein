@@ -1,49 +1,114 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
-
 class SelectedUser with ChangeNotifier {
-  Set<String> _selected = {};
-  Map<String, String> _selectedName = {};
+  Set<String> _selectedChat = {};
+  Map<String, String> _selectedChatName = {};
+  Set<String> _selectedGroup = {};
+  Map<String, String> _selectedGroupName = {};
+
+  void addSelectionGroup({String id, String name}) {
+    _selectedGroup.add(id);
+    _selectedGroupName[id] = name;
+    notifyListeners();
+  }
 
   void addSelection({String email, String name}) {
-    _selected.add(email);
-    _selectedName[email] = name;
+    _selectedChat.add(email);
+    _selectedChatName[email] = name;
     notifyListeners();
+  }
+
+  bool isAlreadySelectedGroup({String id}) {
+    return _selectedGroup.contains(id);
   }
 
   bool isAlreadySelected({String email}) {
-    return _selected.contains(email);
+    return _selectedChat.contains(email);
   }
 
-  List<String> getList() {
+  List<String> getListChat() {
     List<String> list = [];
-    _selected.forEach((element) {list.add(element);});
+    _selectedChat.forEach((element) {
+      list.add(element);
+    });
     return list;
   }
 
-  List<Map<String, String>> getNameList(){
+  List<String> getListGroup() {
+    List<String> list = [];
+    _selectedGroup.forEach((element) {
+      list.add(element);
+    });
+    return list;
+  }
+
+  List<Map<String, String>> getNameList() {
     List<Map<String, String>> list = [];
-    _selectedName.forEach((key, value) {list.add({key : value});});
+    _selectedChatName.forEach((key, value) {
+      list.add({key: value});
+    });
     return list;
   }
 
-  Map<String, String> getMap(){
-    return _selectedName;
+  Map<String, String> getMapChat() {
+    return _selectedChatName;
   }
 
-  void deSelect({String email}){
-    _selected.remove(email);
-    _selectedName.remove(email);
+  Map<String, String> getMapGroup() {
+    return _selectedGroupName;
+  }
+
+  void deSelectChat({String email}) {
+    _selectedChat.remove(email);
+    _selectedChatName.remove(email);
     notifyListeners();
   }
 
-  void clear() {
-    _selected.clear();
-    _selectedName.clear();
+  void deSelectGroup({String id}) {
+    _selectedGroup.remove(id);
+    _selectedGroupName.remove(id);
     notifyListeners();
   }
 
-  bool get isEmpty{
-    return _selected.isEmpty;
+  Future<void> clearChat() async {
+    for (String email in getListChat()) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser.email)
+          .collection('friends')
+          .doc(email)
+          .update({'selected': false});
+    }
+    _selectedChat.clear();
+    _selectedChatName.clear();
+    notifyListeners();
+  }
+
+  Future<void> clearGroup()async {
+    for (String id in getListGroup()) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser.email)
+          .collection('groups')
+          .doc(id)
+          .update({'selected': false});
+    }
+    _selectedGroup.clear();
+    _selectedGroupName.clear();
+    notifyListeners();
+  }
+
+  bool get isEmpty {
+    return _selectedChat.isEmpty;
+  }
+
+  bool get isEmptyGroup {
+    return _selectedGroup.isEmpty;
+  }
+
+  bool get nothingSelected {
+    return _selectedGroup.isEmpty && _selectedChat.isEmpty;
   }
 }

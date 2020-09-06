@@ -66,7 +66,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       height: 60,
                       child: Consumer<SelectedUser>(
                         builder: (context, value, child) {
-                          List<String> list = value.getList();
+                          List<String> list = value.getListChat();
                           return ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: list.length,
@@ -191,25 +191,18 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       FirebaseAuth _auth = FirebaseAuth.instance;
                       final List<String> memberList =
                           Provider.of<SelectedUser>(context, listen: false)
-                              .getList();
+                              .getListChat();
+                      int size = await _firestore.collection('groups').doc(widget.groupId).get().then((value) => value.data()['size']);
+                      size += memberList.length;
                       final List<Map<String, String>> nameList =
                           Provider.of<SelectedUser>(context, listen: false)
                               .getNameList();
                       await _firestore.collection('groups').doc(widget.groupId).update({
                         'members': FieldValue.arrayUnion(memberList),
                         'members_name': FieldValue.arrayUnion(nameList),
+                        'size':size,
                       });
-                      for (String email
-                          in Provider.of<SelectedUser>(context, listen: false)
-                              .getList()) {
-                        await _firestore
-                            .collection('users')
-                            .doc(_auth.currentUser.email)
-                            .collection('friends')
-                            .doc(email)
-                            .update({'selected': false});
-                      }
-                      Provider.of<SelectedUser>(context, listen: false).clear();
+                      await Provider.of<SelectedUser>(context, listen: false).clearChat();
                       setState(() {
                         spin = false;
                       });

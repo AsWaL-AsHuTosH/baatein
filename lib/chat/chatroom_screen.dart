@@ -196,8 +196,10 @@ class _ChatRoomState extends State<ChatRoom> {
                     bool ok = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            ForwardSelectionScreen(selectedMessage: list),
+                        builder: (context) => ForwardSelectionScreen(
+                          selectedMessage: list,
+                          from: 'chat',
+                        ),
                       ),
                     );
                     if (ok != null && ok == true) {
@@ -205,18 +207,12 @@ class _ChatRoomState extends State<ChatRoom> {
                         selectedMessage.clear();
                         selectionMode = false;
                       });
+                    } else {
+                      await Provider.of<SelectedUser>(context, listen: false)
+                          .clearChat();
+                      await Provider.of<SelectedUser>(context, listen: false)
+                          .clearGroup();
                     }
-                    for (String email
-                        in Provider.of<SelectedUser>(context, listen: false)
-                            .getList()) {
-                      await _firestore
-                          .collection('users')
-                          .doc(_auth.currentUser.email)
-                          .collection('friends')
-                          .doc(email)
-                          .update({'selected': false});
-                    }
-                    Provider.of<SelectedUser>(context, listen: false).clear();
                   },
                 ),
               ],
@@ -301,7 +297,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                 isMe: sender == _auth.currentUser.email,
                                 time: time,
                                 id: messageId,
-                                onLongpressCallback: () {
+                                onLongPressCallback: () {
                                   setState(() {
                                     selectedMessage.addAll({
                                       messageId: MessageInfo(
@@ -359,16 +355,20 @@ class _ChatRoomState extends State<ChatRoom> {
                                         selectionMode = false;
                                     });
                                   } else {
-                                    setState(() {
-                                      selectedMessage.addAll({
-                                        messageId: MessageInfo(
-                                            message: mess,
-                                            time: stamp.toDate(),
-                                            type: 'img',
-                                            imageName: imageName,
-                                            url: url),
-                                      },);
-                                    },);
+                                    setState(
+                                      () {
+                                        selectedMessage.addAll(
+                                          {
+                                            messageId: MessageInfo(
+                                                message: mess,
+                                                time: stamp.toDate(),
+                                                type: 'img',
+                                                imageName: imageName,
+                                                url: url),
+                                          },
+                                        );
+                                      },
+                                    );
                                   }
                                 },
                                 isSelected:
@@ -382,7 +382,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           } else {
                             messageList.add(
                               PhotoMessage(
-                                onLongpressCallback: () {
+                                onLongPressCallback: () {
                                   setState(() {
                                     selectedMessage.addAll({
                                       messageId: MessageInfo(

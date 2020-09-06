@@ -72,8 +72,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                     if (pickedImage == null) return;
                                     final ref = FirebaseStorage.instance
                                         .ref()
-                                        .child(widget.groupId +
-                                            '.jpg');
+                                        .child(widget.groupId + '.jpg');
                                     final File file = File(pickedImage.path);
                                     StorageUploadTask task = ref.putFile(file);
                                     StorageTaskSnapshot taskSnapshot =
@@ -224,11 +223,19 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   child: Text('Kick'),
                                   onPressed: () async {
                                     String email = widget.members[index];
+                                    int size = await FirebaseFirestore.instance
+                                        .collection('groups')
+                                        .doc(widget.groupId)
+                                        .get()
+                                        .then((value) => value.data()['size']);
+                                    --size;
                                     await FirebaseFirestore.instance
                                         .collection('groups')
                                         .doc(widget.groupId)
                                         .update({
-                                      'members': FieldValue.arrayRemove([email])
+                                      'members':
+                                          FieldValue.arrayRemove([email]),
+                                      'size': size,
                                     });
                                     await FirebaseFirestore.instance
                                         .collection('groups')
@@ -306,8 +313,8 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                       height: 0,
                     )
                   : Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: 8.0, left: 10, right: 10),
+                      padding: const EdgeInsets.only(
+                          bottom: 8.0, left: 10, right: 10),
                       child: RoundTextButton(
                         text: 'Leave Group',
                         icon: Icons.directions_walk,
@@ -425,19 +432,10 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                             ).show(context);
                             Navigator.pop(context);
                           }
-                          for (String email in Provider.of<SelectedUser>(
-                                  context,
+
+                          await Provider.of<SelectedUser>(context,
                                   listen: false)
-                              .getList()) {
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(FirebaseAuth.instance.currentUser.email)
-                                .collection('friends')
-                                .doc(email)
-                                .update({'selected': false});
-                          }
-                          Provider.of<SelectedUser>(context, listen: false)
-                              .clear();
+                              .clearChat();
                         },
                       ),
                     )

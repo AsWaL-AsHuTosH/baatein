@@ -146,8 +146,9 @@ class _GroupSetupState extends State<GroupSetup> {
                     String id = Uuid().v4();
                     List<String> list =
                         Provider.of<SelectedUser>(context, listen: false)
-                            .getList();
+                            .getListChat();
                     list.add(_auth.currentUser.email);
+                    int size = list.length;
                     List<Map<String, String>> nameList =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getNameList();
@@ -158,7 +159,7 @@ class _GroupSetupState extends State<GroupSetup> {
                         .then((doc) => doc.data()['name']);
                     nameList
                         .add({FirebaseAuth.instance.currentUser.email: myName});
-                        DateTime time = DateTime.now();
+                    DateTime time = DateTime.now();
                     await _firestore.collection('groups').doc(id).set({
                       'name': controller.text.trim(),
                       'search_name': controller.text.trim().toLowerCase(),
@@ -170,6 +171,7 @@ class _GroupSetupState extends State<GroupSetup> {
                       'read': null,
                       'type': null,
                       'time': time,
+                      'size': size,
                     });
                     if (imageFile != null) {
                       final ref =
@@ -177,7 +179,7 @@ class _GroupSetupState extends State<GroupSetup> {
                       StorageUploadTask task = ref.putFile(imageFile);
                       StorageTaskSnapshot taskSnapshot = await task.onComplete;
                       String url = await taskSnapshot.ref.getDownloadURL();
-                      _firestore
+                      await _firestore
                           .collection('profile_pic')
                           .doc(id)
                           .collection('image')
@@ -191,17 +193,22 @@ class _GroupSetupState extends State<GroupSetup> {
                           .doc('image_url')
                           .set({'url': kNoGroupPic});
                     }
-                    for (String email
-                        in Provider.of<SelectedUser>(context, listen: false)
-                            .getList()) {
-                      await _firestore
+                    for (String email in list) {
+                      _firestore
                           .collection('users')
-                          .doc(_auth.currentUser.email)
-                          .collection('friends')
                           .doc(email)
-                          .update({'selected': false});
+                          .collection('groups')
+                          .doc(id)
+                          .set({
+                        'name': controller.text.trim(),
+                        'search_name': controller.text.trim().toLowerCase(),
+                        'id': id,
+                        'selected': false,
+                        'admin': _auth.currentUser.email,
+                      });
                     }
-                    Provider.of<SelectedUser>(context, listen: false).clear();
+                    await Provider.of<SelectedUser>(context, listen: false)
+                        .clearChat();
                     setState(() {
                       spin = false;
                     });

@@ -1,14 +1,12 @@
 import 'package:baatein/chat/friends_search_screen.dart';
+import 'package:baatein/chat/group_search_screen.dart';
 import 'package:baatein/chat/group_selection_screen.dart';
-import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/customs/group_chat_card.dart';
+import 'package:baatein/customs/group_chatcard_builder.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:date_time_format/date_time_format.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 
 class GroupChatScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -17,51 +15,32 @@ class GroupChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.search, color: Colors.white),
-          backgroundColor: Theme.of(context).primaryColor,
-          onPressed: () =>
-              Navigator.pushNamed(context, FreindSearchScreen.routeId)),
+        child: Icon(Icons.search, color: Colors.white),
+        backgroundColor: Theme.of(context).primaryColor,
+        onPressed: () =>
+            Navigator.pushNamed(context, GroupSearchScreen.routeId),
+      ),
       body: Container(
         color: Theme.of(context).accentColor,
         child: Column(
           children: [
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
+                  .collection('users')
+                  .doc(_auth.currentUser.email)
                   .collection('groups')
-                  .where('members', arrayContains: _auth.currentUser.email)
                   .snapshots(),
               builder: (context, snaps) {
-                List<GroupChatCard> groupList = [];
+                List<GroupChatCardBuilder> groupList = [];
                 if (snaps.hasData) {
-                  final groups = snaps.data.docs;
+                  var groups;
+                  if (snaps.data != null) groups = snaps.data.docs;
                   if (groups != null) {
                     for (var group in groups) {
-                      String name = group.data()['name'];
-                      String admin = group.data()['admin'];
                       String id = group.data()['id'];
-                      bool isImage = group.data()['type'] == 'img';
-                      String lastMessage = group.data()['last_message'];
-                      Timestamp stamp = group.data()['time'];
-
-                      String time = DateTimeFormat.format(stamp.toDate(),
-                          format: 'h:i a');
-
-                      bool newMessage;
-                      var data = group.data()['read'];
-                      if (data == null)
-                        newMessage = true;
-                      else
-                        newMessage =
-                            !List.from(data).contains(_auth.currentUser.email);
                       groupList.add(
-                        GroupChatCard(
-                          groupAdmin: admin,
+                        GroupChatCardBuilder(
                           groupId: id,
-                          groupName: name,
-                          isImage: isImage,
-                          lastMessage: lastMessage == null ? '' : lastMessage,
-                          newMessage: newMessage,
-                          time: time,
                         ),
                       );
                     }
@@ -106,17 +85,6 @@ class GroupChatScreen extends StatelessWidget {
                     ).show(context);
                     return;
                   }
-                  for (String email
-                      in Provider.of<SelectedUser>(context, listen: false)
-                          .getList()) {
-                    await _firestore
-                        .collection('users')
-                        .doc(_auth.currentUser.email)
-                        .collection('friends')
-                        .doc(email)
-                        .update({'selected': false});
-                  }
-                  Provider.of<SelectedUser>(context, listen: false).clear();
                 },
               ),
             ),

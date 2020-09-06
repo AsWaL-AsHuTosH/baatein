@@ -6,7 +6,7 @@ class PhotoMessage extends StatelessWidget {
   final bool isMe, isSelected;
   final String time;
   final String id;
-  final Function onLongpressCallback;
+  final Function onLongPressCallback;
   final Function onTapCallback;
   PhotoMessage(
       {this.message,
@@ -15,12 +15,12 @@ class PhotoMessage extends StatelessWidget {
       this.time,
       this.id,
       this.isSelected = false,
-      this.onLongpressCallback,
+      this.onLongPressCallback,
       this.onTapCallback});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: onLongpressCallback,
+      onLongPress: onLongPressCallback,
       onTap: onTapCallback,
       child: Column(
         crossAxisAlignment:
@@ -71,7 +71,7 @@ class PhotoMessage extends StatelessWidget {
                           );
                         },
                   child: Container(
-                    constraints: BoxConstraints(maxHeight: 300),
+                    constraints: BoxConstraints(maxHeight: 300, maxWidth: 300),
                     child: Image(
                       image: NetworkImage(photoUrl),
                     ),
