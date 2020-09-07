@@ -220,15 +220,18 @@ class _ChatRoomState extends State<ChatRoom> {
           : AppBar(
               elevation: 10,
               title: GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfileView(
-                      friendEmail: widget.friendEmail,
-                      friendName: widget.friendName,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileView(
+                        friendEmail: widget.friendEmail,
+                        friendName: widget.friendName,
+                        isFriend: true,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
                 child: Row(
                   children: [
                     StreamBuilder<QuerySnapshot>(

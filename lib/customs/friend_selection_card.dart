@@ -71,6 +71,7 @@ class _FriendSelectionCardState extends State<FriendSelectionCard> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProfileView(
+                    isFriend: true,
                     friendEmail: widget.friendEmail,
                     friendName: widget.friendName,
                   ),

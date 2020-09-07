@@ -21,6 +21,7 @@ class RequestTile extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (context) => ProfileView(
+            isFriend: false,
             friendEmail: senderEmail,
             friendName: senderName,
           ),

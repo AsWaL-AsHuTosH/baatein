@@ -1,5 +1,6 @@
 import 'package:baatein/constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/chat/chatroom_screen.dart';
 import 'package:baatein/chat/profile_view.dart';
@@ -23,15 +24,25 @@ class FriendTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: readOnly
-          ? () => Navigator.push(
+          ? () async {
+              bool isFriend = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser.email)
+                  .collection('friends')
+                  .doc(friendEmail)
+                  .get()
+                  .then((value) => value.exists);
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProfileView(
+                    isFriend: isFriend,
                     friendEmail: friendEmail,
                     friendName: friendName,
                   ),
                 ),
-              )
+              );
+            }
           : () {
               Navigator.push(
                 context,
@@ -50,15 +61,25 @@ class FriendTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileView(
-                    friendEmail: friendEmail,
-                    friendName: friendName,
+              onTap: () async {
+                bool isFriend = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser.email)
+                    .collection('friends')
+                    .doc(friendEmail)
+                    .get()
+                    .then((value) => value.exists);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileView(
+                      isFriend: isFriend,
+                      friendEmail: friendEmail,
+                      friendName: friendName,
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')

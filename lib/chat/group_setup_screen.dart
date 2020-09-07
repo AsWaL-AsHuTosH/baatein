@@ -73,11 +73,11 @@ class _GroupSetupState extends State<GroupSetup> {
                         Icons.photo_camera,
                         size: 30,
                       ),
-                      radius: 50,
+                      radius: 30,
                     )
                   : CircleAvatar(
                       backgroundImage: AssetImage(imageFile.path),
-                      radius: 50,
+                      radius: 30,
                     ),
             ),
             SizedBox(

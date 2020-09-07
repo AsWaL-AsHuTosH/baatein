@@ -89,6 +89,7 @@ class ChatCard extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProfileView(
+                    isFriend: true,
                     friendEmail: friendEmail,
                     friendName: friendName,
                   ),
