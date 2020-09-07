@@ -35,6 +35,63 @@ class GroupProfileView extends StatefulWidget {
 
 class _GroupProfileViewState extends State<GroupProfileView> {
   bool spin = false;
+
+  Future<void> increaseCount(String name) async {
+    int count = await FirebaseFirestore.instance
+        .collection('shared_images')
+        .doc(name)
+        .get()
+        .then((value) => value.data()['count']);
+
+    ++count;
+    await FirebaseFirestore.instance
+        .collection('shared_images')
+        .doc(name)
+        .update({'count': count});
+  }
+
+  Future<void> reduceCountKickLeave(String name) async {
+    int count = await FirebaseFirestore.instance
+        .collection('shared_images')
+        .doc(name)
+        .get()
+        .then((value) => value.data()['count']);
+    if (count - 1 <= 0) {
+      await FirebaseFirestore.instance
+          .collection('shared_images')
+          .doc(name)
+          .delete();
+      await FirebaseStorage.instance.ref().child(name).delete();
+    } else {
+      --count;
+      await FirebaseFirestore.instance
+          .collection('shared_images')
+          .doc(name)
+          .update({'count': count});
+    }
+  }
+
+  Future<void> reduceCount(String name) async {
+    int count = await FirebaseFirestore.instance
+        .collection('shared_images')
+        .doc(name)
+        .get()
+        .then((value) => value.data()['count']);
+    if (count - widget.members.length <= 0) {
+      await FirebaseFirestore.instance
+          .collection('shared_images')
+          .doc(name)
+          .delete();
+      await FirebaseStorage.instance.ref().child(name).delete();
+    } else {
+      count -= widget.members.length;
+      await FirebaseFirestore.instance
+          .collection('shared_images')
+          .doc(name)
+          .update({'count': count});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,43 +284,6 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   FlatButton(
                                     child: Text('Kick'),
                                     onPressed: () async {
-                                      setState(() {
-                                        spin = true;
-                                      });
-                                      String email = widget.members[index];
-                                      int size = await FirebaseFirestore
-                                          .instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .get()
-                                          .then(
-                                              (value) => value.data()['size']);
-                                      --size;
-                                      await FirebaseFirestore.instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .update({
-                                        'members':
-                                            FieldValue.arrayRemove([email]),
-                                        'size': size,
-                                      });
-                                      await FirebaseFirestore.instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .update({
-                                        'members_name': FieldValue.arrayRemove([
-                                          {email: widget.membersName[email]}
-                                        ])
-                                      });
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(email)
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .delete();
-                                      setState(() {
-                                        spin = false;
-                                      });
                                       Navigator.pop(context, true);
                                     },
                                   ),
@@ -276,6 +296,58 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               ),
                             );
                             if (ok != null && ok == true) {
+                              setState(() {
+                                spin = true;
+                              });
+                              String email = widget.members[index];
+                              int size = await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .get()
+                                  .then((value) => value.data()['size']);
+                              --size;
+
+                              // REDUCING IMAGE COUNT OF ALL IMAGES IN SHARED IN GROUP.
+                              var messages = await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .collection('messages')
+                                  .get()
+                                  .then((value) =>
+                                      value != null ? value.docs : null);
+                              if (messages != null) {
+                                for (var message in messages) {
+                                  if (message.data()['type'] == 'img') {
+                                    String name = message.data()['image_name'];
+                                    if (!List.from(message.data()['deleted_by'])
+                                        .contains(email))
+                                      reduceCountKickLeave(name);
+                                  }
+                                }
+                              }
+
+                              await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .update({
+                                'members': FieldValue.arrayRemove([email]),
+                                'size': size,
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .update({
+                                'members_name': FieldValue.arrayRemove([
+                                  {email: widget.membersName[email]}
+                                ])
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(email)
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .delete();
+
                               await Flushbar(
                                 message:
                                     "${widget.membersName[widget.members[index]]} is no longer a member of group.",
@@ -303,6 +375,9 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 String email = widget.members[index];
                                 widget.members.remove(email);
                                 widget.membersName.remove(email);
+                              });
+                              setState(() {
+                                spin = false;
                               });
                             }
                           },
@@ -349,52 +424,6 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   FlatButton(
                                     child: Text('Leave'),
                                     onPressed: () async {
-                                      setState(() {
-                                        spin = true;
-                                      });
-                                      String email = FirebaseAuth
-                                          .instance.currentUser.email;
-                                      await FirebaseFirestore.instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .update({
-                                        'members':
-                                            FieldValue.arrayRemove([email])
-                                      });
-                                      await FirebaseFirestore.instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .update({
-                                        'members_name': FieldValue.arrayRemove([
-                                          {email: widget.membersName[email]}
-                                        ])
-                                      });
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(email)
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .delete();
-
-                                      int size = await FirebaseFirestore
-                                          .instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .get()
-                                          .then(
-                                              (value) => value.data()['size']);
-                                      --size;
-                                      await FirebaseFirestore.instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .update({
-                                        'members':
-                                            FieldValue.arrayRemove([email]),
-                                        'size': size,
-                                      });
-                                      setState(() {
-                                        spin = false;
-                                      });
                                       Navigator.pop(context, true);
                                     },
                                   ),
@@ -408,6 +437,67 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                             );
 
                             if (ok != null && ok == true) {
+                              setState(() {
+                                spin = true;
+                              });
+                              String email =
+                                  FirebaseAuth.instance.currentUser.email;
+
+                              //  var messages = await FirebaseFirestore
+                              var messages = await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .collection('messages')
+                                  .get()
+                                  .then((value) =>
+                                      value != null ? value.docs : null);
+                              if (messages != null) {
+                                for (var message in messages) {
+                                  if (message.data()['type'] == 'img') {
+                                    String name = message.data()['image_name'];
+                                    if (!List.from(message.data()['deleted_by'])
+                                        .contains(email))
+                                      reduceCountKickLeave(name);
+                                  }
+                                }
+                              }
+                              await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .update({
+                                'members': FieldValue.arrayRemove([email])
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .update({
+                                'members_name': FieldValue.arrayRemove([
+                                  {email: widget.membersName[email]}
+                                ])
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(email)
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .delete();
+
+                              int size = await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .get()
+                                  .then((value) => value.data()['size']);
+                              --size;
+                              await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .update({
+                                'members': FieldValue.arrayRemove([email]),
+                                'size': size,
+                              });
+                              setState(() {
+                                spin = false;
+                              });
                               await Flushbar(
                                 message:
                                     "You are no longer a memeber of '${widget.groupName}'.",
@@ -514,39 +604,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 actions: [
                                   FlatButton(
                                     child: Text('Delete'),
-                                    onPressed: () async {
-                                      setState(() {
-                                        spin = true;
-                                      });
-                                      if (await FirebaseFirestore.instance
-                                              .collection('profile_pic')
-                                              .doc(widget.groupId)
-                                              .collection('image')
-                                              .doc('image_url')
-                                              .get()
-                                              .then((value) =>
-                                                  value.data()['url']) !=
-                                          kNoGroupPic) {
-                                        await FirebaseStorage.instance
-                                            .ref()
-                                            .child(widget.groupId + '.jpg')
-                                            .delete();
-                                      }
-
-                                      for (String email in widget.members)
-                                        await FirebaseFirestore.instance
-                                            .collection('users')
-                                            .doc(email)
-                                            .collection('groups')
-                                            .doc(widget.groupId)
-                                            .delete();
-                                      await FirebaseFirestore.instance
-                                          .collection('groups')
-                                          .doc(widget.groupId)
-                                          .delete();
-                                      setState(() {
-                                        spin = false;
-                                      });
+                                    onPressed: () {
                                       Navigator.pop(context, true);
                                     },
                                   ),
@@ -557,9 +615,55 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   ),
                                 ],
                               ),
-                            ); 
-                            
+                            );
+
                             if (ok != null && ok == true) {
+                              setState(() {
+                                spin = true;
+                              });
+                              if (await FirebaseFirestore.instance
+                                      .collection('profile_pic')
+                                      .doc(widget.groupId)
+                                      .collection('image')
+                                      .doc('image_url')
+                                      .get()
+                                      .then((value) => value.data()['url']) !=
+                                  kNoGroupPic) {
+                                await FirebaseStorage.instance
+                                    .ref()
+                                    .child(widget.groupId + '.jpg')
+                                    .delete();
+                              }
+                              // REDUCING IMAGE COUNT OF ALL IMAGES IN SHARED IN GROUP.
+                              var messages = await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .collection('messages')
+                                  .get()
+                                  .then((value) =>
+                                      value != null ? value.docs : null);
+                              if (messages != null) {
+                                for (var message in messages) {
+                                  if (message.data()['type'] == 'img') {
+                                    String name = message.data()['image_name'];
+                                    await reduceCount(name);
+                                  }
+                                }
+                              }
+                              for (String email in widget.members)
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(email)
+                                    .collection('groups')
+                                    .doc(widget.groupId)
+                                    .delete();
+                              await FirebaseFirestore.instance
+                                  .collection('groups')
+                                  .doc(widget.groupId)
+                                  .delete();
+                              setState(() {
+                                spin = false;
+                              });
                               await Flushbar(
                                 message:
                                     "${widget.groupName} is no longer available.",

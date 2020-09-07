@@ -418,6 +418,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                 isMe: senderEmail == _auth.currentUser.email,
                                 time: time,
                                 photoUrl: url,
+                                id: id,
+                                senderEmail: senderEmail,
+                                senderName: senderName,
                               ),
                             );
                           } else {
@@ -433,12 +436,14 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                           imageName: imageName,
                                           url: url)
                                     });
-
                                     selectionMode = true;
                                   });
                                 },
                                 isSelected: selectedMessage.containsKey(id),
                                 message: mess,
+                                id: id,
+                                senderEmail: senderEmail,
+                                senderName: senderName,
                                 isMe: senderEmail == _auth.currentUser.email,
                                 time: time,
                                 photoUrl: url,

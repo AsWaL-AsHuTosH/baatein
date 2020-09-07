@@ -66,20 +66,22 @@ class GroupPhotoMessage extends StatelessWidget {
                 isMe
                     ? Container(width: 0, height: 0)
                     : FractionallySizedBox(
+                        widthFactor: 0.40,
                         child: Divider(color: Colors.white),
                       ),
                 GestureDetector(
-                  onTap:  onTapCallback != null
-                      ? null : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ImageViewScreen(
-                          url: photoUrl,
-                        ),
-                      ),
-                    );
-                  },
+                  onTap: onTapCallback != null
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ImageViewScreen(
+                                url: photoUrl,
+                              ),
+                            ),
+                          );
+                        },
                   child: Container(
                     constraints: BoxConstraints(maxHeight: 300, maxWidth: 300),
                     child: Image(

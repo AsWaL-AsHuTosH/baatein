@@ -209,6 +209,32 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         'members_name': FieldValue.arrayUnion(nameList),
                         'size': size,
                       });
+                      //increasing image count.
+                      var messages = await FirebaseFirestore.instance
+                          .collection('groups')
+                          .doc(widget.groupId)
+                          .collection('messages')
+                          .get()
+                          .then((value) => value != null ? value.docs : null);
+
+                      if (messages != null) {
+                        for (var message in messages) {
+                          if (message.data()['type'] == 'img') {
+                            String name = message.data()['image_name'];
+                            int count = await FirebaseFirestore.instance
+                                .collection('shared_images')
+                                .doc(name)
+                                .get()
+                                .then((value) => value.data()['count']);
+                            count += memberList.length;
+                            await FirebaseFirestore.instance
+                                .collection('shared_images')
+                                .doc(name)
+                                .update({'count': count});
+                          }
+                        }
+                      }
+                      //Adding group to each memeber collection
                       for (String email in memberList)
                         await _firestore
                             .collection('users')
