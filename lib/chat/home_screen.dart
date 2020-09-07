@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(3.0),
+          padding: const EdgeInsets.all(8.0),
           child: GestureDetector(
             onTap: () => _scaffoldKey.currentState.openDrawer(),
             child: StreamBuilder<QuerySnapshot>(
@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen>
                 if (url == null) url = kNoProfilePic;
                 return CircleAvatar(
                   backgroundImage: NetworkImage(url),
-                  radius: 25,
+                  radius: 20,
                 );
               },
             ),
@@ -241,7 +241,8 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         elevation: 5,
         backgroundColor: Theme.of(context).primaryColor,
-        title: Center(
+        title: Padding(
+          padding: const EdgeInsets.only(left: 80.0),
           child: Text(
             'Baatein',
             style: TextStyle(

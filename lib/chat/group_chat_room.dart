@@ -285,12 +285,11 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                         return CircleAvatar(
                           backgroundImage: NetworkImage(url),
                           backgroundColor: Colors.grey,
-                          radius: 25,
                         );
                       },
                     ),
                     SizedBox(
-                      width: 10,
+                      width: 20,
                     ),
                     Text(
                       widget.groupName,

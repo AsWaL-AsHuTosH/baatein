@@ -249,12 +249,11 @@ class _ChatRoomState extends State<ChatRoom> {
                         if (url == null) url = kNoProfilePic;
                         return CircleAvatar(
                           backgroundImage: NetworkImage(url),
-                          radius: 25,
                         );
                       },
                     ),
                     SizedBox(
-                      width: 10,
+                      width: 20,
                     ),
                     Text(
                       widget.friendName,
