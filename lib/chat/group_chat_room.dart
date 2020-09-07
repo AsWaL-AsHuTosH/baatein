@@ -39,9 +39,13 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
   String myName;
 
   Future<void> setLastMessageRead() async {
+    try{
     await _firestore.collection('groups').doc(widget.groupId).update({
       'read': FieldValue.arrayUnion([_auth.currentUser.email])
     });
+    }catch(e){
+      return;
+    }
   }
 
   @override
@@ -230,6 +234,10 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
               elevation: 10,
               title: GestureDetector(
                 onTap: () async {
+                  setState(() {
+                    spin = true;
+                  });
+                  FocusScope.of(context).unfocus();
                   List<String> members = List.from(await _firestore
                       .collection('groups')
                       .doc(widget.groupId)
@@ -243,6 +251,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                       .then((value) => value.data()['members_name']);
                   Map<String, dynamic> membersName = {};
                   for (var map in mapList) membersName.addAll(map);
+                  setState(() {
+                    spin = false;
+                  });
                   Navigator.push(
                     context,
                     MaterialPageRoute(

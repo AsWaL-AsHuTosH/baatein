@@ -182,10 +182,18 @@ class _GroupSetupState extends State<GroupSetup> {
                       await _firestore
                           .collection('profile_pic')
                           .doc(id)
+                          .set({'id': id});
+                      await _firestore
+                          .collection('profile_pic')
+                          .doc(id)
                           .collection('image')
                           .doc('image_url')
                           .set({'url': url});
                     } else {
+                      await _firestore
+                          .collection('profile_pic')
+                          .doc(id)
+                          .set({'id': id});
                       await _firestore
                           .collection('profile_pic')
                           .doc(id)
@@ -194,7 +202,7 @@ class _GroupSetupState extends State<GroupSetup> {
                           .set({'url': kNoGroupPic});
                     }
                     for (String email in list) {
-                      _firestore
+                      await _firestore
                           .collection('users')
                           .doc(email)
                           .collection('groups')

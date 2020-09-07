@@ -10,15 +10,19 @@ class GroupChatCard extends StatelessWidget {
   final String groupName;
   final String groupId;
   final String groupAdmin;
-  final time;
-  GroupChatCard(
-      {@required this.groupName,
-      @required this.newMessage,
-      @required this.lastMessage,
-      @required this.groupId,
-      @required this.time,
-      @required this.isImage,
-      @required this.groupAdmin});
+  final String time;
+  final Function spinTrue, spinFalse;
+  GroupChatCard({
+    @required this.groupName,
+    @required this.newMessage,
+    @required this.lastMessage,
+    @required this.groupId,
+    @required this.time,
+    @required this.isImage,
+    @required this.groupAdmin,
+    @required this.spinFalse,
+    @required this.spinTrue,
+  });
   Widget message() {
     return isImage
         ? Icon(Icons.image)
@@ -89,6 +93,8 @@ class GroupChatCard extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () async {
+                FocusScope.of(context).unfocus();
+                spinTrue();
                 List<String> members = List.from(await FirebaseFirestore
                     .instance
                     .collection('groups')
@@ -102,6 +108,7 @@ class GroupChatCard extends StatelessWidget {
                     .then((value) => value.data()['members_name']);
                 Map<String, dynamic> membersName = {};
                 for (var map in mapList) membersName.addAll(map);
+                spinFalse();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -115,6 +122,7 @@ class GroupChatCard extends StatelessWidget {
                   ),
                 );
               },
+             
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')
@@ -123,7 +131,7 @@ class GroupChatCard extends StatelessWidget {
                     .snapshots(),
                 builder: (context, snapshot) {
                   String url;
-                  if (snapshot.hasData) {
+                  if (snapshot.hasData && snapshot.data != null && snapshot.data.docs.isNotEmpty) {
                     final image = snapshot.data.docs;
                     url = image[0].data()['url'];
                   }

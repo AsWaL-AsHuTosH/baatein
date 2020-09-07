@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:baatein/chat/add_member_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
@@ -198,7 +197,9 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       String url;
-                      if (snapshot.hasData) {
+                      if (snapshot.hasData &&
+                          snapshot.data != null &&
+                          snapshot.data.docs.isNotEmpty) {
                         final image = snapshot.data.docs;
                         url = image[0].data()['url'];
                       }
@@ -443,7 +444,6 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               String email =
                                   FirebaseAuth.instance.currentUser.email;
 
-                              //  var messages = await FirebaseFirestore
                               var messages = await FirebaseFirestore.instance
                                   .collection('groups')
                                   .doc(widget.groupId)
@@ -621,19 +621,6 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               setState(() {
                                 spin = true;
                               });
-                              if (await FirebaseFirestore.instance
-                                      .collection('profile_pic')
-                                      .doc(widget.groupId)
-                                      .collection('image')
-                                      .doc('image_url')
-                                      .get()
-                                      .then((value) => value.data()['url']) !=
-                                  kNoGroupPic) {
-                                await FirebaseStorage.instance
-                                    .ref()
-                                    .child(widget.groupId + '.jpg')
-                                    .delete();
-                              }
                               // REDUCING IMAGE COUNT OF ALL IMAGES IN SHARED IN GROUP.
                               var messages = await FirebaseFirestore.instance
                                   .collection('groups')
@@ -648,6 +635,12 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                     String name = message.data()['image_name'];
                                     await reduceCount(name);
                                   }
+                                  await FirebaseFirestore.instance
+                                      .collection('groups')
+                                      .doc(widget.groupId)
+                                      .collection('messages')
+                                      .doc(message.id)
+                                      .delete();
                                 }
                               }
                               for (String email in widget.members)
@@ -657,10 +650,36 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                     .collection('groups')
                                     .doc(widget.groupId)
                                     .delete();
+
                               await FirebaseFirestore.instance
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .delete();
+
+                              if (await FirebaseFirestore.instance
+                                      .collection('profile_pic')
+                                      .doc(widget.groupId)
+                                      .collection('image')
+                                      .doc('image_url')
+                                      .get()
+                                      .then((value) => value.data()['url']) !=
+                                  kNoGroupPic) {
+                                await FirebaseStorage.instance
+                                    .ref()
+                                    .child(widget.groupId + '.jpg')
+                                    .delete();
+                              }
+                              await FirebaseFirestore.instance
+                                  .collection('profile_pic')
+                                  .doc(widget.groupId)
+                                  .collection('image')
+                                  .doc('image_url')
+                                  .delete();
+                              await FirebaseFirestore.instance
+                                  .collection('profile_pic')
+                                  .doc(widget.groupId)
+                                  .delete();
+
                               setState(() {
                                 spin = false;
                               });
@@ -686,6 +705,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   )
                                 ],
                               ).show(context);
+
                               Navigator.popUntil(context,
                                   ModalRoute.withName(HomeScreen.routeId));
                             }

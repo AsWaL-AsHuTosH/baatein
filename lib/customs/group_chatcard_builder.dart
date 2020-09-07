@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 class GroupChatCardBuilder extends StatelessWidget {
   final String groupId;
-  GroupChatCardBuilder({this.groupId});
+  final Function spinTrue, spinFalse;
+  GroupChatCardBuilder({this.groupId,@required this.spinFalse,@required this.spinTrue});
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -15,7 +16,7 @@ class GroupChatCardBuilder extends StatelessWidget {
           .where('id', isEqualTo: groupId)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.data == null)
+        if (snapshot.data == null || snapshot.data.docs.isEmpty)
           return Container(
             width: 0,
             height: 0,
@@ -36,6 +37,8 @@ class GroupChatCardBuilder extends StatelessWidget {
           newMessage = !List.from(data)
               .contains(FirebaseAuth.instance.currentUser.email);
         return GroupChatCard(
+          spinFalse: spinFalse,
+          spinTrue: spinTrue,
           groupAdmin: admin,
           groupId: id,
           groupName: name,
