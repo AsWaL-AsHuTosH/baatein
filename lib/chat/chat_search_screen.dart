@@ -29,7 +29,6 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
               padding: const EdgeInsets.all(4.0),
               child: SearchField(
                 hintText: 'Search a chat by name......',
-                labelText: null,
                 onChangeCallback: (value) {
                   setState(() {
                     if (value == null || value.isEmpty) {

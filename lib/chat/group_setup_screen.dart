@@ -87,7 +87,6 @@ class _GroupSetupState extends State<GroupSetup> {
               padding: const EdgeInsets.all(8.0),
               child: SearchField(
                 hintText: 'Group Name',
-                labelText: null,
                 controller: controller,
                 validator: validator,
                 formKey: _key,

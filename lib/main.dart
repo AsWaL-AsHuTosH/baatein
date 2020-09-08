@@ -35,7 +35,7 @@ class Baatein extends StatelessWidget {
         },
         initialRoute: LoadingScreen.routeId,
         theme: ThemeData(
-          primaryColor: Color(0xfff44336),
+          primaryColor: Colors.blue,
           accentColor: Colors.white,
           canvasColor: Colors.transparent,
         ),

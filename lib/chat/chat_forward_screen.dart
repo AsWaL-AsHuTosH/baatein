@@ -40,7 +40,6 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                 padding: const EdgeInsets.all(4.0),
                 child: SearchField(
                   hintText: 'Type your friend name......',
-                  labelText: null,
                   onChangeCallback: (value) {
                     setState(() {
                       if (value == null || value.isEmpty) {
@@ -148,7 +147,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10.0),
                 child: RoundTextButton(
-                  text: 'Send To Selectd Groups & Chats',
+                  text: 'Send',
                   icon: Icons.send,
                   onPress: () async {
                     setState(() {

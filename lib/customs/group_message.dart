@@ -58,14 +58,14 @@ class GroupMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                isMe ? Container(width: 0, height: 0) : Text(senderName),
+                isMe ? Container(width: 0, height: 0) : Text(senderName, style: TextStyle(fontWeight: FontWeight.bold),),
                 isMe
                     ? Container(width: 0, height: 0)
                     : FractionallySizedBox(
                         child: Divider(color: Colors.white),
                         widthFactor: 0.33,
                       ),
-                Text(message),
+                Text(message, style: TextStyle(color: Colors.black54),),
               ],
             ),
           ),

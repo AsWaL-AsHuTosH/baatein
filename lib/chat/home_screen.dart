@@ -1,11 +1,16 @@
 import 'package:baatein/chat/chat_overview_screen.dart';
+import 'package:baatein/chat/chat_search_screen.dart';
+import 'package:baatein/chat/friends_search_screen.dart';
 import 'package:baatein/chat/group_chat_screen.dart';
+import 'package:baatein/chat/group_search_screen.dart';
 import 'package:baatein/chat/request_screen.dart';
 import 'package:baatein/chat/friend_list_screen.dart';
+import 'package:baatein/chat/request_search_screen.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/login_reg/signin_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,7 +21,7 @@ import 'package:flushbar/flushbar.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeId = 'home_screen';
-
+  static const List<String> screen = [ChatSearchScreen.routeId, GroupSearchScreen.routeId, FreindSearchScreen.routeId, RequestSearchScreen.routeId];
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -24,13 +29,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   final _auth = FirebaseAuth.instance;
-
   final _firestore = FirebaseFirestore.instance;
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   TabController _tabController;
-
   String name = 'User';
 
   @override
@@ -196,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                         RoundTextButton(
-                          text: 'Log Out',
+                          text: 'Sign Out',
                           icon: Icons.input,
                           onPress: () {
                             _auth.signOut();
@@ -214,6 +215,9 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       appBar: AppBar(
+        actions: [
+          IconButton(icon: Icon(Icons.search), onPressed: () => Navigator.pushNamed(context, HomeScreen.screen[_tabController.animation.value.round()]),)
+        ],
         leading: InkWell(
           onTap: () => _scaffoldKey.currentState.openDrawer(),
           child: Padding(

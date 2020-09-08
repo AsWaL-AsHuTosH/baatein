@@ -37,6 +37,7 @@ class _SearchSheetState extends State<SearchSheet> {
           child: Column(
             children: [
               SearchField(
+                trailing: false,
                 controller: controller,
                 formKey: _formKey,
                 validator: (val) {

@@ -1,4 +1,3 @@
-import 'package:baatein/chat/request_search_screen.dart';
 import 'package:baatein/customs/request_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -10,14 +9,6 @@ class RequestScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, RequestSearchScreen.routeId),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: Icon(
-          Icons.search,
-          color: Colors.white,
-        ),
-      ),
       body: Container(
         color: Theme.of(context).accentColor,
         child: Column(
@@ -53,7 +44,6 @@ class RequestScreen extends StatelessWidget {
                 return Expanded(child: ListView(children: requestList));
               },
             ),
-           
           ],
         ),
       ),

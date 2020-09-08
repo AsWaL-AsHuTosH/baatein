@@ -62,7 +62,12 @@ class GroupPhotoMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                isMe ? Container(width: 0, height: 0) : Text(senderName),
+                isMe
+                    ? Container(width: 0, height: 0)
+                    : Text(
+                        senderName,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                 isMe
                     ? Container(width: 0, height: 0)
                     : FractionallySizedBox(
@@ -95,6 +100,7 @@ class GroupPhotoMessage extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.start,
+                  style: TextStyle(color: Colors.black54),
                 ),
               ],
             ),

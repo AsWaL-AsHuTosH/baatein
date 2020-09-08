@@ -1,4 +1,3 @@
-import 'package:baatein/chat/chat_search_screen.dart';
 import 'package:baatein/customs/chat_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +10,6 @@ class ChatOverviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.search, color: Colors.white),
-        backgroundColor: Theme.of(context).primaryColor,
-        onPressed: () => Navigator.pushNamed(context, ChatSearchScreen.routeId),
-      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 1.0),
         decoration: BoxDecoration(

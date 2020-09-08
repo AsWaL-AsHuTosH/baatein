@@ -41,7 +41,6 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                 padding: const EdgeInsets.all(4.0),
                 child: SearchField(
                   hintText: 'Type group name......',
-                  labelText: null,
                   onChangeCallback: (value) {
                     setState(() {
                       if (value == null || value.isEmpty) {
@@ -135,7 +134,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                             groupAdmin: admin,
                             groupName: name,
                             groupId: id,
-                            color: isSelected ? Colors.green : Colors.red,
+                            isSelected: isSelected,
                           ),
                         );
                       }
@@ -151,7 +150,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10.0),
                 child: RoundTextButton(
-                  text: 'Send To Selectd Groups & Chats',
+                  text: 'Send',
                   icon: Icons.send,
                   onPress: () async {
                     setState(() {
@@ -378,7 +377,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                         }
                       }
                     }
-                    
+
                     for (String groupId in groups) {
                       for (MessageInfo element in widget.selectedMessage) {
                         if (element.type == 'txt') {

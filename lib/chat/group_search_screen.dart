@@ -45,7 +45,6 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
                 padding: const EdgeInsets.all(4.0),
                 child: SearchField(
                   hintText: 'Type group name......',
-                  labelText: null,
                   onChangeCallback: (value) {
                     setState(() {
                       if (value == null || value.isEmpty) {

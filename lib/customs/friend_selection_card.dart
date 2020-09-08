@@ -28,126 +28,105 @@ class FriendSelectionCard extends StatefulWidget {
 class _FriendSelectionCardState extends State<FriendSelectionCard> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.disableSelection
-          ? null
-          : () async {
-              SelectedUser ref =
-                  Provider.of<SelectedUser>(context, listen: false);
-              if (ref.isAlreadySelected(email: widget.friendEmail)) {
-                ref.deSelectChat(email: widget.friendEmail);
+    return Material(
+      child: InkWell(
+        onTap: widget.disableSelection
+            ? null
+            : () async {
+                SelectedUser ref =
+                    Provider.of<SelectedUser>(context, listen: false);
+                if (ref.isAlreadySelected(email: widget.friendEmail)) {
+                  ref.deSelectChat(email: widget.friendEmail);
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(FirebaseAuth.instance.currentUser.email)
+                      .collection('friends')
+                      .doc(widget.friendEmail)
+                      .update({
+                    'selected': false,
+                  });
+                  return;
+                }
+                ref.addSelection(
+                  email: widget.friendEmail,
+                  name: widget.friendName,
+                );
+
                 await FirebaseFirestore.instance
                     .collection('users')
                     .doc(FirebaseAuth.instance.currentUser.email)
                     .collection('friends')
                     .doc(widget.friendEmail)
                     .update({
-                  'selected': false,
+                  'selected': true,
                 });
-                return;
-              }
-              ref.addSelection(
-                email: widget.friendEmail,
-                name: widget.friendName,
-              );
-
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(FirebaseAuth.instance.currentUser.email)
-                  .collection('friends')
-                  .doc(widget.friendEmail)
-                  .update({
-                'selected': true,
-              });
-            },
-      child: Container(
-        margin: EdgeInsets.all(3.0),
-        padding: EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileView(
-                    isFriend: true,
-                    friendEmail: widget.friendEmail,
-                    friendName: widget.friendName,
+              },
+        child: Container(
+          color: widget.disableSelection  || widget.isSelected ? Colors.black12 : Colors.white,
+          padding: EdgeInsets.all(10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileView(
+                      isFriend: true,
+                      friendEmail: widget.friendEmail,
+                      friendName: widget.friendName,
+                    ),
                   ),
                 ),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('profile_pic')
+                      .doc(widget.friendEmail)
+                      .collection('image')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    String url;
+                    if (snapshot.hasData) {
+                      final image = snapshot.data.docs;
+                      url = image[0].data()['url'];
+                    }
+                    if (url == null) url = kNoProfilePic;
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(url),
+                      radius: 30,
+                    );
+                  },
+                ),
               ),
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('profile_pic')
-                    .doc(widget.friendEmail)
-                    .collection('image')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  String url;
-                  if (snapshot.hasData) {
-                    final image = snapshot.data.docs;
-                    url = image[0].data()['url'];
-                  }
-                  if (url == null) url = kNoProfilePic;
-                  return CircleAvatar(
-                    backgroundImage: NetworkImage(url),
-                    radius: 30,
-                  );
-                },
+              SizedBox(
+                width: 10,
               ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.friendName,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.friendName,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    widget.friendEmail,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      letterSpacing: 0.5,
-                      fontSize: 10.0,
-                      fontStyle: FontStyle.italic,
+                    Text(
+                      widget.friendEmail,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        letterSpacing: 0.5,
+                        fontSize: 10.0,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            stops: [0.1, 0.5, 0.7, 0.9],
-            colors: [
-              widget.color[300],
-              widget.color[400],
-              widget.color[600],
-              widget.color[800],
             ],
           ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(15),
-          ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              blurRadius: 1.0,
-              color: Colors.black,
-              offset: Offset(0.0, 1.0),
-            )
-          ],
         ),
       ),
     );

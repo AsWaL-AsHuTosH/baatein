@@ -27,7 +27,6 @@ class _FreindSearchScreenState extends State<FreindSearchScreen> {
               padding: const EdgeInsets.all(4.0),
               child: SearchField(
                 hintText: 'Type your friend name......',
-                labelText: null,
                 onChangeCallback: (value) {
                   setState(() {
                     if (value == null || value.isEmpty) {

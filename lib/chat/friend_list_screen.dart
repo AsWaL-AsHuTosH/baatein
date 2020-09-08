@@ -1,4 +1,3 @@
-import 'package:baatein/chat/friends_search_screen.dart';
 import 'package:baatein/chat/search_sheet.dart';
 import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -13,11 +12,6 @@ class FriendListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.search, color: Colors.white),
-          backgroundColor: Theme.of(context).primaryColor,
-          onPressed: () =>
-              Navigator.pushNamed(context, FreindSearchScreen.routeId)),
       body: Container(
         color: Theme.of(context).accentColor,
         child: Column(

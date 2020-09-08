@@ -15,9 +15,7 @@ class GroupChatScreen extends StatefulWidget {
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
   bool spin = false;
 
   void spinTrue() {
@@ -35,12 +33,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.search, color: Colors.white),
-        backgroundColor: Theme.of(context).primaryColor,
-        onPressed: () =>
-            Navigator.pushNamed(context, GroupSearchScreen.routeId),
-      ),
       body: ModalProgressHUD(
         inAsyncCall: spin,
         child: Container(

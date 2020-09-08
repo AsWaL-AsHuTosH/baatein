@@ -28,7 +28,6 @@ class _RequestSearchScreenState extends State<RequestSearchScreen> {
               padding: const EdgeInsets.all(4.0),
               child: SearchField(
                 hintText: 'Search for existing request by name......',
-                labelText: null,
                 onChangeCallback: (value) {
                   setState(() {
                     if (value == null || value.isEmpty) {
