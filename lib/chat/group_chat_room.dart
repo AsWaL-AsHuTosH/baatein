@@ -62,7 +62,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
               ),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.cancel),
+                  icon: Icon(Icons.clear),
                   onPressed: () {
                     setState(() {
                       selectedMessage.clear();

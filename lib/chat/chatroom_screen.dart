@@ -74,7 +74,7 @@ class _ChatRoomState extends State<ChatRoom> {
               ),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.cancel),
+                  icon: Icon(Icons.clear),
                   onPressed: () {
                     setState(() {
                       selectedMessage.clear();
