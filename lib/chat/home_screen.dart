@@ -59,187 +59,217 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Theme.of(context).primaryColor,
-      drawer: Drawer(
-        child: Container(
-          padding: EdgeInsets.only(top: 5),
-          color: Theme.of(context).primaryColor,
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: Text(
-                      'Baatein',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30,
-                        fontFamily: 'DancingScript',
-                        color: Colors.white,
+    return WillPopScope(
+      onWillPop: () async {
+        bool ok = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Sign Out?'),
+            content: Text('Do you want to Sign Out?'),
+            actions: [
+              FlatButton(
+                child: Text('Yes'),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                },
+              ),
+              FlatButton(
+                child: Text('No'),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+            ],
+          ),
+        );
+        if (ok != null && ok == true) {
+          _auth.signOut();
+          Navigator.popAndPushNamed(context, SignInScreen.routeId);
+          return true;
+        } else {
+          return false;
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Theme.of(context).primaryColor,
+        drawer: Drawer(
+          child: Container(
+            padding: EdgeInsets.only(top: 5),
+            color: Theme.of(context).primaryColor,
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Text(
+                        'Baatein',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30,
+                          fontFamily: 'DancingScript',
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.only(top: 5),
-                    color: Colors.white,
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProfileEditScreen(
-                                  docId: _auth.currentUser.email,
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 5),
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfileEditScreen(
+                                    docId: _auth.currentUser.email,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('profile_pic')
-                                .doc(_auth.currentUser.email)
-                                .collection('image')
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              String url;
-                              if (snapshot.hasData) {
-                                final image = snapshot.data.docs;
-                                url = image[0].data()['url'];
-                              }
-                              if (url == null) url = kNoProfilePic;
-                              return CircleAvatar(
-                                backgroundImage: NetworkImage(url),
-                                radius: 50,
                               );
                             },
-                          ),
-                        ),
-                        ListTile(
-                          leading: Icon(
-                            Icons.person,
-                            color: Colors.black,
-                          ),
-                          title: Text(
-                            name,
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 10,
-                              fontFamily: 'Source Sans Pro',
-                              letterSpacing: 5.0,
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('profile_pic')
+                                  .doc(_auth.currentUser.email)
+                                  .collection('image')
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                String url;
+                                if (snapshot.hasData) {
+                                  final image = snapshot.data.docs;
+                                  url = image[0].data()['url'];
+                                }
+                                if (url == null) url = kNoProfilePic;
+                                return CircleAvatar(
+                                  backgroundImage: NetworkImage(url),
+                                  radius: 50,
+                                );
+                              },
                             ),
                           ),
-                        ),
-                        ListTile(
-                          leading: Icon(
-                            Icons.email,
-                            color: Colors.black,
-                          ),
-                          title: Text(
-                            _auth.currentUser.email,
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 10,
-                              fontFamily: 'Source Sans Pro',
-                              letterSpacing: 2.0,
+                          ListTile(
+                            leading: Icon(
+                              Icons.person,
+                              color: Colors.black,
+                            ),
+                            title: Text(
+                              name,
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 10,
+                                fontFamily: 'Source Sans Pro',
+                                letterSpacing: 5.0,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          child: Divider(
-                            color: Colors.grey,
-                            indent: 15,
-                            endIndent: 15,
+                          ListTile(
+                            leading: Icon(
+                              Icons.email,
+                              color: Colors.black,
+                            ),
+                            title: Text(
+                              _auth.currentUser.email,
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 10,
+                                fontFamily: 'Source Sans Pro',
+                                letterSpacing: 2.0,
+                              ),
+                            ),
                           ),
-                        ),
-                        RoundTextButton(
-                          text: 'Sign Out',
-                          icon: Icons.input,
-                          onPress: () {
-                            _auth.signOut();
-                            Navigator.popAndPushNamed(
-                                context, SignInScreen.routeId);
-                          },
-                        )
-                      ],
+                          SizedBox(
+                            child: Divider(
+                              color: Colors.grey,
+                              indent: 15,
+                              endIndent: 15,
+                            ),
+                          ),
+                          RoundTextButton(
+                            text: 'Sign Out',
+                            icon: Icons.input,
+                            onPress: () {
+                              _auth.signOut();
+                              Navigator.popAndPushNamed(
+                                  context, SignInScreen.routeId);
+                            },
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () => Navigator.pushNamed(context,
-                HomeScreen.screen[_tabController.animation.value.round()]),
-          )
-        ],
-        leading: InkWell(
-          onTap: () => _scaffoldKey.currentState.openDrawer(),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('profile_pic')
-                  .doc(_auth.currentUser.email)
-                  .collection('image')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                String url;
-                if (snapshot.hasData) {
-                  final image = snapshot.data.docs;
-                  url = image[0].data()['url'];
-                }
-                if (url == null) url = kNoProfilePic;
-                return CircleAvatar(
-                  backgroundImage: NetworkImage(url),
-                );
-              },
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () => Navigator.pushNamed(context,
+                  HomeScreen.screen[_tabController.animation.value.round()]),
+            )
+          ],
+          leading: InkWell(
+            onTap: () => _scaffoldKey.currentState.openDrawer(),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('profile_pic')
+                    .doc(_auth.currentUser.email)
+                    .collection('image')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  String url;
+                  if (snapshot.hasData) {
+                    final image = snapshot.data.docs;
+                    url = image[0].data()['url'];
+                  }
+                  if (url == null) url = kNoProfilePic;
+                  return CircleAvatar(
+                    backgroundImage: NetworkImage(url),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-        elevation: 5,
-        backgroundColor: Theme.of(context).primaryColor,
-        title: Padding(
-          padding: const EdgeInsets.only(left: 80.0),
-          child: Text(
-            'Baatein',
-            style: TextStyle(
-              fontFamily: 'DancingScript',
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
+          elevation: 5,
+          backgroundColor: Theme.of(context).primaryColor,
+          title: Padding(
+            padding: const EdgeInsets.only(left: 80.0),
+            child: Text(
+              'Baatein',
+              style: TextStyle(
+                fontFamily: 'DancingScript',
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
+          bottom: TabBar(
+            isScrollable: true,
+            controller: _tabController,
+            tabs: [
+              Tab(text: 'Chats'),
+              Tab(text: 'Groups'),
+              Tab(text: 'Friends'),
+              Tab(text: 'Requests'),
+            ],
+          ),
         ),
-        bottom: TabBar(
-          isScrollable: true,
+        body: TabBarView(
           controller: _tabController,
-          tabs: [
-            Tab(text: 'Chats'),
-            Tab(text: 'Groups'),
-            Tab(text: 'Friends'),
-            Tab(text: 'Requests'),
+          children: [
+            ChatOverviewScreen(),
+            GroupChatScreen(),
+            FriendListScreen(),
+            RequestScreen(),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          ChatOverviewScreen(),
-          GroupChatScreen(),
-          FriendListScreen(),
-          RequestScreen(),
-        ],
       ),
     );
   }

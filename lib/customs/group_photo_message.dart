@@ -69,25 +69,29 @@ class GroupPhotoMessage extends StatelessWidget {
                     ? Container(width: 0, height: 0)
                     : Material(
                         child: InkWell(
-                          onTap: () async {
-                            bool isFriend = await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(FirebaseAuth.instance.currentUser.email)
-                                .collection('friends')
-                                .doc(senderEmail)
-                                .get()
-                                .then((value) => value.exists);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProfileView(
-                                  isFriend: isFriend,
-                                  friendEmail: senderEmail,
-                                  friendName: senderName,
-                                ),
-                              ),
-                            );
-                          },
+                          onTap: onTapCallback == null
+                              ? () async {
+                                  bool isFriend = await FirebaseFirestore
+                                      .instance
+                                      .collection('users')
+                                      .doc(FirebaseAuth
+                                          .instance.currentUser.email)
+                                      .collection('friends')
+                                      .doc(senderEmail)
+                                      .get()
+                                      .then((value) => value.exists);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ProfileView(
+                                        isFriend: isFriend,
+                                        friendEmail: senderEmail,
+                                        friendName: senderName,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              : null,
                           child: Text(
                             senderName,
                             style: TextStyle(
