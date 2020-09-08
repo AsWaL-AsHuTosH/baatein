@@ -21,7 +21,12 @@ import 'package:flushbar/flushbar.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeId = 'home_screen';
-  static const List<String> screen = [ChatSearchScreen.routeId, GroupSearchScreen.routeId, FreindSearchScreen.routeId, RequestSearchScreen.routeId];
+  static const List<String> screen = [
+    ChatSearchScreen.routeId,
+    GroupSearchScreen.routeId,
+    FreindSearchScreen.routeId,
+    RequestSearchScreen.routeId
+  ];
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -90,51 +95,6 @@ class _HomeScreenState extends State<HomeScreen>
                               MaterialPageRoute(
                                 builder: (context) => ProfileEditScreen(
                                   docId: _auth.currentUser.email,
-                                  editButtonCallback: () async {
-                                    final ImagePicker picker = ImagePicker();
-                                    final PickedFile pickedImage = await picker
-                                        .getImage(source: ImageSource.gallery);
-                                    if (pickedImage == null) return;
-                                    final ref = FirebaseStorage.instance
-                                        .ref()
-                                        .child(FirebaseAuth
-                                                .instance.currentUser.email +
-                                            '.jpg');
-                                    final File file = File(pickedImage.path);
-                                    StorageUploadTask task = ref.putFile(file);
-                                    StorageTaskSnapshot taskSnapshot =
-                                        await task.onComplete;
-                                    String url =
-                                        await taskSnapshot.ref.getDownloadURL();
-                                    _firestore
-                                        .collection('profile_pic')
-                                        .doc(_auth.currentUser.email)
-                                        .collection('image')
-                                        .doc('image_url')
-                                        .update({'url': url});
-                                    Flushbar(
-                                      message:
-                                          "Your profile picture is updated successfully.",
-                                      backgroundGradient: LinearGradient(
-                                          colors: [Colors.red, Colors.orange]),
-                                      icon: Icon(
-                                        Icons.check,
-                                        color: Colors.green,
-                                        size: 40,
-                                      ),
-                                      margin: EdgeInsets.all(8),
-                                      borderRadius: 8,
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 3),
-                                      boxShadows: [
-                                        BoxShadow(
-                                          color: Colors.lightBlueAccent,
-                                          offset: Offset(0.0, 2.0),
-                                          blurRadius: 3.0,
-                                        )
-                                      ],
-                                    ).show(context);
-                                  },
                                 ),
                               ),
                             );
@@ -216,7 +176,11 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       appBar: AppBar(
         actions: [
-          IconButton(icon: Icon(Icons.search), onPressed: () => Navigator.pushNamed(context, HomeScreen.screen[_tabController.animation.value.round()]),)
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () => Navigator.pushNamed(context,
+                HomeScreen.screen[_tabController.animation.value.round()]),
+          )
         ],
         leading: InkWell(
           onTap: () => _scaffoldKey.currentState.openDrawer(),

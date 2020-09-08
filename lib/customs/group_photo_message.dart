@@ -1,4 +1,7 @@
 import 'package:baatein/chat/image_view_screen.dart';
+import 'package:baatein/chat/profile_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class GroupPhotoMessage extends StatelessWidget {
@@ -38,7 +41,7 @@ class GroupPhotoMessage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected
                   ? Colors.greenAccent
-                  : isMe ? Colors.teal : Colors.lightBlueAccent,
+                  : isMe ? Colors.lightBlueAccent : Colors.white,
               borderRadius: isMe
                   ? BorderRadius.only(
                       topLeft: Radius.circular(10.0),
@@ -64,15 +67,39 @@ class GroupPhotoMessage extends StatelessWidget {
               children: [
                 isMe
                     ? Container(width: 0, height: 0)
-                    : Text(
-                        senderName,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                    : Material(
+                        child: InkWell(
+                          onTap: () async {
+                            bool isFriend = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(FirebaseAuth.instance.currentUser.email)
+                                .collection('friends')
+                                .doc(senderEmail)
+                                .get()
+                                .then((value) => value.exists);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfileView(
+                                  isFriend: isFriend,
+                                  friendEmail: senderEmail,
+                                  friendName: senderName,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            senderName,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87),
+                          ),
+                        ),
                       ),
                 isMe
                     ? Container(width: 0, height: 0)
-                    : FractionallySizedBox(
-                        widthFactor: 0.40,
-                        child: Divider(color: Colors.white),
+                    : SizedBox(
+                        height: 5,
                       ),
                 GestureDetector(
                   onTap: onTapCallback != null
@@ -100,7 +127,7 @@ class GroupPhotoMessage extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.start,
-                  style: TextStyle(color: Colors.black54),
+                  style: TextStyle(color: Colors.black),
                 ),
               ],
             ),

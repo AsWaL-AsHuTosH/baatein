@@ -10,9 +10,7 @@ class ImagePreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Image Preview'),
-      ),
+      appBar: AppBar(),
       body: Column(
         children: [
           Expanded(

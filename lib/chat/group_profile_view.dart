@@ -125,49 +125,6 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                             MaterialPageRoute(
                               builder: (context) => ProfileEditScreen(
                                 docId: widget.groupId,
-                                editButtonCallback: () async {
-                                  final ImagePicker picker = ImagePicker();
-                                  final PickedFile pickedImage = await picker
-                                      .getImage(source: ImageSource.gallery);
-                                  if (pickedImage == null) return;
-                                  final ref = FirebaseStorage.instance
-                                      .ref()
-                                      .child(widget.groupId + '.jpg');
-                                  final File file = File(pickedImage.path);
-                                  StorageUploadTask task = ref.putFile(file);
-                                  StorageTaskSnapshot taskSnapshot =
-                                      await task.onComplete;
-                                  String url =
-                                      await taskSnapshot.ref.getDownloadURL();
-                                  FirebaseFirestore.instance
-                                      .collection('profile_pic')
-                                      .doc(widget.groupId)
-                                      .collection('image')
-                                      .doc('image_url')
-                                      .update({'url': url});
-                                  Flushbar(
-                                    message:
-                                        "Group profile picture is updated successfully.",
-                                    backgroundGradient: LinearGradient(
-                                        colors: [Colors.red, Colors.orange]),
-                                    icon: Icon(
-                                      Icons.check,
-                                      color: Colors.green,
-                                      size: 40,
-                                    ),
-                                    margin: EdgeInsets.all(8),
-                                    borderRadius: 8,
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 2),
-                                    boxShadows: [
-                                      BoxShadow(
-                                        color: Colors.lightBlueAccent,
-                                        offset: Offset(0.0, 2.0),
-                                        blurRadius: 3.0,
-                                      )
-                                    ],
-                                  ).show(context);
-                                },
                               ),
                             ),
                           );

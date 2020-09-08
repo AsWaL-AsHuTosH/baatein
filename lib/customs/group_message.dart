@@ -1,3 +1,6 @@
+import 'package:baatein/chat/profile_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class GroupMessage extends StatelessWidget {
@@ -34,7 +37,7 @@ class GroupMessage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected
                   ? Colors.greenAccent
-                  : isMe ? Colors.teal : Colors.lightBlueAccent,
+                  : isMe ? Colors.lightBlueAccent : Colors.white,
               borderRadius: isMe
                   ? BorderRadius.only(
                       topLeft: Radius.circular(20.0),
@@ -58,14 +61,46 @@ class GroupMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                isMe ? Container(width: 0, height: 0) : Text(senderName, style: TextStyle(fontWeight: FontWeight.bold),),
                 isMe
                     ? Container(width: 0, height: 0)
-                    : FractionallySizedBox(
-                        child: Divider(color: Colors.white),
-                        widthFactor: 0.33,
+                    : Material(
+                        child: InkWell(
+                          onTap: () async {
+                            bool isFriend = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(FirebaseAuth.instance.currentUser.email)
+                                .collection('friends')
+                                .doc(senderEmail)
+                                .get()
+                                .then((value) => value.exists);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfileView(
+                                  isFriend: isFriend,
+                                  friendEmail: senderEmail,
+                                  friendName: senderName,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            senderName,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87),
+                          ),
+                        ),
                       ),
-                Text(message, style: TextStyle(color: Colors.black54),),
+                isMe
+                    ? Container(width: 0, height: 0)
+                    : SizedBox(
+                        height: 5,
+                      ),
+                Text(
+                  message,
+                  style: TextStyle(color: Colors.black),
+                ),
               ],
             ),
           ),

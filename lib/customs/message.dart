@@ -7,42 +7,58 @@ class Message extends StatelessWidget {
   final String id;
   final Function onLongPressCallback;
   final Function onTapCallback;
-  
-  Message({this.message, this.isMe, this.time, @required this.id, this.onLongPressCallback, this.onTapCallback, this.isSelected = false});
+
+  Message(
+      {this.message,
+      this.isMe,
+      this.time,
+      @required this.id,
+      this.onLongPressCallback,
+      this.onTapCallback,
+      this.isSelected = false});
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onLongPress: onLongPressCallback,
       onTap: onTapCallback,
-          child: Column(
+      child: Column(
         crossAxisAlignment:
             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Container(
             padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 5, bottom: 5, left: isMe? 20 : 5, right:  isMe? 5: 20),
+            margin: EdgeInsets.only(
+                top: 5, bottom: 5, left: isMe ? 20 : 5, right: isMe ? 5 : 20),
             decoration: BoxDecoration(
-              color:  isSelected ? Colors.greenAccent: isMe? Colors.teal : Colors.lightBlueAccent,
-              borderRadius: isMe? BorderRadius.only(
-                topLeft: Radius.circular(30.0),
-                topRight: Radius.circular(30.0),
-                bottomLeft: Radius.circular(30.0),
-                bottomRight: Radius.circular(0.0),
-              ) : 
-              BorderRadius.only(
-                topLeft: Radius.circular(30.0),
-                topRight: Radius.circular(30.0),
-                bottomLeft: Radius.circular(0.0),
-                bottomRight: Radius.circular(30.0),
-              ),
-               boxShadow: <BoxShadow>[
+              color: isSelected
+                  ? Colors.greenAccent
+                  : isMe ? Colors.lightBlueAccent : Colors.white,
+              borderRadius: isMe
+                  ? BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      topRight: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(0.0),
+                    )
+                  : BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      topRight: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(0.0),
+                      bottomRight: Radius.circular(30.0),
+                    ),
+              boxShadow: <BoxShadow>[
                 BoxShadow(
-                    color: Colors.black, blurRadius: 2.5, offset: Offset(0.0, 1.0))
+                    color: Colors.black,
+                    blurRadius: 2.5,
+                    offset: Offset(0.0, 1.0))
               ],
             ),
             child: Text(message),
           ),
-          Text(time, style: TextStyle(color: Colors.grey, fontSize: 10),)
+          Text(
+            time,
+            style: TextStyle(color: Colors.grey, fontSize: 10),
+          )
         ],
       ),
     );

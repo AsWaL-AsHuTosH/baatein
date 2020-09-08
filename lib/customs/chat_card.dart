@@ -104,7 +104,7 @@ class ChatCard extends StatelessWidget {
                     Text(
                       time,
                       style: TextStyle(
-                          color: Colors.black45,
+                          color: newMessage ? Colors.black: Colors.black45,
                           fontSize: 10,
                           fontWeight: FontWeight.bold),
                     ),

@@ -33,7 +33,7 @@ class PhotoMessage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected
                   ? Colors.greenAccent
-                  : isMe ? Colors.teal : Colors.lightBlueAccent,
+                  : isMe ? Colors.lightBlueAccent : Colors.white,
               borderRadius: isMe
                   ? BorderRadius.only(
                       topLeft: Radius.circular(10.0),
