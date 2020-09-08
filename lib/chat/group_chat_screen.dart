@@ -33,6 +33,38 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(Icons.group, color: Colors.white,),
+        onPressed: () async {
+          var ok =
+              await Navigator.pushNamed(context, GroupSelectionScreen.routeId);
+          if (ok != null && ok == true) {
+            Flushbar(
+              message: "Group created successfully.",
+              backgroundGradient:
+                  LinearGradient(colors: [Colors.red, Colors.orange]),
+              icon: Icon(
+                Icons.check,
+                color: Colors.green,
+                size: 40,
+              ),
+              margin: EdgeInsets.all(8),
+              borderRadius: 8,
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+              boxShadows: [
+                BoxShadow(
+                  color: Colors.lightBlueAccent,
+                  offset: Offset(0.0, 2.0),
+                  blurRadius: 3.0,
+                )
+              ],
+            ).show(context);
+            return;
+          }
+        },
+      ),
       body: ModalProgressHUD(
         inAsyncCall: spin,
         child: Container(
@@ -69,41 +101,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     ),
                   );
                 },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 80.0, bottom: 18),
-                child: RoundTextButton(
-                  text: 'Create Group',
-                  icon: Icons.group,
-                  onPress: () async {
-                    var ok = await Navigator.pushNamed(
-                        context, GroupSelectionScreen.routeId);
-                    if (ok != null && ok == true) {
-                      Flushbar(
-                        message: "Group created successfully.",
-                        backgroundGradient:
-                            LinearGradient(colors: [Colors.red, Colors.orange]),
-                        icon: Icon(
-                          Icons.check,
-                          color: Colors.green,
-                          size: 40,
-                        ),
-                        margin: EdgeInsets.all(8),
-                        borderRadius: 8,
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 3),
-                        boxShadows: [
-                          BoxShadow(
-                            color: Colors.lightBlueAccent,
-                            offset: Offset(0.0, 2.0),
-                            blurRadius: 3.0,
-                          )
-                        ],
-                      ).show(context);
-                      return;
-                    }
-                  },
-                ),
               ),
             ],
           ),

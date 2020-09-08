@@ -72,13 +72,15 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Baatein',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30,
-                      fontFamily: 'DancingScript',
-                      color: Colors.white,
+                  child: Center(
+                    child: Text(
+                      'Baatein',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                        fontFamily: 'DancingScript',
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
