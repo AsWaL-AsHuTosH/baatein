@@ -1,6 +1,7 @@
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
 import 'package:baatein/customs/round_text_button.dart';
+import 'package:date_time_format/date_time_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
@@ -312,15 +313,110 @@ class _ProfileViewState extends State<ProfileView> {
                             setState(() {
                               spin = false;
                             });
-                            Navigator.popUntil(context,
-                                ModalRoute.withName(HomeScreen.routeId));
+                            Navigator.pop(context);
                           }
                         },
                       )
-                    : Container(
-                        width: 0,
-                        height: 0,
-                      ),
+                    : FirebaseAuth.instance.currentUser.email !=
+                            widget.friendEmail
+                        ? RoundTextButton(
+                            text: 'Send Request',
+                            icon: Icons.person_add,
+                            color: Colors.green,
+                            onPress: () async {
+                              setState(() {
+                                spin = true;
+                              });
+                              if (await FirebaseFirestore.instance
+                                  .collection('requests')
+                                  .doc(FirebaseAuth.instance.currentUser.email)
+                                  .collection('request')
+                                  .doc(widget.friendEmail)
+                                  .get()
+                                  .then(
+                                      (value) => value.exists ? true : false)) {
+                                await Flushbar(
+                                  message:
+                                      "You already have request from same user!",
+                                  backgroundGradient: LinearGradient(
+                                      colors: [Colors.grey, Colors.grey]),
+                                  icon: Icon(
+                                    Icons.error,
+                                    color: Colors.red[800],
+                                    size: 20,
+                                  ),
+                                  margin: EdgeInsets.all(8),
+                                  borderRadius: 8,
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 2),
+                                  boxShadows: [
+                                    BoxShadow(
+                                      color: Colors.lightBlueAccent,
+                                      offset: Offset(0.0, 2.0),
+                                      blurRadius: 3.0,
+                                    )
+                                  ],
+                                ).show(context);
+                                setState(() {
+                                  spin = false;
+                                });
+                                return;
+                              }
+                              DateTime stamp = DateTime.now();
+                              String day = DateTimeFormat.format(stamp,
+                                  format: 'D, M d, Y');
+                              String time =
+                                  DateTimeFormat.format(stamp, format: 'h:i a');
+                              String myEmail =
+                                  FirebaseAuth.instance.currentUser.email;
+                              String myName = await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(myEmail)
+                                  .get()
+                                  .then((doc) => doc.data()['name']);
+                              FirebaseFirestore.instance
+                                  .collection('requests')
+                                  .doc(widget.friendEmail)
+                                  .collection('request')
+                                  .doc(myEmail)
+                                  .set({
+                                'from': myEmail,
+                                'name': myName,
+                                'search_name': myName.toLowerCase(),
+                                'time': time,
+                                'day': day
+                              });
+                              await Flushbar(
+                                message: "Your reuest is sent successfully.",
+                                backgroundGradient: LinearGradient(
+                                    colors: [Colors.red, Colors.orange]),
+                                icon: Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                  size: 40,
+                                ),
+                                margin: EdgeInsets.all(8),
+                                borderRadius: 8,
+                                backgroundColor: Colors.red,
+                                duration: Duration(seconds: 3),
+                                boxShadows: [
+                                  BoxShadow(
+                                    color: Colors.lightBlueAccent,
+                                    offset: Offset(0.0, 2.0),
+                                    blurRadius: 3.0,
+                                  )
+                                ],
+                              ).show(context);
+                              setState(() {
+                                spin = false;
+                              });
+                              Navigator.pop(context);
+                            },
+                          )
+                        : Container(
+                            width: 0,
+                            height: 0,
+                          ),
               ],
             ),
           ),

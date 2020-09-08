@@ -55,10 +55,15 @@ class Message extends StatelessWidget {
             ),
             child: Text(message),
           ),
-          Text(
-            time,
-            style: TextStyle(color: Colors.grey, fontSize: 10),
-          )
+          Padding(
+            padding: isMe
+                ? const EdgeInsets.only(right: 5)
+                : const EdgeInsets.only(left: 5),
+            child: Text(
+              time,
+              style: TextStyle(color: Colors.grey, fontSize: 10),
+            ),
+          ),
         ],
       ),
     );

@@ -11,16 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'login_reg/signin_screen.dart';
 
-void main() {
-  runApp(Baatein());
-}
+void main() => runApp(Baatein());
 
 class Baatein extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (context) => SelectedUser(),
-        child: MaterialApp(
+      create: (context) => SelectedUser(),
+      child: MaterialApp(
         debugShowCheckedModeBanner: false,
         routes: {
           SignInScreen.routeId: (context) => SignInScreen(),
