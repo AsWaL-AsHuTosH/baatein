@@ -39,11 +39,11 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
   String myName;
 
   Future<void> setLastMessageRead() async {
-    try{
-    await _firestore.collection('groups').doc(widget.groupId).update({
-      'read': FieldValue.arrayUnion([_auth.currentUser.email])
-    });
-    }catch(e){
+    try {
+      await _firestore.collection('groups').doc(widget.groupId).update({
+        'read': FieldValue.arrayUnion([_auth.currentUser.email])
+      });
+    } catch (e) {
       return;
     }
   }
@@ -232,73 +232,78 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
             )
           : AppBar(
               elevation: 10,
-              title: GestureDetector(
-                onTap: () async {
-                  setState(() {
-                    spin = true;
-                  });
-                  FocusScope.of(context).unfocus();
-                  List<String> members = List.from(await _firestore
-                      .collection('groups')
-                      .doc(widget.groupId)
-                      .get()
-                      .then((value) => value.data()['members']));
+              actions: [
+                InkWell(
+                  onTap: () async {
+                    setState(() {
+                      spin = true;
+                    });
+                    FocusScope.of(context).unfocus();
+                    List<String> members = List.from(await _firestore
+                        .collection('groups')
+                        .doc(widget.groupId)
+                        .get()
+                        .then((value) => value.data()['members']));
 
-                  List<dynamic> mapList = await _firestore
-                      .collection('groups')
-                      .doc(widget.groupId)
-                      .get()
-                      .then((value) => value.data()['members_name']);
-                  Map<String, dynamic> membersName = {};
-                  for (var map in mapList) membersName.addAll(map);
-                  setState(() {
-                    spin = false;
-                  });
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GroupProfileView(
-                        groupId: widget.groupId,
-                        groupName: widget.groupName,
-                        groupAdmin: widget.admin,
-                        members: members,
-                        membersName: membersName,
+                    List<dynamic> mapList = await _firestore
+                        .collection('groups')
+                        .doc(widget.groupId)
+                        .get()
+                        .then((value) => value.data()['members_name']);
+                    Map<String, dynamic> membersName = {};
+                    for (var map in mapList) membersName.addAll(map);
+                    setState(() {
+                      spin = false;
+                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GroupProfileView(
+                          groupId: widget.groupId,
+                          groupName: widget.groupName,
+                          groupAdmin: widget.admin,
+                          members: members,
+                          membersName: membersName,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: Row(
-                  children: [
-                    StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('profile_pic')
-                          .doc(widget.groupId)
-                          .collection('image')
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        String url;
-                        if (snapshot.hasData) {
-                          final image = snapshot.data.docs;
-                          url = image[0].data()['url'];
-                        }
-                        if (url == null) url = kNoGroupPic;
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(url),
-                          backgroundColor: Colors.grey,
-                        );
-                      },
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Text(
-                      widget.groupName,
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('profile_pic')
+                            .doc(widget.groupId)
+                            .collection('image')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          String url;
+                          if (snapshot.hasData) {
+                            final image = snapshot.data.docs;
+                            url = image[0].data()['url'];
+                          }
+                          if (url == null) url = kNoGroupPic;
+                          return CircleAvatar(
+                            backgroundImage: NetworkImage(url),
+                            backgroundColor: Colors.grey,
+                          );
+                        },
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        widget.groupName,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 200,
+                      )
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
       body: ModalProgressHUD(
         inAsyncCall: spin,

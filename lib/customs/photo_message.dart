@@ -19,7 +19,7 @@ class PhotoMessage extends StatelessWidget {
       this.onTapCallback});
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onLongPress: onLongPressCallback,
       onTap: onTapCallback,
       child: Column(

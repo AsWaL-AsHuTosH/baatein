@@ -214,10 +214,10 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: () => _scaffoldKey.currentState.openDrawer(),
+        leading: InkWell(
+          onTap: () => _scaffoldKey.currentState.openDrawer(),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('profile_pic')
@@ -233,7 +233,6 @@ class _HomeScreenState extends State<HomeScreen>
                 if (url == null) url = kNoProfilePic;
                 return CircleAvatar(
                   backgroundImage: NetworkImage(url),
-                  radius: 20,
                 );
               },
             ),

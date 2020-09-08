@@ -20,7 +20,7 @@ class GroupMessage extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onLongPress: onLongpressCallback,
       onTap: onTapCallback,
       child: Column(

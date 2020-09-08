@@ -11,7 +11,7 @@ class Message extends StatelessWidget {
   Message({this.message, this.isMe, this.time, @required this.id, this.onLongPressCallback, this.onTapCallback, this.isSelected = false});
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onLongPress: onLongPressCallback,
       onTap: onTapCallback,
           child: Column(

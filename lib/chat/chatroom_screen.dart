@@ -219,50 +219,57 @@ class _ChatRoomState extends State<ChatRoom> {
             )
           : AppBar(
               elevation: 10,
-              title: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProfileView(
-                        friendEmail: widget.friendEmail,
-                        friendName: widget.friendName,
-                        isFriend: true,
+              titleSpacing: 0,
+              centerTitle: false,
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfileView(
+                          friendEmail: widget.friendEmail,
+                          friendName: widget.friendName,
+                          isFriend: true,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: Row(
-                  children: [
-                    StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('profile_pic')
-                          .doc(widget.friendEmail)
-                          .collection('image')
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        String url;
-                        if (snapshot.hasData) {
-                          final image = snapshot.data.docs;
-                          url = image[0].data()['url'];
-                        }
-                        if (url == null) url = kNoProfilePic;
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(url),
-                        );
-                      },
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Text(
-                      widget.friendName,
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('profile_pic')
+                            .doc(widget.friendEmail)
+                            .collection('image')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          String url;
+                          if (snapshot.hasData) {
+                            final image = snapshot.data.docs;
+                            url = image[0].data()['url'];
+                          }
+                          if (url == null) url = kNoProfilePic;
+                          return CircleAvatar(
+                            backgroundImage: NetworkImage(url),
+                          );
+                        },
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        widget.friendName,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 200,
+                      )
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
       body: ModalProgressHUD(
         inAsyncCall: spin,
