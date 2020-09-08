@@ -10,14 +10,9 @@ import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/login_reg/signin_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'profile_pic_edit.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:flushbar/flushbar.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeId = 'home_screen';
