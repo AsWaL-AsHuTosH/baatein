@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/chat/profile_view.dart';
 
@@ -142,6 +143,17 @@ class RequestTile extends StatelessWidget {
                       .collection('request')
                       .doc(senderEmail)
                       .delete();
+                    await Flushbar(
+                        message: "Request accpted!",
+                        margin: EdgeInsets.all(8),
+                        borderRadius: 8,
+                        icon: Icon(
+                          Icons.check_circle,
+                          color: Colors.blue[300],
+                          size: 20,
+                        ),
+                        duration: Duration(seconds: 1),
+                      ).show(context);
                 },
               ),
               SizedBox(
@@ -152,7 +164,7 @@ class RequestTile extends StatelessWidget {
                   Icons.clear,
                   color: Colors.red,
                 ),
-                onPressed: () {
+                onPressed: () async{
                   //removing request
                   _firesotre
                       .collection('requests')
@@ -160,6 +172,17 @@ class RequestTile extends StatelessWidget {
                       .collection('request')
                       .doc(senderEmail)
                       .delete();
+                  await Flushbar(
+                        message: "Request rejected!",
+                        margin: EdgeInsets.all(8),
+                        borderRadius: 8,
+                        icon: Icon(
+                          Icons.clear,
+                          color: Colors.blue[300],
+                          size: 20,
+                        ),
+                        duration: Duration(seconds: 1),
+                      ).show(context);
                 },
               ),
             ],

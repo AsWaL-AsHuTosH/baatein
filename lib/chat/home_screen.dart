@@ -32,7 +32,9 @@ class _HomeScreenState extends State<HomeScreen>
   final _firestore = FirebaseFirestore.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController _tabController;
-  String name = 'User';
+  String name = '';
+  final myEmail = FirebaseAuth.instance.currentUser.email;
+
 
   @override
   void initState() {
@@ -40,12 +42,13 @@ class _HomeScreenState extends State<HomeScreen>
     WidgetsBinding.instance.addObserver(this);
     _tabController = new TabController(vsync: this, length: 4);
     getMyName();
+    setMeOnline(true);
   }
 
   Future<void> setMeOnline(bool value) async {
     await FirebaseFirestore.instance
         .collection('presence')
-        .doc(FirebaseAuth.instance.currentUser.email)
+        .doc(myEmail)
         .collection('status')
         .doc('is_online')
         .update({'is_online': value});
@@ -54,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> getMyName() async {
     String myName = await _firestore
         .collection('users')
-        .doc(_auth.currentUser.email)
+        .doc(myEmail)
         .get()
         .then((value) => value.data()['name']);
     setState(() {
@@ -140,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ProfileEditScreen(
-                                    docId: _auth.currentUser.email,
+                                    docId: myEmail,
                                   ),
                                 ),
                               );
@@ -148,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen>
                             child: StreamBuilder<QuerySnapshot>(
                               stream: FirebaseFirestore.instance
                                   .collection('profile_pic')
-                                  .doc(_auth.currentUser.email)
+                                  .doc(myEmail)
                                   .collection('image')
                                   .snapshots(),
                               builder: (context, snapshot) {
@@ -176,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen>
                           StreamBuilder<QuerySnapshot>(
                             stream: FirebaseFirestore.instance
                                 .collection('presence')
-                                .doc(FirebaseAuth.instance.currentUser.email)
+                                .doc(myEmail)
                                 .collection('status')
                                 .snapshots(),
                             builder: (context, snapshot) {
@@ -187,16 +190,15 @@ class _HomeScreenState extends State<HomeScreen>
                               }
                               return isOnline
                                   ? Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
                                         'Online',
                                         style: TextStyle(
-                                          fontFamily: 'Source Sans Pro',
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold
-                                        ),
+                                            fontFamily: 'Source Sans Pro',
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold),
                                       ),
-                                  )
+                                    )
                                   : Container(
                                       width: 0,
                                       height: 0,
@@ -224,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen>
                               color: Colors.black,
                             ),
                             title: Text(
-                              _auth.currentUser.email,
+                              myEmail,
                               style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 10,
@@ -274,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('profile_pic')
-                    .doc(_auth.currentUser.email)
+                    .doc(myEmail)
                     .collection('image')
                     .snapshots(),
                 builder: (context, snapshot) {

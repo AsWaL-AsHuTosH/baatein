@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class RequestScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final String myEmail = FirebaseAuth.instance.currentUser.email;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +16,7 @@ class RequestScreen extends StatelessWidget {
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('requests')
-                  .doc(_auth.currentUser.email)
+                  .doc(myEmail)
                   .collection('request')
                   .orderBy('day')
                   .snapshots(),

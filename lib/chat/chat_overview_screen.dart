@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:date_time_format/date_time_format.dart';
 
 class ChatOverviewScreen extends StatelessWidget {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firesotre = FirebaseFirestore.instance;
+  final String myEmail = FirebaseAuth.instance.currentUser.email;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +18,7 @@ class ChatOverviewScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: _firesotre
               .collection('users')
-              .doc(_auth.currentUser.email)
+              .doc(myEmail)
               .collection('chats')
               .orderBy('time', descending: true)
               .snapshots(),

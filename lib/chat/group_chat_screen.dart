@@ -13,7 +13,7 @@ class GroupChatScreen extends StatefulWidget {
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final String myEmail = FirebaseAuth.instance.currentUser.email;
   bool spin = false;
 
   void spinTrue() {
@@ -65,7 +65,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               StreamBuilder<QuerySnapshot>(
                 stream: _firestore
                     .collection('users')
-                    .doc(_auth.currentUser.email)
+                    .doc(myEmail)
                     .collection('groups')
                     .snapshots(),
                 builder: (context, snaps) {

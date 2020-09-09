@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class FriendListScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final String myEmail = FirebaseAuth.instance.currentUser.email;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +45,7 @@ class FriendListScreen extends StatelessWidget {
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('users')
-                  .doc(_auth.currentUser.email)
+                  .doc(myEmail)
                   .collection('friends')
                   .orderBy('name', descending: false)
                   .snapshots(),
