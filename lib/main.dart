@@ -6,6 +6,7 @@ import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/loading_screen.dart';
 import 'package:baatein/chat/request_search_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/login_reg/forgot_password.dart';
 import 'package:baatein/login_reg/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +31,7 @@ class Baatein extends StatelessWidget {
           RequestSearchScreen.routeId: (context) => RequestSearchScreen(),
           GroupSelectionScreen.routeId: (context) => GroupSelectionScreen(),
           GroupSearchScreen.routeId: (context) => GroupSearchScreen(),
+          ForgotPasswordScreen.routeId: (context) => ForgotPasswordScreen(),
         },
         initialRoute: LoadingScreen.routeId,
         theme: ThemeData(

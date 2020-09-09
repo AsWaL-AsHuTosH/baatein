@@ -1,27 +1,23 @@
-import 'package:baatein/customs/elivated_form.dart';
-import 'package:baatein/login_reg/forgot_password.dart';
+import 'package:baatein/constants/constants.dart';
+import 'package:baatein/customs/search_field.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_button.dart';
-import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:baatein/chat/home_screen.dart';
-import 'package:baatein/constants/constants.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class SignInScreen extends StatefulWidget {
-  static const routeId = 'log_in_screen';
+class ForgotPasswordScreen extends StatefulWidget {
+  static const routeId = 'forgot_pass_screen';
   @override
-  _SignInScreenState createState() => _SignInScreenState();
+  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool spin = false;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  bool otherEmailError = false;
-  bool otherPasswordError = false;
+  bool otherError = false;
   String errorMessage;
 
   @override
@@ -58,12 +54,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(height: 10),
-                          ElivatedForm(
-                            emailController: emailController,
-                            passwordController: passwordController,
-                            emailValidationCallback: (val) {
-                              if (otherEmailError) {
-                                otherEmailError = false;
+                          SearchField(
+                            trailing: false,
+                            hintText: 'Enter your email.',
+                            validator: (val) {
+                              if (otherError) {
+                                otherError = false;
                                 return errorMessage;
                               }
                               return RegExp(
@@ -72,29 +68,12 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ? null
                                   : "Please enter a valid email address!";
                             },
-                            passwordValidationCallback: (val) {
-                              if (otherPasswordError) {
-                                otherPasswordError = false;
-                                return errorMessage;
-                              }
-                              return val.length < 6
-                                  ? "Password should be at least 6 characters long!"
-                                  : null;
-                            },
                             formKey: _formKey,
-                          ),
-                          FlatButton(
-                            child: Text(
-                              'Forgot Password?',
-                              style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1),
-                            ),
-                            onPressed: () {
-                              Navigator.pushNamed(context, ForgotPasswordScreen.routeId);
-                            },
+                            controller: emailController,
                           ),
                           RoundTextButton(
-                            text: 'Sign In',
-                            icon: Icons.verified_user,
+                            text: 'Reset Password',
+                            icon: Icons.lock,
                             margin: 60,
                             onPress: () async {
                               setState(() {
@@ -108,24 +87,29 @@ class _SignInScreenState extends State<SignInScreen> {
                               }
                               try {
                                 await FirebaseAuth.instance
-                                    .signInWithEmailAndPassword(
-                                  email: emailController.text,
-                                  password: passwordController.text,
-                                );
+                                    .sendPasswordResetEmail(
+                                        email: emailController.text.trim());
+                                await Flushbar(
+                                  message:
+                                      "Your password reset email has been sent to ${emailController.text.trim()}",
+                                  margin: EdgeInsets.all(8),
+                                  borderRadius: 8,
+                                  icon: Icon(
+                                    Icons.error,
+                                    color: Colors.blue[300],
+                                    size: 20,
+                                  ),
+                                  duration: Duration(seconds: 2),
+                                ).show(context);
                                 setState(() {
                                   spin = false;
                                 });
                                 emailController.clear();
-                                passwordController.clear();
-                                Navigator.pushNamed(
-                                    context, HomeScreen.routeId);
+                                Navigator.pop(context);
                               } catch (e) {
                                 if (e.toString() == kInvalidUser) {
-                                  otherEmailError = true;
+                                  otherError = true;
                                   errorMessage = kInvalidUserWarning;
-                                } else if (e.toString() == kWrongPassword) {
-                                  otherPasswordError = true;
-                                  errorMessage = kWrongPasswordWarning;
                                 } else
                                   assert(false);
                                 setState(() {
@@ -134,20 +118,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                 _formKey.currentState.validate();
                               }
                             },
-                          ),
-                          Divider(
-                            color: Colors.transparent,
-                          ),
-                          Hero(
-                            tag: 'sign_up_button',
-                            child: RoundTextButton(
-                              text: 'Create New Account',
-                              icon: Icons.person_add,
-                              color: Colors.green,
-                              margin: 20,
-                              onPress: () => Navigator.pushNamed(
-                                  context, SignUpScreen.routeId),
-                            ),
                           ),
                         ],
                       ),
