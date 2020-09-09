@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         );
         if (ok != null && ok == true) {
-          _auth.signOut();
+          await _auth.signOut();
           Navigator.popAndPushNamed(context, SignInScreen.routeId);
           return true;
         } else {
@@ -185,8 +185,8 @@ class _HomeScreenState extends State<HomeScreen>
                           RoundTextButton(
                             text: 'Sign Out',
                             icon: Icons.input,
-                            onPress: () {
-                              _auth.signOut();
+                            onPress: () async{
+                             await _auth.signOut();
                               Navigator.popAndPushNamed(
                                   context, SignInScreen.routeId);
                             },

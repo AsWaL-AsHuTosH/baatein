@@ -163,24 +163,14 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         .isEmpty) {
                       Flushbar(
                         message: "No member selected!",
-                        backgroundGradient:
-                            LinearGradient(colors: [Colors.grey, Colors.grey]),
+                        margin: EdgeInsets.all(8),
+                        borderRadius: 8,
                         icon: Icon(
                           Icons.error,
-                          color: Colors.red[800],
+                          color: Colors.blue[300],
                           size: 20,
                         ),
-                        margin: EdgeInsets.all(4),
-                        borderRadius: 8,
-                        backgroundColor: Colors.red,
                         duration: Duration(seconds: 1),
-                        boxShadows: [
-                          BoxShadow(
-                            color: Colors.lightBlueAccent,
-                            offset: Offset(0.0, 2.0),
-                            blurRadius: 3.0,
-                          )
-                        ],
                       ).show(context);
                       setState(() {
                         spin = false;

@@ -1,4 +1,5 @@
 import 'package:baatein/chat/forward_selection_screen.dart';
+import 'package:baatein/chat/message_info_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/classes/message_info.dart';
 import 'package:baatein/constants/constants.dart';
@@ -84,6 +85,28 @@ class _ChatRoomState extends State<ChatRoom> {
                   child: Text('${selectedMessage.length} selected'),
                 ),
                 actions: [
+                  selectedMessage.length == 1
+                      ? IconButton(
+                          icon: Icon(Icons.info),
+                          onPressed: () {
+                            MessageInfo message;
+                            selectedMessage.forEach((key, value) {
+                              message = value;
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MessageInfoScrren(
+                                  message: message,
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: 0,
+                          height: 0,
+                        ),
                   IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
@@ -162,24 +185,14 @@ class _ChatRoomState extends State<ChatRoom> {
                           message: selectedMessage.length > 1
                               ? "${selectedMessage.length} messages deleted."
                               : 'Message deleted.',
-                          backgroundGradient: LinearGradient(
-                              colors: [Colors.grey, Colors.grey]),
-                          icon: Icon(
-                            Icons.delete_sweep,
-                            color: Colors.black,
-                            size: 20,
-                          ),
                           margin: EdgeInsets.all(8),
                           borderRadius: 8,
-                          backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
-                          boxShadows: [
-                            BoxShadow(
-                              color: Colors.lightBlueAccent,
-                              offset: Offset(0.0, 2.0),
-                              blurRadius: 3.0,
-                            )
-                          ],
+                          icon: Icon(
+                            Icons.delete_sweep,
+                            color: Colors.blue[300],
+                            size: 20,
+                          ),
+                          duration: Duration(seconds: 1),
                         ).show(context);
                         setState(() {
                           selectedMessage.clear();
@@ -296,23 +309,31 @@ class _ChatRoomState extends State<ChatRoom> {
                       if (messages != null) {
                         for (var message in messages) {
                           String mess = message.data()['message'];
-                          String sender = message.data()['sender'];
+                          String senderEmail = message.data()['sender'];
+                          String senderName = message.data()['name'];
                           Timestamp stamp = message.data()['time'];
+
                           String time = DateTimeFormat.format(stamp.toDate(),
                               format: 'h:i a');
+                          String date = DateTimeFormat.format(stamp.toDate(),
+                              format: 'D, M d, Y');
                           String messageId = message.data()['id'];
                           if (message.data()['type'] == 'txt') {
                             if (selectionMode == false) {
                               messageList.add(
                                 Message(
                                   message: mess,
-                                  isMe: sender == _auth.currentUser.email,
+                                  isMe: senderEmail == _auth.currentUser.email,
                                   time: time,
                                   id: messageId,
                                   onLongPressCallback: () {
                                     setState(() {
                                       selectedMessage.addAll({
                                         messageId: MessageInfo(
+                                            senderEmail: senderEmail,
+                                            senderName: senderName,
+                                            timeString: time,
+                                            date: date,
                                             message: mess,
                                             time: stamp.toDate(),
                                             type: 'txt')
@@ -327,7 +348,7 @@ class _ChatRoomState extends State<ChatRoom> {
                               messageList.add(
                                 Message(
                                   message: mess,
-                                  isMe: sender == _auth.currentUser.email,
+                                  isMe: senderEmail == _auth.currentUser.email,
                                   time: time,
                                   id: messageId,
                                   onTapCallback: () {
@@ -342,6 +363,10 @@ class _ChatRoomState extends State<ChatRoom> {
                                       setState(() {
                                         selectedMessage.addAll({
                                           messageId: MessageInfo(
+                                              senderEmail: senderEmail,
+                                              senderName: senderName,
+                                              timeString: time,
+                                              date: date,
                                               message: mess,
                                               time: stamp.toDate(),
                                               type: 'txt')
@@ -374,6 +399,10 @@ class _ChatRoomState extends State<ChatRoom> {
                                           selectedMessage.addAll(
                                             {
                                               messageId: MessageInfo(
+                                                  senderEmail: senderEmail,
+                                                  senderName: senderName,
+                                                  timeString: time,
+                                                  date: date,
                                                   message: mess,
                                                   time: stamp.toDate(),
                                                   type: 'img',
@@ -388,7 +417,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   isSelected:
                                       selectedMessage.containsKey(messageId),
                                   message: mess,
-                                  isMe: sender == _auth.currentUser.email,
+                                  isMe: senderEmail == _auth.currentUser.email,
                                   time: time,
                                   photoUrl: url,
                                 ),
@@ -400,6 +429,10 @@ class _ChatRoomState extends State<ChatRoom> {
                                     setState(() {
                                       selectedMessage.addAll({
                                         messageId: MessageInfo(
+                                            senderEmail: senderEmail,
+                                            senderName: senderName,
+                                            timeString: time,
+                                            date: date,
                                             message: mess,
                                             time: stamp.toDate(),
                                             type: 'img',
@@ -413,7 +446,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   isSelected:
                                       selectedMessage.containsKey(messageId),
                                   message: mess,
-                                  isMe: sender == _auth.currentUser.email,
+                                  isMe: senderEmail == _auth.currentUser.email,
                                   time: time,
                                   photoUrl: url,
                                 ),
@@ -513,6 +546,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   .doc(messageId)
                                   .set(
                                 {
+                                  'name': myName,
                                   'message': imageMessageController.text.trim(),
                                   'sender': _auth.currentUser.email,
                                   'time': time,
@@ -548,6 +582,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   .doc(messageId)
                                   .set(
                                 {
+                                  'name': myName,
                                   'message': imageMessageController.text.trim(),
                                   'sender': _auth.currentUser.email,
                                   'time': time,
@@ -601,6 +636,7 @@ class _ChatRoomState extends State<ChatRoom> {
                               .doc(messageId)
                               .set(
                             {
+                              'name': myName,
                               'message': controller.text.trim(),
                               'sender': _auth.currentUser.email,
                               'time': time,
@@ -634,6 +670,7 @@ class _ChatRoomState extends State<ChatRoom> {
                               .doc(messageId)
                               .set(
                             {
+                              'name': myName,
                               'message': controller.text.trim(),
                               'sender': _auth.currentUser.email,
                               'time': time,

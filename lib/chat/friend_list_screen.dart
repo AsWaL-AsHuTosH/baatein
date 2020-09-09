@@ -26,24 +26,14 @@ class FriendListScreen extends StatelessWidget {
           if (sent) {
             Flushbar(
               message: "Your reuest is sent successfully.",
-              backgroundGradient:
-                  LinearGradient(colors: [Colors.red, Colors.orange]),
-              icon: Icon(
-                Icons.check,
-                color: Colors.green,
-                size: 40,
-              ),
               margin: EdgeInsets.all(8),
               borderRadius: 8,
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
-              boxShadows: [
-                BoxShadow(
-                  color: Colors.lightBlueAccent,
-                  offset: Offset(0.0, 2.0),
-                  blurRadius: 3.0,
-                )
-              ],
+              icon: Icon(
+                Icons.check,
+                color: Colors.blue[300],
+                size: 20,
+              ),
+              duration: Duration(seconds: 1),
             ).show(context);
           }
         },

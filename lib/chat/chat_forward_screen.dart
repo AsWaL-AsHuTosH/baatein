@@ -157,24 +157,14 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                         .nothingSelected) {
                       Flushbar(
                         message: "No member selected!",
-                        backgroundGradient:
-                            LinearGradient(colors: [Colors.grey, Colors.grey]),
-                        icon: Icon(
-                          Icons.error,
-                          color: Colors.red[800],
-                          size: 20,
-                        ),
                         margin: EdgeInsets.all(8),
                         borderRadius: 8,
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 2),
-                        boxShadows: [
-                          BoxShadow(
-                            color: Colors.lightBlueAccent,
-                            offset: Offset(0.0, 2.0),
-                            blurRadius: 3.0,
-                          )
-                        ],
+                        icon: Icon(
+                          Icons.error,
+                          color: Colors.blue[300],
+                          size: 20,
+                        ),
+                        duration: Duration(seconds: 1),
                       ).show(context);
                       setState(() {
                         spin = false;

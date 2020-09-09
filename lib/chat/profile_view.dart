@@ -290,25 +290,16 @@ class _ProfileViewState extends State<ProfileView> {
                             await Flushbar(
                               message:
                                   "You are no longer friend with ${widget.friendName}.",
-                              backgroundGradient: LinearGradient(
-                                  colors: [Colors.red, Colors.orange]),
-                              icon: Icon(
-                                Icons.directions_walk,
-                                color: Colors.green,
-                                size: 40,
-                              ),
                               margin: EdgeInsets.all(8),
                               borderRadius: 8,
-                              backgroundColor: Colors.red,
-                              duration: Duration(seconds: 2),
-                              boxShadows: [
-                                BoxShadow(
-                                  color: Colors.lightBlueAccent,
-                                  offset: Offset(0.0, 2.0),
-                                  blurRadius: 3.0,
-                                )
-                              ],
+                              icon: Icon(
+                                Icons.directions_walk,
+                                color: Colors.blue[300],
+                                size: 20,
+                              ),
+                              duration: Duration(seconds: 1),
                             ).show(context);
+
                             setState(() {
                               spin = false;
                             });
@@ -337,25 +328,16 @@ class _ProfileViewState extends State<ProfileView> {
                                 await Flushbar(
                                   message:
                                       "You already have request from same user!",
-                                  backgroundGradient: LinearGradient(
-                                      colors: [Colors.grey, Colors.grey]),
-                                  icon: Icon(
-                                    Icons.error,
-                                    color: Colors.red[800],
-                                    size: 20,
-                                  ),
                                   margin: EdgeInsets.all(8),
                                   borderRadius: 8,
-                                  backgroundColor: Colors.red,
-                                  duration: Duration(seconds: 2),
-                                  boxShadows: [
-                                    BoxShadow(
-                                      color: Colors.lightBlueAccent,
-                                      offset: Offset(0.0, 2.0),
-                                      blurRadius: 3.0,
-                                    )
-                                  ],
+                                  icon: Icon(
+                                    Icons.error,
+                                    color: Colors.blue[300],
+                                    size: 20,
+                                  ),
+                                  duration: Duration(seconds: 1),
                                 ).show(context);
+
                                 setState(() {
                                   spin = false;
                                 });
@@ -385,27 +367,19 @@ class _ProfileViewState extends State<ProfileView> {
                                 'time': time,
                                 'day': day
                               });
+
                               await Flushbar(
                                 message: "Your reuest is sent successfully.",
-                                backgroundGradient: LinearGradient(
-                                    colors: [Colors.red, Colors.orange]),
-                                icon: Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
                                 margin: EdgeInsets.all(8),
                                 borderRadius: 8,
-                                backgroundColor: Colors.red,
-                                duration: Duration(seconds: 3),
-                                boxShadows: [
-                                  BoxShadow(
-                                    color: Colors.lightBlueAccent,
-                                    offset: Offset(0.0, 2.0),
-                                    blurRadius: 3.0,
-                                  )
-                                ],
+                                icon: Icon(
+                                  Icons.check_circle,
+                                  color: Colors.blue[300],
+                                  size: 20,
+                                ),
+                                duration: Duration(seconds: 1),
                               ).show(context);
+
                               setState(() {
                                 spin = false;
                               });

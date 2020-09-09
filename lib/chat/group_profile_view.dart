@@ -307,24 +307,14 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               await Flushbar(
                                 message:
                                     "${widget.membersName[widget.members[index]]} is no longer a member of group.",
-                                backgroundGradient: LinearGradient(
-                                    colors: [Colors.red, Colors.orange]),
-                                icon: Icon(
-                                  Icons.done,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
                                 margin: EdgeInsets.all(8),
                                 borderRadius: 8,
-                                backgroundColor: Colors.red,
-                                duration: Duration(seconds: 2),
-                                boxShadows: [
-                                  BoxShadow(
-                                    color: Colors.lightBlueAccent,
-                                    offset: Offset(0.0, 2.0),
-                                    blurRadius: 3.0,
-                                  )
-                                ],
+                                icon: Icon(
+                                  Icons.done,
+                                  color: Colors.blue[300],
+                                  size: 20,
+                                ),
+                                duration: Duration(seconds: 1),
                               ).show(context);
 
                               setState(() {
@@ -453,28 +443,20 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               setState(() {
                                 spin = false;
                               });
+
                               await Flushbar(
                                 message:
                                     "You are no longer a memeber of '${widget.groupName}'.",
-                                backgroundGradient: LinearGradient(
-                                    colors: [Colors.red, Colors.orange]),
-                                icon: Icon(
-                                  Icons.directions_walk,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
                                 margin: EdgeInsets.all(8),
                                 borderRadius: 8,
-                                backgroundColor: Colors.red,
-                                duration: Duration(seconds: 2),
-                                boxShadows: [
-                                  BoxShadow(
-                                    color: Colors.lightBlueAccent,
-                                    offset: Offset(0.0, 2.0),
-                                    blurRadius: 3.0,
-                                  )
-                                ],
+                                icon: Icon(
+                                  Icons.directions_walk,
+                                  color: Colors.blue[300],
+                                  size: 20,
+                                ),
+                                duration: Duration(seconds: 1),
                               ).show(context);
+
                               Navigator.popUntil(context,
                                   ModalRoute.withName(HomeScreen.routeId));
                             }
@@ -508,24 +490,14 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                             if (ok != null || ok == true) {
                               await Flushbar(
                                 message: "New members added successfully.",
-                                backgroundGradient: LinearGradient(
-                                    colors: [Colors.red, Colors.orange]),
-                                icon: Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
                                 margin: EdgeInsets.all(8),
                                 borderRadius: 8,
-                                backgroundColor: Colors.red,
+                                icon: Icon(
+                                  Icons.directions_walk,
+                                  color: Colors.blue[300],
+                                  size: 20,
+                                ),
                                 duration: Duration(seconds: 1),
-                                boxShadows: [
-                                  BoxShadow(
-                                    color: Colors.lightBlueAccent,
-                                    offset: Offset(0.0, 2.0),
-                                    blurRadius: 3.0,
-                                  )
-                                ],
                               ).show(context);
                               Navigator.pop(context);
                             }

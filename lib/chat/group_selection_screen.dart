@@ -143,27 +143,18 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                 text: 'Setup Group',
                 icon: Icons.group,
                 onPress: () async {
-                  if( Provider.of<SelectedUser>(context, listen: false).isEmpty){
+                  if (Provider.of<SelectedUser>(context, listen: false)
+                      .isEmpty) {
                     Flushbar(
                       message: "No member selected!",
-                      backgroundGradient:
-                          LinearGradient(colors: [Colors.grey, Colors.grey]),
-                      icon: Icon(
-                        Icons.error,
-                        color: Colors.red[800],
-                        size: 20,
-                      ),
                       margin: EdgeInsets.all(8),
                       borderRadius: 8,
-                      backgroundColor: Colors.red,
-                      duration: Duration(seconds: 2),
-                      boxShadows: [
-                        BoxShadow(
-                          color: Colors.lightBlueAccent,
-                          offset: Offset(0.0, 2.0),
-                          blurRadius: 3.0,
-                        )
-                      ],
+                      icon: Icon(
+                        Icons.error,
+                        color: Colors.blue[300],
+                        size: 20,
+                      ),
+                      duration: Duration(seconds: 1),
                     ).show(context);
                     return;
                   }
@@ -176,9 +167,9 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                                   .getListChat()),
                     ),
                   );
-                  if(ok == null || ok == false){
+                  if (ok == null || ok == false) {
                     Navigator.pop(context, false);
-                  }else{
+                  } else {
                     Navigator.pop(context, true);
                   }
                 },

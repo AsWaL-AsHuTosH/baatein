@@ -1,5 +1,6 @@
 import 'package:baatein/chat/forward_selection_screen.dart';
 import 'package:baatein/chat/group_profile_view.dart';
+import 'package:baatein/chat/message_info_screen.dart';
 import 'package:baatein/classes/SelectedUser.dart';
 import 'package:baatein/classes/message_info.dart';
 import 'package:baatein/constants/constants.dart';
@@ -72,6 +73,28 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                   child: Text('${selectedMessage.length} selected'),
                 ),
                 actions: [
+                  selectedMessage.length == 1
+                      ? IconButton(
+                          icon: Icon(Icons.info),
+                          onPressed: () {
+                            MessageInfo message;
+                            selectedMessage.forEach((key, value) {
+                              message = value;
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MessageInfoScrren(
+                                  message: message,
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: 0,
+                          height: 0,
+                        ),
                   IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
@@ -177,24 +200,14 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                           message: selectedMessage.length > 1
                               ? "${selectedMessage.length} messages deleted."
                               : 'Message deleted.',
-                          backgroundGradient: LinearGradient(
-                              colors: [Colors.grey, Colors.grey]),
-                          icon: Icon(
-                            Icons.delete_sweep,
-                            color: Colors.black,
-                            size: 20,
-                          ),
                           margin: EdgeInsets.all(8),
                           borderRadius: 8,
-                          backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
-                          boxShadows: [
-                            BoxShadow(
-                              color: Colors.lightBlueAccent,
-                              offset: Offset(0.0, 2.0),
-                              blurRadius: 3.0,
-                            )
-                          ],
+                          icon: Icon(
+                            Icons.delete_sweep,
+                            color: Colors.blue[300],
+                            size: 20,
+                          ),
+                          duration: Duration(seconds: 1),
                         ).show(context);
                         setState(() {
                           selectedMessage.clear();
@@ -255,6 +268,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                           .then((value) => value.data()['members_name']);
                       Map<String, dynamic> membersName = {};
                       for (var map in mapList) membersName.addAll(map);
+                      members.sort();
                       setState(() {
                         spin = false;
                       });
@@ -338,6 +352,8 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                           String id = message.data()['id'];
                           String time = DateTimeFormat.format(stamp.toDate(),
                               format: 'h:i a');
+                          String date = DateTimeFormat.format(stamp.toDate(),
+                              format: 'D, M d, Y');
                           if (message.data()['type'] == 'txt') {
                             if (selectionMode) {
                               messageList.add(
@@ -362,8 +378,12 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                           selectedMessage.addAll(
                                             {
                                               id: MessageInfo(
+                                                date: date,
                                                 message: mess,
                                                 time: stamp.toDate(),
+                                                senderEmail: senderEmail,
+                                                senderName: senderName,
+                                                timeString: time,
                                                 type: 'txt',
                                               )
                                             },
@@ -389,6 +409,10 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                         selectedMessage.addAll(
                                           {
                                             id: MessageInfo(
+                                               senderEmail: senderEmail,
+                                                senderName: senderName,
+                                                timeString: time,
+                                                date: date,
                                                 message: mess,
                                                 time: stamp.toDate(),
                                                 type: 'txt')
@@ -420,6 +444,10 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                           selectedMessage.addAll(
                                             {
                                               id: MessageInfo(
+                                                 senderEmail: senderEmail,
+                                                senderName: senderName,
+                                                timeString: time,
+                                                  date: date,
                                                   message: mess,
                                                   time: stamp.toDate(),
                                                   type: 'img',
@@ -448,6 +476,10 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                     setState(() {
                                       selectedMessage.addAll({
                                         id: MessageInfo(
+                                           senderEmail: senderEmail,
+                                                senderName: senderName,
+                                                timeString: time,
+                                            date: date,
                                             message: mess,
                                             time: stamp.toDate(),
                                             type: 'img',
@@ -500,24 +532,14 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                 //Flushbar to indicate the group deletion by admin
                                 await Flushbar(
                                   message: 'The group is deleted by the admin.',
-                                  backgroundGradient: LinearGradient(
-                                      colors: [Colors.grey, Colors.grey]),
-                                  icon: Icon(
-                                    Icons.delete_sweep,
-                                    color: Colors.black,
-                                    size: 20,
-                                  ),
                                   margin: EdgeInsets.all(8),
                                   borderRadius: 8,
-                                  backgroundColor: Colors.red,
-                                  duration: Duration(seconds: 2),
-                                  boxShadows: [
-                                    BoxShadow(
-                                      color: Colors.lightBlueAccent,
-                                      offset: Offset(0.0, 2.0),
-                                      blurRadius: 3.0,
-                                    )
-                                  ],
+                                  icon: Icon(
+                                    Icons.error,
+                                    color: Colors.blue[300],
+                                    size: 20,
+                                  ),
+                                  duration: Duration(seconds: 1),
                                 ).show(context);
                                 Navigator.pop(context);
                                 return;
@@ -634,24 +656,14 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                             //Flushbar to indicate the group deletion by admin
                             await Flushbar(
                               message: 'The group is deleted by the admin.',
-                              backgroundGradient: LinearGradient(
-                                  colors: [Colors.grey, Colors.grey]),
-                              icon: Icon(
-                                Icons.delete_sweep,
-                                color: Colors.black,
-                                size: 20,
-                              ),
                               margin: EdgeInsets.all(8),
                               borderRadius: 8,
-                              backgroundColor: Colors.red,
-                              duration: Duration(seconds: 2),
-                              boxShadows: [
-                                BoxShadow(
-                                  color: Colors.lightBlueAccent,
-                                  offset: Offset(0.0, 2.0),
-                                  blurRadius: 3.0,
-                                )
-                              ],
+                              icon: Icon(
+                                Icons.error,
+                                color: Colors.blue[300],
+                                size: 20,
+                              ),
+                              duration: Duration(seconds: 1),
                             ).show(context);
                             Navigator.pop(context);
                             return;
