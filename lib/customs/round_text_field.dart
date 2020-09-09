@@ -28,6 +28,7 @@ class RoundTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
+          counterText: "",
           errorStyle: TextStyle(
             fontSize: 10,
           ),
