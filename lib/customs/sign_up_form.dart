@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_field.dart';
 
-class SignUpForm extends StatelessWidget {
+class SignUpForm extends StatefulWidget {
   final Function emailValidationCallback,
       passwordValidationCallback,
       nameValidataionCallback;
@@ -18,10 +18,17 @@ class SignUpForm extends StatelessWidget {
     @required this.passwordController,
     this.nameController,
   });
+
+  @override
+  _SignUpFormState createState() => _SignUpFormState();
+}
+
+class _SignUpFormState extends State<SignUpForm> {
+  bool obscureText = true;
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: widget.formKey,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
         decoration: BoxDecoration(
@@ -35,24 +42,65 @@ class SignUpForm extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(10))),
         child: Column(
           children: [
-            RoundTextField(
-              labelText: 'Name',
-              validator: nameValidataionCallback,
-              controller: nameController,
-              maxLength: 25,
+            Row(
+              children: [
+                Expanded(
+                  child: RoundTextField(
+                    labelText: 'Name',
+                    validator: widget.nameValidataionCallback,
+                    controller: widget.nameController,
+                    maxLength: 25,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(Icons.person, color: Colors.grey),
+                ),
+              ],
             ),
             Divider(),
-            RoundTextField(
-              labelText: 'Email',
-              validator: emailValidationCallback,
-              controller: emailController,
+            Row(
+              children: [
+                Expanded(
+                  child: RoundTextField(
+                    labelText: 'Email',
+                    validator: widget.emailValidationCallback,
+                    controller: widget.emailController,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(Icons.mail, color: Colors.grey),
+                ),
+              ],
             ),
             Divider(),
-            RoundTextField(
-              labelText: 'Password',
-              validator: passwordValidationCallback,
-              controller: passwordController,
-              obscureText: true,
+            Row(
+              children: [
+                Expanded(
+                  child: RoundTextField(
+                    labelText: 'Password',
+                    validator: widget.passwordValidationCallback,
+                    controller: widget.passwordController,
+                    obscureText: obscureText,
+                  ),
+                ),
+                 IconButton(
+                  icon: Icon(obscureText ? Icons.lock : Icons.lock_open,
+                      color: Colors.grey),
+                  onPressed: () {
+                    setState(
+                      () {
+                        setState(
+                          () {
+                            obscureText = !obscureText;
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),

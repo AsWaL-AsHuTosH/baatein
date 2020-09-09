@@ -136,7 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   nameController.clear();
                                   emailController.clear();
                                   passwordController.clear();
-                                  Navigator.pushNamed(
+                                  Navigator.popAndPushNamed(
                                       context, HomeScreen.routeId);
                                 } catch (e) {
                                   if (e.toString() == kEmailInUse) {

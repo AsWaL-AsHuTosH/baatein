@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_icon_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';

@@ -34,7 +34,7 @@ class RoundTextField extends StatelessWidget {
           ),
           labelText: labelText,
           labelStyle: TextStyle(
-              color: Colors.grey, backgroundColor: Colors.transparent),
+              color: Colors.grey, backgroundColor: Colors.transparent, fontSize: 12,),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(
               Radius.circular(radius),

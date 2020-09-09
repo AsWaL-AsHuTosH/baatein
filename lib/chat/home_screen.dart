@@ -35,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen>
   String name = '';
   final myEmail = FirebaseAuth.instance.currentUser.email;
 
-
   @override
   void initState() {
     super.initState();
@@ -81,14 +80,12 @@ class _HomeScreenState extends State<HomeScreen>
         bool ok = await showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Sign Out?'),
+            title: Text('Sign Out'),
             content: Text('Do you want to Sign Out?'),
             actions: [
               FlatButton(
                 child: Text('Yes'),
-                onPressed: () async {
-                  Navigator.pop(context, true);
-                },
+                onPressed: () => Navigator.pop(context, true),
               ),
               FlatButton(
                 child: Text('No'),
@@ -100,7 +97,8 @@ class _HomeScreenState extends State<HomeScreen>
         if (ok != null && ok == true) {
           await setMeOnline(false);
           await _auth.signOut();
-          Navigator.popAndPushNamed(context, SignInScreen.routeId);
+          Navigator.pushNamedAndRemoveUntil(
+              context, SignInScreen.routeId, (Route<dynamic> route) => false);
           return true;
         } else {
           return false;
@@ -248,8 +246,10 @@ class _HomeScreenState extends State<HomeScreen>
                             onPress: () async {
                               await setMeOnline(false);
                               await _auth.signOut();
-                              Navigator.popAndPushNamed(
-                                  context, SignInScreen.routeId);
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  SignInScreen.routeId,
+                                  (Route<dynamic> route) => false);
                             },
                           )
                         ],

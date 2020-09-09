@@ -19,7 +19,7 @@ class ChatCard extends StatelessWidget {
       @required this.isImage});
   Widget message() {
     return isImage
-        ? Icon(Icons.image)
+        ? Icon(Icons.image, color: newMessage ? Colors.black : Colors.grey,)
         : Text(
             lastMessage,
             style: TextStyle(

@@ -311,7 +311,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           },
                         ),
                         SizedBox(
-                          width: 180,
+                          width: 170,
                         )
                       ],
                     ),

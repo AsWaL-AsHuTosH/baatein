@@ -26,140 +26,169 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      body: ModalProgressHUD(
-        inAsyncCall: spin,
-        child: SafeArea(
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(right: 10),
-                  child: Text(
-                    'Baatein',
-                    style: TextStyle(
-                      fontSize: 50,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      fontFamily: 'DancingScript',
-                    ),
+    return WillPopScope(
+      onWillPop: () async {
+        bool ok = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Exit'),
+            content: Text('Do you want to exit?'),
+            actions: [
+              FlatButton(
+                child: Text('Yes'),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+              FlatButton(
+                child: Text('No'),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+            ],
+          ),
+        );
+        if (ok != null && ok == true)
+          return true;
+        else
+          return false;
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
+        body: ModalProgressHUD(
+          inAsyncCall: spin,
+          child: SafeArea(
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    height: 20,
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 10),
-                          ElivatedForm(
-                            emailController: emailController,
-                            passwordController: passwordController,
-                            emailValidationCallback: (val) {
-                              if (otherEmailError) {
-                                otherEmailError = false;
-                                return errorMessage;
-                              }
-                              return RegExp(
-                                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                      .hasMatch(val)
-                                  ? null
-                                  : "Please enter a valid email address!";
-                            },
-                            passwordValidationCallback: (val) {
-                              if (otherPasswordError) {
-                                otherPasswordError = false;
-                                return errorMessage;
-                              }
-                              return val.length < 6
-                                  ? "Password should be at least 6 characters long!"
-                                  : null;
-                            },
-                            formKey: _formKey,
-                          ),
-                          FlatButton(
-                            child: Text(
-                              'Forgot Password?',
-                              style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1),
-                            ),
-                            onPressed: () {
-                              Navigator.pushNamed(context, ForgotPasswordScreen.routeId);
-                            },
-                          ),
-                          RoundTextButton(
-                            text: 'Sign In',
-                            icon: Icons.verified_user,
-                            margin: 60,
-                            onPress: () async {
-                              setState(() {
-                                spin = true;
-                              });
-                              if (!_formKey.currentState.validate()) {
-                                setState(() {
-                                  spin = false;
-                                });
-                                return;
-                              }
-                              try {
-                                await FirebaseAuth.instance
-                                    .signInWithEmailAndPassword(
-                                  email: emailController.text,
-                                  password: passwordController.text,
-                                );
-                                setState(() {
-                                  spin = false;
-                                });
-                                emailController.clear();
-                                passwordController.clear();
-                                Navigator.pushNamed(
-                                    context, HomeScreen.routeId);
-                              } catch (e) {
-                                if (e.toString() == kInvalidUser) {
-                                  otherEmailError = true;
-                                  errorMessage = kInvalidUserWarning;
-                                } else if (e.toString() == kWrongPassword) {
-                                  otherPasswordError = true;
-                                  errorMessage = kWrongPasswordWarning;
-                                } else
-                                  assert(false);
-                                setState(() {
-                                  spin = false;
-                                });
-                                _formKey.currentState.validate();
-                              }
-                            },
-                          ),
-                          Divider(
-                            color: Colors.transparent,
-                          ),
-                          Hero(
-                            tag: 'sign_up_button',
-                            child: RoundTextButton(
-                              text: 'Create New Account',
-                              icon: Icons.person_add,
-                              color: Colors.green,
-                              margin: 20,
-                              onPress: () => Navigator.pushNamed(
-                                  context, SignUpScreen.routeId),
-                            ),
-                          ),
-                        ],
+                  Padding(
+                    padding: EdgeInsets.only(right: 10),
+                    child: Text(
+                      'Baatein',
+                      style: TextStyle(
+                        fontSize: 50,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        fontFamily: 'DancingScript',
                       ),
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.only(topLeft: Radius.circular(150)),
+                  ),
+                  Expanded(
+                    child: Container(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 10),
+                            ElivatedForm(
+                              emailController: emailController,
+                              passwordController: passwordController,
+                              emailValidationCallback: (val) {
+                                if (otherEmailError) {
+                                  otherEmailError = false;
+                                  return errorMessage;
+                                }
+                                return RegExp(
+                                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                        .hasMatch(val)
+                                    ? null
+                                    : "Please enter a valid email address!";
+                              },
+                              passwordValidationCallback: (val) {
+                                if (otherPasswordError) {
+                                  otherPasswordError = false;
+                                  return errorMessage;
+                                }
+                                return val.length < 6
+                                    ? "Password should be at least 6 characters long!"
+                                    : null;
+                              },
+                              formKey: _formKey,
+                            ),
+                            FlatButton(
+                              child: Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                    letterSpacing: 1),
+                              ),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                    context, ForgotPasswordScreen.routeId);
+                              },
+                            ),
+                            RoundTextButton(
+                              text: 'Sign In',
+                              icon: Icons.verified_user,
+                              margin: 60,
+                              onPress: () async {
+                                setState(() {
+                                  spin = true;
+                                });
+                                if (!_formKey.currentState.validate()) {
+                                  setState(() {
+                                    spin = false;
+                                  });
+                                  return;
+                                }
+                                try {
+                                  await FirebaseAuth.instance
+                                      .signInWithEmailAndPassword(
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                  );
+                                  setState(() {
+                                    spin = false;
+                                  });
+                                  emailController.clear();
+                                  passwordController.clear();
+                                  Navigator.pushNamed(
+                                      context, HomeScreen.routeId);
+                                } catch (e) {
+                                  if (e.toString() == kInvalidUser) {
+                                    otherEmailError = true;
+                                    errorMessage = kInvalidUserWarning;
+                                  } else if (e.toString() == kWrongPassword) {
+                                    otherPasswordError = true;
+                                    errorMessage = kWrongPasswordWarning;
+                                  } else
+                                    assert(false);
+                                  setState(() {
+                                    spin = false;
+                                  });
+                                  _formKey.currentState.validate();
+                                }
+                              },
+                            ),
+                            Divider(
+                              color: Colors.transparent,
+                            ),
+                            Hero(
+                              tag: 'sign_up_button',
+                              child: RoundTextButton(
+                                text: 'Create New Account',
+                                icon: Icons.person_add,
+                                color: Colors.green,
+                                margin: 20,
+                                onPress: () => Navigator.popAndPushNamed(
+                                    context, SignUpScreen.routeId),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.only(topLeft: Radius.circular(150)),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
