@@ -40,6 +40,7 @@ class SearchField extends StatelessWidget {
                 validator: validator,
                 controller: controller,
                 decoration: InputDecoration(
+                  counterText: "",
                   errorStyle: TextStyle(
                     fontSize: 10,
                   ),

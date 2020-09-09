@@ -91,12 +91,8 @@ class _GroupSetupState extends State<GroupSetup> {
                 validator: validator,
                 formKey: _key,
                 maxLength: 25,
+                trailing: false,
               ),
-            ),
-            Divider(
-              color: Colors.grey,
-              indent: 10,
-              endIndent: 10,
             ),
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance

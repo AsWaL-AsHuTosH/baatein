@@ -61,7 +61,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   });
                   final ref = FirebaseStorage.instance
                       .ref()
-                      .child(FirebaseAuth.instance.currentUser.email + '.jpg');
+                      .child(widget.docId + '.jpg');
                   final File file = File(pickedImage.path);
                   StorageUploadTask task = ref.putFile(file);
                   StorageTaskSnapshot taskSnapshot = await task.onComplete;
