@@ -82,6 +82,34 @@ class _ProfileViewState extends State<ProfileView> {
                     },
                   ),
                 ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('presence')
+                      .doc(widget.friendEmail)
+                      .collection('status')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    bool isOnline = false;
+                    if (snapshot.hasData && snapshot.data != null) {
+                      isOnline = snapshot.data.docs[0].data()['is_online'];
+                    }
+                    return isOnline
+                        ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Online',
+                              style: TextStyle(
+                                  fontFamily: 'Source Sans Pro',
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        : Container(
+                            width: 0,
+                            height: 0,
+                          );
+                  },
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 70.0),
                   child: ListTile(

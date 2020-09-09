@@ -279,8 +279,39 @@ class _ChatRoomState extends State<ChatRoom> {
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.bold),
                         ),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('presence')
+                              .doc(widget.friendEmail)
+                              .collection('status')
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            bool isOnline = false;
+                            try {
+                              if (snapshot.hasData && snapshot.data != null) {
+                                isOnline =
+                                    snapshot.data.docs[0].data()['is_online'];
+                              }
+                            } catch (e) {
+                              isOnline = false;
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: isOnline
+                                  ? Icon(
+                                      Icons.fiber_manual_record,
+                                      color: Colors.green,
+                                      size: 12,
+                                    )
+                                  : Container(
+                                      width: 0,
+                                      height: 0,
+                                    ),
+                            );
+                          },
+                        ),
                         SizedBox(
-                          width: 200,
+                          width: 180,
                         )
                       ],
                     ),

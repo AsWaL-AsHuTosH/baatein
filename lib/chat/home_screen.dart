@@ -27,7 +27,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -37,11 +37,21 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = new TabController(vsync: this, length: 4);
     getMyName();
   }
 
-  void getMyName() async {
+  Future<void> setMeOnline(bool value) async {
+    await FirebaseFirestore.instance
+        .collection('presence')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('status')
+        .doc('is_online')
+        .update({'is_online': value});
+  }
+
+  Future<void> getMyName() async {
     String myName = await _firestore
         .collection('users')
         .doc(_auth.currentUser.email)
@@ -50,6 +60,15 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() {
       name = myName;
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed)
+      setMeOnline(true);
+    else
+      setMeOnline(false);
   }
 
   @override
@@ -76,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         );
         if (ok != null && ok == true) {
+          await setMeOnline(false);
           await _auth.signOut();
           Navigator.popAndPushNamed(context, SignInScreen.routeId);
           return true;
@@ -133,9 +153,17 @@ class _HomeScreenState extends State<HomeScreen>
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 String url;
-                                if (snapshot.hasData) {
-                                  final image = snapshot.data.docs;
-                                  url = image[0].data()['url'];
+                                try {
+                                  if (snapshot.hasData) {
+                                    final image = snapshot.data.docs;
+                                    url = image[0].data()['url'];
+                                  }
+                                } catch (e) {
+                                  return CircleAvatar(
+                                    backgroundImage:
+                                        NetworkImage(kNoProfilePic),
+                                    radius: 50,
+                                  );
                                 }
                                 if (url == null) url = kNoProfilePic;
                                 return CircleAvatar(
@@ -144,6 +172,36 @@ class _HomeScreenState extends State<HomeScreen>
                                 );
                               },
                             ),
+                          ),
+                          StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('presence')
+                                .doc(FirebaseAuth.instance.currentUser.email)
+                                .collection('status')
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              bool isOnline = false;
+                              if (snapshot.hasData && snapshot.data != null) {
+                                isOnline =
+                                    snapshot.data.docs[0].data()['is_online'];
+                              }
+                              return isOnline
+                                  ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                        'Online',
+                                        style: TextStyle(
+                                          fontFamily: 'Source Sans Pro',
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                  )
+                                  : Container(
+                                      width: 0,
+                                      height: 0,
+                                    );
+                            },
                           ),
                           ListTile(
                             leading: Icon(
@@ -185,8 +243,9 @@ class _HomeScreenState extends State<HomeScreen>
                           RoundTextButton(
                             text: 'Sign Out',
                             icon: Icons.input,
-                            onPress: () async{
-                             await _auth.signOut();
+                            onPress: () async {
+                              await setMeOnline(false);
+                              await _auth.signOut();
                               Navigator.popAndPushNamed(
                                   context, SignInScreen.routeId);
                             },

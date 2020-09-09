@@ -145,7 +145,7 @@ class GroupChatCard extends StatelessWidget {
                     ),
                     Icon(
                       newMessage ? Icons.sms : null,
-                      color: Colors.black,
+                      color: Colors.green,
                     ),
                   ],
                 ),

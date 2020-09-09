@@ -84,7 +84,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Hero(
                             tag: 'sign_up_button',
-                                                      child: RoundTextButton(
+                            child: RoundTextButton(
                               text: 'Sign Up',
                               icon: Icons.arrow_forward_ios,
                               margin: 50,
@@ -113,8 +113,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       .doc(email)
                                       .set({
                                     'name': nameController.text.trim(),
-                                    'search_name':
-                                        nameController.text.trim().toLowerCase(),
+                                    'search_name': nameController.text
+                                        .trim()
+                                        .toLowerCase(),
                                     'email': email
                                   });
                                   await firestore
@@ -123,6 +124,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       .collection('image')
                                       .doc('image_url')
                                       .set({'url': kNoProfilePic});
+                                  await FirebaseFirestore.instance
+                                      .collection('presence')
+                                      .doc(email)
+                                      .collection('status')
+                                      .doc('is_online')
+                                      .set({'is_online': true});
                                   setState(() {
                                     spin = false;
                                   });
