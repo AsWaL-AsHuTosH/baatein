@@ -14,4 +14,4 @@ const String kEmailInUseWarning =
 const String kNoProfilePic =
     'https://firebasestorage.googleapis.com/v0/b/baatein-7d689.appspot.com/o/blank-profile-picture-973460_1280.png?alt=media&token=f031bd7c-4065-4616-bb2c-bb6777d1258a';
 const String kNoGroupPic =
-    'https://firebasestorage.googleapis.com/v0/b/baatein-7d689.appspot.com/o/groups-icon-300x3000sd7fsdfhsdio.png?alt=media&token=cb30e83a-ee9c-418c-9ee8-f96e61445340';
+    'https://firebasestorage.googleapis.com/v0/b/baatein-7d689.appspot.com/o/group-of-people-icon.jpg?alt=media&token=b12a3252-03ed-4aae-8411-8c82bf62e75c';
