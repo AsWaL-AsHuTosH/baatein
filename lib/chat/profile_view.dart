@@ -1,3 +1,4 @@
+import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:date_time_format/date_time_format.dart';
@@ -331,7 +332,10 @@ class _ProfileViewState extends State<ProfileView> {
                             setState(() {
                               spin = false;
                             });
-                            Navigator.pop(context);
+                            Navigator.popUntil(
+                              context,
+                              ModalRoute.withName(HomeScreen.routeId),
+                            );
                           }
                         },
                       )

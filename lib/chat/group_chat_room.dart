@@ -315,7 +315,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                               fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(
-                          width: 200,
+                          width: MediaQuery.of(context).size.width * 0.5,
                         )
                       ],
                     ),
@@ -409,7 +409,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                         selectedMessage.addAll(
                                           {
                                             id: MessageInfo(
-                                               senderEmail: senderEmail,
+                                                senderEmail: senderEmail,
                                                 senderName: senderName,
                                                 timeString: time,
                                                 date: date,
@@ -444,9 +444,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                           selectedMessage.addAll(
                                             {
                                               id: MessageInfo(
-                                                 senderEmail: senderEmail,
-                                                senderName: senderName,
-                                                timeString: time,
+                                                  senderEmail: senderEmail,
+                                                  senderName: senderName,
+                                                  timeString: time,
                                                   date: date,
                                                   message: mess,
                                                   time: stamp.toDate(),
@@ -476,9 +476,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                     setState(() {
                                       selectedMessage.addAll({
                                         id: MessageInfo(
-                                           senderEmail: senderEmail,
-                                                senderName: senderName,
-                                                timeString: time,
+                                            senderEmail: senderEmail,
+                                            senderName: senderName,
+                                            timeString: time,
                                             date: date,
                                             message: mess,
                                             time: stamp.toDate(),

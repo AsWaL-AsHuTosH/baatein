@@ -311,7 +311,7 @@ class _ChatRoomState extends State<ChatRoom> {
                           },
                         ),
                         SizedBox(
-                          width: 170,
+                          width: MediaQuery.of(context).size.width * 0.5,
                         )
                       ],
                     ),
