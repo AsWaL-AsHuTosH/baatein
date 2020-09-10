@@ -467,7 +467,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                     });
 
                     await Flushbar(
-                      message: "sending.....",
+                      message: "Sending.",
                       backgroundGradient:
                           LinearGradient(colors: [Colors.orange, Colors.red]),
                       icon: Icon(

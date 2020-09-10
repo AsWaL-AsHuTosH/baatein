@@ -14,7 +14,7 @@ class SelectedUser with ChangeNotifier {
     notifyListeners();
   }
 
-  void addSelection({String email, String name}) {
+  void addSelectionChat({String email, String name}) {
     _selectedChat.add(email);
     _selectedChatName[email] = name;
     notifyListeners();

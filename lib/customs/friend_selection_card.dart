@@ -47,7 +47,7 @@ class _FriendSelectionCardState extends State<FriendSelectionCard> {
                   });
                   return;
                 }
-                ref.addSelection(
+                ref.addSelectionChat(
                   email: widget.friendEmail,
                   name: widget.friendName,
                 );
