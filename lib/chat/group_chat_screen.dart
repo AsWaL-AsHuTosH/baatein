@@ -1,10 +1,12 @@
-import 'package:baatein/chat/group_selection_screen.dart';
+import 'package:baatein/chat/group_member_selection_screen.dart';
 import 'package:baatein/customs/group_chatcard_builder.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
 class GroupChatScreen extends StatefulWidget {
   @override
@@ -12,8 +14,21 @@ class GroupChatScreen extends StatefulWidget {
 }
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String myEmail = FirebaseAuth.instance.currentUser.email;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
   bool spin = false;
 
   void spinTrue() {
@@ -39,7 +54,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         ),
         onPressed: () async {
           var ok =
-              await Navigator.pushNamed(context, GroupSelectionScreen.routeId);
+              await Navigator.pushNamed(context, GroupMemberSelectionScreen.routeId);
           if (ok != null && ok == true) {
             Flushbar(
               message: "Group created successfully.",
@@ -63,9 +78,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           child: Column(
             children: [
               StreamBuilder<QuerySnapshot>(
-                stream: _firestore
+                stream: _firebase.firestore
                     .collection('users')
-                    .doc(myEmail)
+                    .doc(_user.email)
                     .collection('groups')
                     .snapshots(),
                 builder: (context, snaps) {

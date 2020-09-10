@@ -1,8 +1,10 @@
 import 'package:baatein/customs/request_tile.dart';
 import 'package:baatein/customs/search_field.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class RequestSearchScreen extends StatefulWidget {
   static const String routeId = 'request_search_screen';
@@ -11,11 +13,24 @@ class RequestSearchScreen extends StatefulWidget {
 }
 
 class _RequestSearchScreenState extends State<RequestSearchScreen> {
-  Stream<QuerySnapshot> myStream;
   String data1;
   String data2;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+      
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,9 +60,9 @@ class _RequestSearchScreenState extends State<RequestSearchScreen> {
               ),
             ),
             StreamBuilder<QuerySnapshot>(
-              stream: _firestore
+              stream: _firebase.firestore
                   .collection('requests')
-                  .doc(_auth.currentUser.email)
+                  .doc(_user.email)
                   .collection('request')
                   .where('search_name', isGreaterThanOrEqualTo: data1)
                   .where('search_name', isLessThan: data2)

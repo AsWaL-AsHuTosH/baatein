@@ -1,13 +1,16 @@
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
 import 'package:baatein/customs/round_text_button.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
 class ProfileView extends StatefulWidget {
   final String friendEmail, friendName;
@@ -19,7 +22,23 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  LoggedInUser _user;
+  FirebaseService _firebase;
   bool spin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +66,7 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    String url = await FirebaseFirestore.instance
+                    String url = await _firebase.firestore
                         .collection('profile_pic')
                         .doc(widget.friendEmail)
                         .collection('image')
@@ -64,7 +83,7 @@ class _ProfileViewState extends State<ProfileView> {
                     );
                   },
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
+                    stream: _firebase.firestore
                         .collection('profile_pic')
                         .doc(widget.friendEmail)
                         .collection('image')
@@ -84,7 +103,7 @@ class _ProfileViewState extends State<ProfileView> {
                   ),
                 ),
                 StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
+                  stream: _firebase.firestore
                       .collection('presence')
                       .doc(widget.friendEmail)
                       .collection('status')
@@ -188,24 +207,21 @@ class _ProfileViewState extends State<ProfileView> {
                               spin = true;
                             });
                             // removing from friends collection both side
-                            FirebaseFirestore _firestore =
-                                FirebaseFirestore.instance;
-                            FirebaseAuth _auth = FirebaseAuth.instance;
-                            String myEmail = _auth.currentUser.email;
-                            _firestore
+                            String myEmail = _user.email;
+                            _firebase.firestore
                                 .collection('users')
                                 .doc(myEmail)
                                 .collection('friends')
                                 .doc(widget.friendEmail)
                                 .delete();
-                            _firestore
+                            _firebase.firestore
                                 .collection('users')
                                 .doc(widget.friendEmail)
                                 .collection('friends')
                                 .doc(myEmail)
                                 .delete();
 
-                            var myChat = await _firestore
+                            var myChat = await _firebase.firestore
                                 .collection('users')
                                 .doc(myEmail)
                                 .collection('chats')
@@ -218,7 +234,7 @@ class _ProfileViewState extends State<ProfileView> {
                               for (var message in myChat) {
                                 if (message.data()['type'] == 'img') {
                                   String name = message.data()['image_name'];
-                                  int count = await FirebaseFirestore.instance
+                                  int count = await _firebase.firestore
                                       .collection('shared_images')
                                       .doc(name)
                                       .get()
@@ -226,7 +242,7 @@ class _ProfileViewState extends State<ProfileView> {
 
                                   --count;
                                   if (count <= 0) {
-                                    await FirebaseFirestore.instance
+                                    await _firebase.firestore
                                         .collection('shared_images')
                                         .doc(name)
                                         .delete();
@@ -235,14 +251,14 @@ class _ProfileViewState extends State<ProfileView> {
                                         .child(name)
                                         .delete();
                                   } else {
-                                    await FirebaseFirestore.instance
+                                    await _firebase.firestore
                                         .collection('shared_images')
                                         .doc(name)
                                         .update({'count': count});
                                   }
                                 }
 
-                                await _firestore
+                                await _firebase.firestore
                                     .collection('users')
                                     .doc(myEmail)
                                     .collection('chats')
@@ -253,7 +269,7 @@ class _ProfileViewState extends State<ProfileView> {
                               }
                             }
 
-                            var friendChat = await _firestore
+                            var friendChat = await _firebase.firestore
                                 .collection('users')
                                 .doc(widget.friendEmail)
                                 .collection('chats')
@@ -267,7 +283,7 @@ class _ProfileViewState extends State<ProfileView> {
                               for (var message in friendChat) {
                                 if (message.data()['type'] == 'img') {
                                   String name = message.data()['image_name'];
-                                  int count = await FirebaseFirestore.instance
+                                  int count = await _firebase.firestore
                                       .collection('shared_images')
                                       .doc(name)
                                       .get()
@@ -275,7 +291,7 @@ class _ProfileViewState extends State<ProfileView> {
 
                                   --count;
                                   if (count <= 0) {
-                                    await FirebaseFirestore.instance
+                                    await _firebase.firestore
                                         .collection('shared_images')
                                         .doc(name)
                                         .delete();
@@ -284,14 +300,14 @@ class _ProfileViewState extends State<ProfileView> {
                                         .child(name)
                                         .delete();
                                   } else {
-                                    await FirebaseFirestore.instance
+                                    await _firebase.firestore
                                         .collection('shared_images')
                                         .doc(name)
                                         .update({'count': count});
                                   }
                                 }
 
-                                await _firestore
+                                await _firebase.firestore
                                     .collection('users')
                                     .doc(widget.friendEmail)
                                     .collection('chats')
@@ -302,14 +318,14 @@ class _ProfileViewState extends State<ProfileView> {
                               }
                             }
 
-                            await _firestore
+                            await _firebase.firestore
                                 .collection('users')
                                 .doc(widget.friendEmail)
                                 .collection('chats')
                                 .doc(myEmail)
                                 .delete();
 
-                            await _firestore
+                            await _firebase.firestore
                                 .collection('users')
                                 .doc(myEmail)
                                 .collection('chats')
@@ -349,7 +365,7 @@ class _ProfileViewState extends State<ProfileView> {
                               setState(() {
                                 spin = true;
                               });
-                              if (await FirebaseFirestore.instance
+                              if (await _firebase.firestore
                                   .collection('requests')
                                   .doc(FirebaseAuth.instance.currentUser.email)
                                   .collection('request')
@@ -382,12 +398,12 @@ class _ProfileViewState extends State<ProfileView> {
                                   DateTimeFormat.format(stamp, format: 'h:i a');
                               String myEmail =
                                   FirebaseAuth.instance.currentUser.email;
-                              String myName = await FirebaseFirestore.instance
+                              String myName = await _firebase.firestore
                                   .collection('users')
                                   .doc(myEmail)
                                   .get()
                                   .then((doc) => doc.data()['name']);
-                              FirebaseFirestore.instance
+                              _firebase.firestore
                                   .collection('requests')
                                   .doc(widget.friendEmail)
                                   .collection('request')

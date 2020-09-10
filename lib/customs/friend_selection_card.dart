@@ -1,4 +1,4 @@
-import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/provider/selected_user.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

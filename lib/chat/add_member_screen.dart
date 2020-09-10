@@ -1,4 +1,6 @@
-import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -6,7 +8,6 @@ import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
@@ -20,11 +21,25 @@ class AddMemberScreen extends StatefulWidget {
 }
 
 class _AddMemberScreenState extends State<AddMemberScreen> {
+  LoggedInUser _user;
+  FirebaseService _firebase;
   String data1;
   String data2;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool spin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +86,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                             itemCount: list.length,
                             itemBuilder: (context, index) =>
                                 StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
+                              stream: _firebase.firestore
                                   .collection('profile_pic')
                                   .doc(list[index])
                                   .collection('image')
@@ -108,9 +123,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       indent: 10,
                     ),
               StreamBuilder<QuerySnapshot>(
-                stream: _firestore
+                stream: _firebase.firestore
                     .collection('users')
-                    .doc(_auth.currentUser.email)
+                    .doc(_user.email)
                     .collection('friends')
                     .where('search_name', isGreaterThanOrEqualTo: data1)
                     .where('search_name', isLessThan: data2)
@@ -177,11 +192,10 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       });
                       return;
                     } else {
-                      FirebaseFirestore _firestore = FirebaseFirestore.instance;
                       final List<String> memberList =
                           Provider.of<SelectedUser>(context, listen: false)
                               .getListChat();
-                      int size = await _firestore
+                      int size = await _firebase.firestore
                           .collection('groups')
                           .doc(widget.groupId)
                           .get()
@@ -190,7 +204,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       final List<Map<String, String>> nameList =
                           Provider.of<SelectedUser>(context, listen: false)
                               .getNameList();
-                      await _firestore
+                      await _firebase.firestore
                           .collection('groups')
                           .doc(widget.groupId)
                           .update({
@@ -199,7 +213,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         'size': size,
                       });
                       //increasing image count.
-                      var messages = await FirebaseFirestore.instance
+                      var messages = await _firebase.firestore
                           .collection('groups')
                           .doc(widget.groupId)
                           .collection('messages')
@@ -210,13 +224,13 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         for (var message in messages) {
                           if (message.data()['type'] == 'img') {
                             String name = message.data()['image_name'];
-                            int count = await FirebaseFirestore.instance
+                            int count = await _firebase.firestore
                                 .collection('shared_images')
                                 .doc(name)
                                 .get()
                                 .then((value) => value.data()['count']);
                             count += memberList.length;
-                            await FirebaseFirestore.instance
+                            await _firebase.firestore
                                 .collection('shared_images')
                                 .doc(name)
                                 .update({'count': count});
@@ -225,7 +239,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       }
                       //Adding group to each memeber collection
                       for (String email in memberList)
-                        await _firestore
+                        await _firebase.firestore
                             .collection('users')
                             .doc(email)
                             .collection('groups')

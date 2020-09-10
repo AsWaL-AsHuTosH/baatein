@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MessageField extends StatelessWidget {
-  // final Function validator;
   final Function imageButtonCallback;
   final Color color = Colors.white;
   final TextEditingController controller;

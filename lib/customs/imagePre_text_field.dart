@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MessageFieldIP extends StatelessWidget {
-  // final Function validator;
   final String hintText;
   final Color color = Colors.white;
   final TextEditingController controller;

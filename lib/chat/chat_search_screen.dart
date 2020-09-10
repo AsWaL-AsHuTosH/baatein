@@ -12,11 +12,12 @@ class ChatSearchScreen extends StatefulWidget {
 }
 
 class _ChatSearchScreenState extends State<ChatSearchScreen> {
-  Stream<QuerySnapshot> myStream;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String myEmail = FirebaseAuth.instance.currentUser.email;
+
   String data1;
   String data2;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +49,7 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('users')
-                  .doc(_auth.currentUser.email)
+                  .doc(myEmail)
                   .collection('chats')
                   .where('search_name', isGreaterThanOrEqualTo: data1)
                   .where('search_name', isLessThan: data2)

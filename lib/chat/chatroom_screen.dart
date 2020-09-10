@@ -1,21 +1,22 @@
 import 'package:baatein/chat/forward_selection_screen.dart';
 import 'package:baatein/chat/message_info_screen.dart';
-import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/classes/message_info.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
+import 'package:baatein/helper/message_info.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/message_text_field.dart';
 import 'package:baatein/customs/round_icon_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baatein/customs/message.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'image_preview_screen.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:baatein/customs/photo_message.dart';
 import 'package:uuid/uuid.dart';
 import 'package:baatein/chat/profile_view.dart';
@@ -30,32 +31,31 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
   final TextEditingController imageMessageController = TextEditingController();
-  Map<String, MessageInfo> selectedMessage = {};
+  final Map<String, MessageInfo> selectedMessage = {};
   bool selectionMode = false, spin = false;
-  String myName;
+
+  LoggedInUser _user;
+  FirebaseService _firebase;
 
   @override
   void initState() {
     super.initState();
-    getName();
+    initLoggedInUser();
+    initFirebaseService();
   }
 
-  Future<void> getName() async {
-    myName = await _firestore
-        .collection('users')
-        .doc(_auth.currentUser.email)
-        .get()
-        .then((doc) => doc.data()['name']);
-  }
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
 
   Future<void> setNewMessageFalse() async {
-    await _firestore
+    await _firebase.firestore
         .collection('users')
-        .doc(_auth.currentUser.email)
+        .doc(_user.email)
         .collection('chats')
         .doc(widget.friendEmail)
         .update({'new_message': false});
@@ -127,7 +127,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   (key, value) async {
                                     if (value.type == 'img') {
                                       String imageName = value.imageName;
-                                      int count = await _firestore
+                                      int count = await _firebase.firestore
                                           .collection('shared_images')
                                           .doc(imageName)
                                           .get()
@@ -135,25 +135,25 @@ class _ChatRoomState extends State<ChatRoom> {
                                               (value) => value.data()['count']);
                                       if (count == 1) {
                                         //last link of image => delete image + its count document.
-                                        FirebaseStorage.instance
+                                        _firebase.storage
                                             .ref()
                                             .child(imageName)
                                             .delete();
-                                        _firestore
+                                        _firebase.firestore
                                             .collection('shared_images')
                                             .doc(imageName)
                                             .delete();
                                       } else {
                                         --count;
-                                        _firestore
+                                        _firebase.firestore
                                             .collection('shared_images')
                                             .doc(imageName)
                                             .update({'count': count});
                                       }
                                     }
-                                    _firestore
+                                    _firebase.firestore
                                         .collection('users')
-                                        .doc(_auth.currentUser.email)
+                                        .doc(_user.email)
                                         .collection('chats')
                                         .doc(widget.friendEmail)
                                         .collection('messages')
@@ -161,9 +161,9 @@ class _ChatRoomState extends State<ChatRoom> {
                                         .delete();
                                   },
                                 );
-                                _firestore
+                                _firebase.firestore
                                     .collection('users')
-                                    .doc(_auth.currentUser.email)
+                                    .doc(_user.email)
                                     .collection('chats')
                                     .doc(widget.friendEmail)
                                     .update({'last_message': ''});
@@ -254,7 +254,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     child: Row(
                       children: [
                         StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
+                          stream: _firebase.firestore
                               .collection('profile_pic')
                               .doc(widget.friendEmail)
                               .collection('image')
@@ -280,7 +280,7 @@ class _ChatRoomState extends State<ChatRoom> {
                               fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
+                          stream: _firebase.firestore
                               .collection('presence')
                               .doc(widget.friendEmail)
                               .collection('status')
@@ -324,9 +324,9 @@ class _ChatRoomState extends State<ChatRoom> {
             child: Column(
               children: [
                 StreamBuilder<QuerySnapshot>(
-                  stream: _firestore
+                  stream: _firebase.firestore
                       .collection('users')
-                      .doc(_auth.currentUser.email)
+                      .doc(_user.email)
                       .collection('chats')
                       .doc(widget.friendEmail)
                       .collection('messages')
@@ -354,7 +354,7 @@ class _ChatRoomState extends State<ChatRoom> {
                               messageList.add(
                                 Message(
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   id: messageId,
                                   onLongPressCallback: () {
@@ -379,7 +379,7 @@ class _ChatRoomState extends State<ChatRoom> {
                               messageList.add(
                                 Message(
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   id: messageId,
                                   onTapCallback: () {
@@ -448,7 +448,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   isSelected:
                                       selectedMessage.containsKey(messageId),
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   photoUrl: url,
                                 ),
@@ -477,7 +477,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                   isSelected:
                                       selectedMessage.containsKey(messageId),
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   photoUrl: url,
                                 ),
@@ -517,10 +517,35 @@ class _ChatRoomState extends State<ChatRoom> {
                                 ),
                               ),
                             );
+                            String message = imageMessageController.text;
+                            imageMessageController.clear();
+                            if (await _firebase.firestore
+                                    .collection('users')
+                                    .doc(_user.email)
+                                    .collection('friends')
+                                    .doc(widget.friendEmail)
+                                    .get()
+                                    .then((value) => value.exists) ==
+                                false) {
+                              //Flushbar to indicate the group deletion by admin
+                              await Flushbar(
+                                message: '${widget.friendName} unfriends you.',
+                                margin: EdgeInsets.all(8),
+                                borderRadius: 8,
+                                icon: Icon(
+                                  Icons.error,
+                                  color: Colors.blue[300],
+                                  size: 20,
+                                ),
+                                duration: Duration(seconds: 1),
+                              ).show(context);
+                              Navigator.pop(context);
+                              return;
+                            }
                             if (send != null && send == true) {
                               String imageId = Uuid().v4();
                               String messageId = Uuid().v4();
-                              final ref = FirebaseStorage.instance
+                              final ref = _firebase.storage
                                   .ref()
                                   .child(imageId + '.jpg');
                               StorageUploadTask task = ref.putFile(imageFile);
@@ -530,30 +555,25 @@ class _ChatRoomState extends State<ChatRoom> {
                                   await taskSnapshot.ref.getDownloadURL();
                               String lastMessage;
                               DateTime time = DateTime.now();
-                              if (imageMessageController.text == null ||
-                                  imageMessageController.text.trim().isEmpty) {
+                              if (message == null || message.trim().isEmpty) {
                                 lastMessage = '';
                               } else {
-                                lastMessage =
-                                    imageMessageController.text.trim().length <=
-                                            25
-                                        ? imageMessageController.text.trim()
-                                        : imageMessageController.text
-                                                .substring(0, 25) +
-                                            "...";
+                                lastMessage = message.trim().length <= 25
+                                    ? message.trim()
+                                    : message.trim().substring(0, 25) + "...";
                               }
 
                               // setting image_share count
                               String imageName = imageId + '.jpg';
-                              _firestore
+                              _firebase.firestore
                                   .collection('shared_images')
                                   .doc(imageName)
                                   .set({'count': 2});
 
                               //adding message to current user database
-                              _firestore
+                              _firebase.firestore
                                   .collection('users')
-                                  .doc(_auth.currentUser.email)
+                                  .doc(_user.email)
                                   .collection('chats')
                                   .doc(widget.friendEmail)
                                   .set(
@@ -568,18 +588,18 @@ class _ChatRoomState extends State<ChatRoom> {
                                   'type': 'img',
                                 },
                               );
-                              _firestore
+                              _firebase.firestore
                                   .collection('users')
-                                  .doc(_auth.currentUser.email)
+                                  .doc(_user.email)
                                   .collection('chats')
                                   .doc(widget.friendEmail)
                                   .collection('messages')
                                   .doc(messageId)
                                   .set(
                                 {
-                                  'name': myName,
-                                  'message': imageMessageController.text.trim(),
-                                  'sender': _auth.currentUser.email,
+                                  'name': _user.name,
+                                  'message': message.trim(),
+                                  'sender': _user.email,
                                   'time': time,
                                   'type': 'img',
                                   'image_url': url,
@@ -588,34 +608,34 @@ class _ChatRoomState extends State<ChatRoom> {
                                 },
                               );
                               //adding message to friend database
-                              _firestore
+                              _firebase.firestore
                                   .collection('users')
                                   .doc(widget.friendEmail)
                                   .collection('chats')
-                                  .doc(_auth.currentUser.email)
+                                  .doc(_user.email)
                                   .set(
                                 {
-                                  'email': _auth.currentUser.email,
-                                  'name': myName,
-                                  'search_name': myName.toLowerCase(),
+                                  'email': _user.email,
+                                  'name': _user.name,
+                                  'search_name': _user.name.toLowerCase(),
                                   'last_message': lastMessage,
                                   'new_message': true,
                                   'time': time,
                                   'type': 'img',
                                 },
                               );
-                              _firestore
+                              _firebase.firestore
                                   .collection('users')
                                   .doc(widget.friendEmail)
                                   .collection('chats')
-                                  .doc(_auth.currentUser.email)
+                                  .doc(_user.email)
                                   .collection('messages')
                                   .doc(messageId)
                                   .set(
                                 {
-                                  'name': myName,
-                                  'message': imageMessageController.text.trim(),
-                                  'sender': _auth.currentUser.email,
+                                  'name': _user.name,
+                                  'message': message.trim(),
+                                  'sender': _user.email,
                                   'time': time,
                                   'type': 'img',
                                   'image_url': url,
@@ -623,7 +643,6 @@ class _ChatRoomState extends State<ChatRoom> {
                                   'image_name': imageName,
                                 },
                               );
-                              imageMessageController.clear();
                             }
                           },
                         ),
@@ -633,18 +652,43 @@ class _ChatRoomState extends State<ChatRoom> {
                       ),
                       RoundIconButton(
                         icon: Icons.send,
-                        onPress: () {
-                          if (controller.text.trim().isEmpty) return;
+                        onPress: () async {
+                          String message = controller.text;
+                          controller.clear();
+                          if (await _firebase.firestore
+                                  .collection('users')
+                                  .doc(_user.email)
+                                  .collection('friends')
+                                  .doc(widget.friendEmail)
+                                  .get()
+                                  .then((value) => value.exists) ==
+                              false) {
+                            //Flushbar to indicate the group deletion by admin
+                            await Flushbar(
+                              message: '${widget.friendName} unfriends you.',
+                              margin: EdgeInsets.all(8),
+                              borderRadius: 8,
+                              icon: Icon(
+                                Icons.error,
+                                color: Colors.blue[300],
+                                size: 20,
+                              ),
+                              duration: Duration(seconds: 1),
+                            ).show(context);
+                            Navigator.pop(context);
+                            return;
+                          }
+                          if (message == null || message.trim().isEmpty) return;
+
                           DateTime time = DateTime.now();
-                          String lastMessage =
-                              controller.text.trim().length <= 25
-                                  ? controller.text.trim()
-                                  : controller.text.substring(0, 25) + "...";
+                          String lastMessage = message.trim().length <= 25
+                              ? message.trim()
+                              : message.trim().substring(0, 25) + "...";
                           String messageId = Uuid().v4();
                           //adding message to current user database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
-                              .doc(_auth.currentUser.email)
+                              .doc(_user.email)
                               .collection('chats')
                               .doc(widget.friendEmail)
                               .set(
@@ -658,58 +702,57 @@ class _ChatRoomState extends State<ChatRoom> {
                               'type': 'txt',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
-                              .doc(_auth.currentUser.email)
+                              .doc(_user.email)
                               .collection('chats')
                               .doc(widget.friendEmail)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
-                              'name': myName,
-                              'message': controller.text.trim(),
-                              'sender': _auth.currentUser.email,
+                              'name': _user.name,
+                              'message': message.trim(),
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
                               'id': messageId,
                             },
                           );
                           //adding message to friend database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(widget.friendEmail)
                               .collection('chats')
-                              .doc(_auth.currentUser.email)
+                              .doc(_user.email)
                               .set(
                             {
-                              'email': _auth.currentUser.email,
-                              'name': myName,
-                              'search_name': myName.toLowerCase(),
+                              'email': _user.email,
+                              'name': _user.name,
+                              'search_name': _user.name.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': true,
                               'time': time,
                               'type': 'txt',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(widget.friendEmail)
                               .collection('chats')
-                              .doc(_auth.currentUser.email)
+                              .doc(_user.email)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
-                              'name': myName,
-                              'message': controller.text.trim(),
-                              'sender': _auth.currentUser.email,
+                              'name': _user.name,
+                              'message': message.trim(),
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
                               'id': messageId,
                             },
                           );
-                          controller.clear();
                         },
                       )
                     ],

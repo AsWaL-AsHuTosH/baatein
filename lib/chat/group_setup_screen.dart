@@ -1,10 +1,11 @@
-import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,17 +23,30 @@ class GroupSetup extends StatefulWidget {
 
 class _GroupSetupState extends State<GroupSetup> {
   final TextEditingController controller = TextEditingController();
-
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
-
   final Function validator = (val) {
     return val.trim().length < 3
         ? "Please enter atleast 3 character long name!"
         : null;
   };
   bool spin = false;
-
   File imageFile;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,9 +109,9 @@ class _GroupSetupState extends State<GroupSetup> {
               ),
             ),
             StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
+              stream: _firebase.firestore
                   .collection('users')
-                  .doc(FirebaseAuth.instance.currentUser.email)
+                  .doc(_user.email)
                   .collection('friends')
                   .where('email', whereIn: widget.selected)
                   .snapshots(),
@@ -136,29 +150,24 @@ class _GroupSetupState extends State<GroupSetup> {
                     spin = true;
                   });
                   if (_key.currentState.validate()) {
-                    FirebaseFirestore _firestore = FirebaseFirestore.instance;
-                    FirebaseAuth _auth = FirebaseAuth.instance;
+                    
                     String id = Uuid().v4();
                     List<String> list =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getListChat();
-                    list.add(_auth.currentUser.email);
+                    list.add(_user.email);
                     int size = list.length;
                     List<Map<String, String>> nameList =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getNameList();
-                    String myName = await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser.email)
-                        .get()
-                        .then((doc) => doc.data()['name']);
+                    String myName = _user.name;
                     nameList
-                        .add({FirebaseAuth.instance.currentUser.email: myName});
+                        .add({_user.email: myName});
                     DateTime time = DateTime.now();
-                    await _firestore.collection('groups').doc(id).set({
+                    await _firebase.firestore.collection('groups').doc(id).set({
                       'name': controller.text.trim(),
                       'search_name': controller.text.trim().toLowerCase(),
-                      'admin': _auth.currentUser.email,
+                      'admin': _user.email,
                       'members': list,
                       'members_name': nameList,
                       'id': id,
@@ -170,26 +179,26 @@ class _GroupSetupState extends State<GroupSetup> {
                     });
                     if (imageFile != null) {
                       final ref =
-                          FirebaseStorage.instance.ref().child(id + '.jpg');
+                         _firebase.storage.ref().child(id + '.jpg');
                       StorageUploadTask task = ref.putFile(imageFile);
                       StorageTaskSnapshot taskSnapshot = await task.onComplete;
                       String url = await taskSnapshot.ref.getDownloadURL();
-                      await _firestore
+                      await _firebase.firestore
                           .collection('profile_pic')
                           .doc(id)
                           .set({'id': id});
-                      await _firestore
+                      await _firebase.firestore
                           .collection('profile_pic')
                           .doc(id)
                           .collection('image')
                           .doc('image_url')
                           .set({'url': url});
                     } else {
-                      await _firestore
+                      await _firebase.firestore
                           .collection('profile_pic')
                           .doc(id)
                           .set({'id': id});
-                      await _firestore
+                      await _firebase.firestore
                           .collection('profile_pic')
                           .doc(id)
                           .collection('image')
@@ -197,7 +206,7 @@ class _GroupSetupState extends State<GroupSetup> {
                           .set({'url': kNoGroupPic});
                     }
                     for (String email in list) {
-                      await _firestore
+                      await _firebase.firestore
                           .collection('users')
                           .doc(email)
                           .collection('groups')
@@ -207,7 +216,7 @@ class _GroupSetupState extends State<GroupSetup> {
                         'search_name': controller.text.trim().toLowerCase(),
                         'id': id,
                         'selected': false,
-                        'admin': _auth.currentUser.email,
+                        'admin': _user.email,
                       });
                     }
                     await Provider.of<SelectedUser>(context, listen: false)

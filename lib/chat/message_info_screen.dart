@@ -1,4 +1,4 @@
-import 'package:baatein/classes/message_info.dart';
+import 'package:baatein/helper/message_info.dart';
 import 'package:flutter/material.dart';
 
 class MessageInfoScrren extends StatelessWidget {

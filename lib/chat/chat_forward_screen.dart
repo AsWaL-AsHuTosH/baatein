@@ -1,5 +1,7 @@
-import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/classes/message_info.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
+import 'package:baatein/helper/message_info.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -7,7 +9,6 @@ import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -21,11 +22,24 @@ class ChatForwardScreen extends StatefulWidget {
 }
 
 class _ChatForwardScreenState extends State<ChatForwardScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool spin = false;
   String data1;
   String data2;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +86,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                             itemCount: list.length,
                             itemBuilder: (context, index) =>
                                 StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
+                              stream: _firebase.firestore
                                   .collection('profile_pic')
                                   .doc(list[index])
                                   .collection('image')
@@ -109,9 +123,9 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                       indent: 10,
                     ),
               StreamBuilder<QuerySnapshot>(
-                stream: _firestore
+                stream: _firebase.firestore
                     .collection('users')
-                    .doc(_auth.currentUser.email)
+                    .doc(_user.email)
                     .collection('friends')
                     .where('search_name', isGreaterThanOrEqualTo: data1)
                     .where('search_name', isLessThan: data2)
@@ -172,12 +186,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                       return;
                     }
                     //Data for chats required
-                    String myName = await _firestore
-                        .collection('users')
-                        .doc(_auth.currentUser.email)
-                        .get()
-                        .then((doc) => doc.data()['name']);
-                    String myEmail = _auth.currentUser.email;
+                    LoggedInUser user = Provider.of<LoggedInUser>(context);
                     List<String> chats =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getListChat();
@@ -193,7 +202,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                     Map<String, int> sizeOfGroup = {};
 
                     for (String id in groups)
-                      sizeOfGroup[id] = await _firestore
+                      sizeOfGroup[id] = await _firebase.firestore
                           .collection('groups')
                           .doc(id)
                           .get()
@@ -210,9 +219,9 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
                           //adding to current user database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .set(
@@ -227,9 +236,9 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               'type': 'txt',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .collection('messages')
@@ -237,40 +246,40 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': myEmail,
+                              'sender': user.email,
                               'time': time,
                               'type': 'txt',
                               'id': messageId,
                             },
                           );
                           //adding message to friend database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .set(
                             {
-                              'email': myEmail,
-                              'name': myName,
-                              'search_name': myName.toLowerCase(),
+                              'email': user.email,
+                              'name': user.name,
+                              'search_name': user.name.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': true,
                               'time': time,
                               'type': 'txt',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
                               'message': element.message,
-                              'sender': myEmail,
+                              'sender': user.email,
                               'time': time,
                               'type': 'txt',
                               'id': messageId,
@@ -291,9 +300,9 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               : element.message.substring(0, 25) + '...';
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .set(
@@ -308,9 +317,9 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               'type': 'img',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .collection('messages')
@@ -318,7 +327,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': myEmail,
+                              'sender': user.email,
                               'time': time,
                               'type': 'img',
                               'id': messageId,
@@ -327,33 +336,33 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                             },
                           );
                           //adding message to friend database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .set(
                             {
-                              'email': myEmail,
-                              'name': myName,
-                              'search_name': myName.toLowerCase(),
+                              'email': user.email,
+                              'name': user.name,
+                              'search_name': user.name.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': true,
                               'time': time,
                               'type': 'img',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(myEmail)
+                              .doc(user.email)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
                               'message': element.message,
-                              'sender': myEmail,
+                              'sender': user.email,
                               'time': time,
                               'type': 'img',
                               'id': messageId,
@@ -375,7 +384,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
                           //adding to current user database
-                          _firestore.collection('groups').doc(groupId).update(
+                          _firebase.firestore.collection('groups').doc(groupId).update(
                             {
                               'last_message': lastMessage,
                               'read': [],
@@ -383,7 +392,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               'time': time,
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('groups')
                               .doc(groupId)
                               .collection('messages')
@@ -391,10 +400,10 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': _auth.currentUser.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
-                              'name': myName,
+                              'name': user.name,
                               'id': messageId,
                               'deleted_by': [],
                             },
@@ -414,7 +423,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               : element.message.substring(0, 25) + '...';
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
-                          _firestore.collection('groups').doc(groupId).update(
+                          _firebase.firestore.collection('groups').doc(groupId).update(
                             {
                               'last_message': lastMessage,
                               'read': [],
@@ -422,7 +431,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               'time': time,
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('groups')
                               .doc(groupId)
                               .collection('messages')
@@ -430,11 +439,11 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': _auth.currentUser.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'img',
                               'image_url': element.url,
-                              'name': myName,
+                              'name': user.name,
                               'id': messageId,
                               'image_name': element.imageName,
                               'deleted_by': [],
@@ -445,13 +454,13 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                     }
 
                     imageCount.forEach((key, counter) async {
-                      int count = await _firestore
+                      int count = await _firebase.firestore
                           .collection('shared_images')
                           .doc(key)
                           .get()
                           .then((value) => value.data()['count']);
                       count += counter;
-                      _firestore
+                      _firebase.firestore
                           .collection('shared_images')
                           .doc(key)
                           .set({'count': count});

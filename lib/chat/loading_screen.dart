@@ -1,9 +1,11 @@
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/login_reg/signin_screen.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:provider/provider.dart';
 
 class LoadingScreen extends StatefulWidget {
   static const String routeId = 'loading_screen';
@@ -19,10 +21,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void checkLastUser() async {
-    await Firebase.initializeApp();
-    if (FirebaseAuth.instance.currentUser != null) 
+    FirebaseService firebase = Provider.of<FirebaseService>(context, listen:  false);
+    await firebase.initServices();
+    if (firebase.auth.currentUser != null) {
+      await Provider.of<LoggedInUser>(context, listen: false).initUser(
+          email: firebase.auth.currentUser.email,
+          name: await FirebaseFirestore.instance
+              .collection('users')
+              .doc(firebase.auth.currentUser.email)
+              .get()
+              .then((value) => value.data()['name']));
       Navigator.popAndPushNamed(context, HomeScreen.routeId);
-     else 
+    } else
       Navigator.popAndPushNamed(context, SignInScreen.routeId);
   }
 
@@ -31,15 +41,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: Center(
-        child:ScaleAnimatedTextKit( 
+        child: ScaleAnimatedTextKit(
           repeatForever: true,
-            text: ['Baatein'],
-            textStyle: TextStyle(
-              fontSize: 80,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              fontFamily: 'DancingScript',
-            ),  
+          text: ['Baatein'],
+          textStyle: TextStyle(
+            fontSize: 80,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            fontFamily: 'DancingScript',
+          ),
         ),
       ),
     );

@@ -2,14 +2,14 @@ import 'package:baatein/chat/add_member_screen.dart';
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/chat/image_view_screen.dart';
 import 'package:baatein/chat/profile_pic_edit.dart';
-import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
 import 'package:baatein/customs/friend_tile.dart';
 import 'package:baatein/customs/round_text_button.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
@@ -31,37 +31,52 @@ class GroupProfileView extends StatefulWidget {
 }
 
 class _GroupProfileViewState extends State<GroupProfileView> {
-  bool spin = false;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
 
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+
+  bool spin = false;
   Future<void> increaseCount(String name) async {
-    int count = await FirebaseFirestore.instance
+    int count = await _firebase.firestore
         .collection('shared_images')
         .doc(name)
         .get()
         .then((value) => value.data()['count']);
 
     ++count;
-    await FirebaseFirestore.instance
+    await _firebase.firestore
         .collection('shared_images')
         .doc(name)
         .update({'count': count});
   }
 
   Future<void> reduceCountKickLeave(String name) async {
-    int count = await FirebaseFirestore.instance
+    int count = await _firebase.firestore
         .collection('shared_images')
         .doc(name)
         .get()
         .then((value) => value.data()['count']);
     if (count - 1 <= 0) {
-      await FirebaseFirestore.instance
+      await _firebase.firestore
           .collection('shared_images')
           .doc(name)
           .delete();
-      await FirebaseStorage.instance.ref().child(name).delete();
+      await _firebase.storage.ref().child(name).delete();
     } else {
       --count;
-      await FirebaseFirestore.instance
+      await _firebase.firestore
           .collection('shared_images')
           .doc(name)
           .update({'count': count});
@@ -69,20 +84,20 @@ class _GroupProfileViewState extends State<GroupProfileView> {
   }
 
   Future<void> reduceCount(String name) async {
-    int count = await FirebaseFirestore.instance
+    int count = await _firebase.firestore
         .collection('shared_images')
         .doc(name)
         .get()
         .then((value) => value.data()['count']);
     if (count - widget.members.length <= 0) {
-      await FirebaseFirestore.instance
+      await _firebase.firestore
           .collection('shared_images')
           .doc(name)
           .delete();
-      await FirebaseStorage.instance.ref().child(name).delete();
+      await _firebase.storage.ref().child(name).delete();
     } else {
       count -= widget.members.length;
-      await FirebaseFirestore.instance
+      await _firebase.firestore
           .collection('shared_images')
           .doc(name)
           .update({'count': count});
@@ -115,7 +130,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: FirebaseAuth.instance.currentUser.email ==
+                  onTap:_user.email ==
                           widget.groupAdmin
                       ? () async {
                           Navigator.push(
@@ -128,7 +143,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                           );
                         }
                       : () async {
-                          String url = await FirebaseFirestore.instance
+                          String url = await _firebase.firestore
                               .collection('profile_pic')
                               .doc(widget.groupId)
                               .collection('image')
@@ -145,7 +160,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                           );
                         },
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
+                    stream: _firebase.firestore
                         .collection('profile_pic')
                         .doc(widget.groupId)
                         .collection('image')
@@ -214,7 +229,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                 Expanded(
                   child: ListView.builder(
                     itemBuilder: (context, index) {
-                      if (FirebaseAuth.instance.currentUser.email ==
+                      if (_user.email ==
                           widget.groupAdmin) {
                         if (widget.members[index] == widget.groupAdmin) {
                           return FriendTile(
@@ -256,7 +271,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 spin = true;
                               });
                               String email = widget.members[index];
-                              int size = await FirebaseFirestore.instance
+                              int size = await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .get()
@@ -264,7 +279,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               --size;
 
                               // REDUCING IMAGE COUNT OF ALL IMAGES IN SHARED IN GROUP.
-                              var messages = await FirebaseFirestore.instance
+                              var messages = await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .collection('messages')
@@ -282,14 +297,14 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 }
                               }
 
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .update({
                                 'members': FieldValue.arrayRemove([email]),
                                 'size': size,
                               });
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .update({
@@ -297,7 +312,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   {email: widget.membersName[email]}
                                 ])
                               });
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('users')
                                   .doc(email)
                                   .collection('groups')
@@ -348,7 +363,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                     itemCount: widget.members.length,
                   ),
                 ),
-                FirebaseAuth.instance.currentUser.email == widget.groupAdmin
+                _user.email == widget.groupAdmin
                     ? Container(
                         width: 0,
                         height: 0,
@@ -387,9 +402,9 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 spin = true;
                               });
                               String email =
-                                  FirebaseAuth.instance.currentUser.email;
+                                  _user.email;
 
-                              var messages = await FirebaseFirestore.instance
+                              var messages = await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .collection('messages')
@@ -406,13 +421,13 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   }
                                 }
                               }
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .update({
                                 'members': FieldValue.arrayRemove([email])
                               });
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .update({
@@ -420,20 +435,20 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                   {email: widget.membersName[email]}
                                 ])
                               });
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('users')
                                   .doc(email)
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .delete();
 
-                              int size = await FirebaseFirestore.instance
+                              int size = await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .get()
                                   .then((value) => value.data()['size']);
                               --size;
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .update({
@@ -463,7 +478,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                           },
                         ),
                       ),
-                FirebaseAuth.instance.currentUser.email == widget.groupAdmin
+                _user.email == widget.groupAdmin
                     ? Padding(
                         padding: const EdgeInsets.only(
                             bottom: 8.0, left: 8, right: 8),
@@ -512,7 +527,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                         width: 0,
                         height: 0,
                       ),
-                FirebaseAuth.instance.currentUser.email == widget.groupAdmin
+                _user.email == widget.groupAdmin
                     ? Padding(
                         padding: const EdgeInsets.only(
                             bottom: 8.0, left: 8, right: 8),
@@ -549,7 +564,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 spin = true;
                               });
                               // REDUCING IMAGE COUNT OF ALL IMAGES IN SHARED IN GROUP.
-                              var messages = await FirebaseFirestore.instance
+                              var messages = await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .collection('messages')
@@ -562,7 +577,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                     String name = message.data()['image_name'];
                                     await reduceCount(name);
                                   }
-                                  await FirebaseFirestore.instance
+                                  await _firebase.firestore
                                       .collection('groups')
                                       .doc(widget.groupId)
                                       .collection('messages')
@@ -571,19 +586,19 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                 }
                               }
                               for (String email in widget.members)
-                                await FirebaseFirestore.instance
+                                await _firebase.firestore
                                     .collection('users')
                                     .doc(email)
                                     .collection('groups')
                                     .doc(widget.groupId)
                                     .delete();
 
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .delete();
 
-                              if (await FirebaseFirestore.instance
+                              if (await _firebase.firestore
                                       .collection('profile_pic')
                                       .doc(widget.groupId)
                                       .collection('image')
@@ -591,18 +606,18 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                                       .get()
                                       .then((value) => value.data()['url']) !=
                                   kNoGroupPic) {
-                                await FirebaseStorage.instance
+                                await _firebase.storage
                                     .ref()
                                     .child(widget.groupId + '.jpg')
                                     .delete();
                               }
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('profile_pic')
                                   .doc(widget.groupId)
                                   .collection('image')
                                   .doc('image_url')
                                   .delete();
-                              await FirebaseFirestore.instance
+                              await _firebase.firestore
                                   .collection('profile_pic')
                                   .doc(widget.groupId)
                                   .delete();

@@ -1,5 +1,7 @@
 import 'package:baatein/chat/group_setup_screen.dart';
-import 'package:baatein/classes/SelectedUser.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/friend_selection_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -7,20 +9,32 @@ import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
-class GroupSelectionScreen extends StatefulWidget {
+class GroupMemberSelectionScreen extends StatefulWidget {
   static const String routeId = 'group_selection_screen';
   @override
-  _GroupSelectionScreenState createState() => _GroupSelectionScreenState();
+  _GroupMemberSelectionScreenState createState() => _GroupMemberSelectionScreenState();
 }
 
-class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
+class _GroupMemberSelectionScreenState extends State<GroupMemberSelectionScreen> {
   String data1;
   String data2;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +79,7 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                           itemCount: list.length,
                           itemBuilder: (context, index) =>
                               StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
+                            stream:  _firebase.firestore
                                 .collection('profile_pic')
                                 .doc(list[index])
                                 .collection('image')
@@ -102,9 +116,9 @@ class _GroupSelectionScreenState extends State<GroupSelectionScreen> {
                     indent: 10,
                   ),
             StreamBuilder<QuerySnapshot>(
-              stream: _firestore
+              stream: _firebase.firestore
                   .collection('users')
-                  .doc(_auth.currentUser.email)
+                  .doc(_user.email)
                   .collection('friends')
                   .where('search_name', isGreaterThanOrEqualTo: data1)
                   .where('search_name', isLessThan: data2)

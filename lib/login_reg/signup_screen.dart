@@ -129,7 +129,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       .doc(email)
                                       .collection('status')
                                       .doc('is_online')
-                                      .set({'is_online': true});
+                                      .set({'is_online': false});
                                   setState(() {
                                     spin = false;
                                   });

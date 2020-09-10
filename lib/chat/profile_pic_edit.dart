@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_icon_button.dart';
+import 'package:baatein/provider/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   final String docId;
@@ -18,7 +20,18 @@ class ProfileEditScreen extends StatefulWidget {
 }
 
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
+  FirebaseService _firebase;
   bool spin = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +42,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           children: [
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
+                  stream: _firebase.firestore
                       .collection('profile_pic')
                       .doc(widget.docId)
                       .collection('image')
@@ -65,7 +78,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   StorageUploadTask task = ref.putFile(file);
                   StorageTaskSnapshot taskSnapshot = await task.onComplete;
                   String url = await taskSnapshot.ref.getDownloadURL();
-                  FirebaseFirestore.instance
+                  _firebase.firestore
                       .collection('profile_pic')
                       .doc(widget.docId)
                       .collection('image')

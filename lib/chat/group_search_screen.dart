@@ -1,9 +1,11 @@
 import 'package:baatein/customs/group_chatcard_builder.dart';
 import 'package:baatein/customs/search_field.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
 class GroupSearchScreen extends StatefulWidget {
   static const String routeId = 'group_search_screen';
@@ -12,12 +14,24 @@ class GroupSearchScreen extends StatefulWidget {
 }
 
 class _GroupSearchScreenState extends State<GroupSearchScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String data1;
   String data2;
-
   bool spin = false;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
 
   void spinTrue() {
     setState(() {
@@ -65,9 +79,9 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
                 height: 5,
               ),
               StreamBuilder<QuerySnapshot>(
-                stream: _firestore
+                stream: _firebase.firestore
                     .collection('users')
-                    .doc(_auth.currentUser.email)
+                    .doc(_user.email)
                     .collection('groups')
                     .where('search_name', isGreaterThanOrEqualTo: data1)
                     .where('search_name', isLessThan: data2)

@@ -1,10 +1,12 @@
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/customs/search_field.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
 class SearchSheet extends StatefulWidget {
   @override
@@ -14,10 +16,24 @@ class SearchSheet extends StatefulWidget {
 class _SearchSheetState extends State<SearchSheet> {
   bool otherError = false, spin = false;
   String errorMessage;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+      
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -64,10 +80,10 @@ class _SearchSheetState extends State<SearchSheet> {
                     spin = true;
                   });
                   if (_formKey.currentState.validate()) {
-                    if (controller.text.trim() == _auth.currentUser.email) {
+                    if (controller.text.trim() == _user.email) {
                       otherError = true;
                       errorMessage = 'You can\'t send request to yourself!';
-                    } else if (await _firestore
+                    } else if (await _firebase.firestore
                         .collection('users')
                         .doc(controller.text.trim())
                         .get()
@@ -75,16 +91,16 @@ class _SearchSheetState extends State<SearchSheet> {
                       otherError = true;
                       errorMessage =
                           'There is no user record corresponding to provided email!';
-                    } else if (await _firestore
+                    } else if (await _firebase.firestore
                         .collection('users')
-                        .doc(_auth.currentUser.email)
+                        .doc(_user.email)
                         .collection('friends')
                         .doc(controller.text.trim())
                         .get()
                         .then((value) => value.exists)) {
                       otherError = true;
                       errorMessage = 'You are already friends!';
-                    } else if (await _firestore
+                    } else if (await _firebase.firestore
                         .collection('requests')
                         .doc(FirebaseAuth.instance.currentUser.email)
                         .collection('request')
@@ -106,12 +122,12 @@ class _SearchSheetState extends State<SearchSheet> {
                         DateTimeFormat.format(stamp, format: 'D, M d, Y');
                     String time = DateTimeFormat.format(stamp, format: 'h:i a');
                     String myEmail = FirebaseAuth.instance.currentUser.email;
-                    String myName = await FirebaseFirestore.instance
+                    String myName = await _firebase.firestore
                         .collection('users')
                         .doc(myEmail)
                         .get()
                         .then((doc) => doc.data()['name']);
-                    FirebaseFirestore.instance
+                    _firebase.firestore
                         .collection('requests')
                         .doc(controller.text.trim())
                         .collection('request')

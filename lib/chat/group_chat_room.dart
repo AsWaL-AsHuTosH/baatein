@@ -1,17 +1,18 @@
 import 'package:baatein/chat/forward_selection_screen.dart';
 import 'package:baatein/chat/group_profile_view.dart';
 import 'package:baatein/chat/message_info_screen.dart';
-import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/classes/message_info.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
+import 'package:baatein/helper/message_info.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/group_message.dart';
 import 'package:baatein/customs/group_photo_message.dart';
 import 'package:baatein/customs/message_text_field.dart';
 import 'package:baatein/customs/round_icon_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -31,18 +32,32 @@ class GroupChatRoom extends StatefulWidget {
 }
 
 class _GroupChatScreenState extends State<GroupChatRoom> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
   final TextEditingController imageMessageController = TextEditingController();
   Map<String, MessageInfo> selectedMessage = {};
   bool selectionMode = false, spin = false;
-  String myName;
+
+  
+  LoggedInUser _user;
+  FirebaseService _firebase;
+  
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
 
   Future<void> setLastMessageRead() async {
     try {
-      await _firestore.collection('groups').doc(widget.groupId).update({
-        'read': FieldValue.arrayUnion([_auth.currentUser.email])
+      await _firebase.firestore.collection('groups').doc(widget.groupId).update({
+        'read': FieldValue.arrayUnion([_user.email])
       });
     } catch (e) {
       return;
@@ -115,7 +130,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                   (key, value) async {
                                     if (value.type == 'img') {
                                       String imageName = value.imageName;
-                                      int count = await _firestore
+                                      int count = await _firebase.firestore
                                           .collection('shared_images')
                                           .doc(imageName)
                                           .get()
@@ -123,34 +138,34 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                               (value) => value.data()['count']);
                                       if (count == 1) {
                                         //last link of image => delete image + its count document.
-                                        FirebaseStorage.instance
+                                          _firebase.storage
                                             .ref()
                                             .child(imageName)
                                             .delete();
-                                        _firestore
+                                        _firebase.firestore
                                             .collection('shared_images')
                                             .doc(imageName)
                                             .delete();
                                       } else {
                                         --count;
-                                        _firestore
+                                        _firebase.firestore
                                             .collection('shared_images')
                                             .doc(imageName)
                                             .update({'count': count});
                                       }
                                     }
 
-                                    _firestore
+                                    _firebase.firestore
                                         .collection('groups')
                                         .doc(widget.groupId)
                                         .collection('messages')
                                         .doc(key)
                                         .update({
                                       'deleted_by': FieldValue.arrayUnion(
-                                          [_auth.currentUser.email])
+                                          [_user.email])
                                     });
                                     Set<String> deletedBy = Set.from(
-                                        await _firestore
+                                        await _firebase.firestore
                                             .collection('groups')
                                             .doc(widget.groupId)
                                             .collection('messages')
@@ -160,7 +175,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                                 value.data()['deleted_by']));
 
                                     List<String> members = List.from(
-                                        await _firestore
+                                        await _firebase.firestore
                                             .collection('groups')
                                             .doc(widget.groupId)
                                             .get()
@@ -173,7 +188,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                       if (everyOneDeleted == false) break;
                                     }
                                     if (everyOneDeleted) {
-                                      _firestore
+                                      _firebase.firestore
                                           .collection('groups')
                                           .doc(widget.groupId)
                                           .collection('messages')
@@ -255,13 +270,13 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                         spin = true;
                       });
                       FocusScope.of(context).unfocus();
-                      List<String> members = List.from(await _firestore
+                      List<String> members = List.from(await _firebase.firestore
                           .collection('groups')
                           .doc(widget.groupId)
                           .get()
                           .then((value) => value.data()['members']));
 
-                      List<dynamic> mapList = await _firestore
+                      List<dynamic> mapList = await _firebase.firestore
                           .collection('groups')
                           .doc(widget.groupId)
                           .get()
@@ -288,7 +303,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                     child: Row(
                       children: [
                         StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
+                          stream: _firebase.firestore
                               .collection('profile_pic')
                               .doc(widget.groupId)
                               .collection('image')
@@ -328,7 +343,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
             child: Column(
               children: [
                 StreamBuilder<QuerySnapshot>(
-                  stream: _firestore
+                  stream: _firebase.firestore
                       .collection('groups')
                       .doc(widget.groupId)
                       .collection('messages')
@@ -343,7 +358,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                         for (var message in messages) {
                           Set<String> deletedBy =
                               Set<String>.from(message.data()['deleted_by']);
-                          if (deletedBy.contains(_auth.currentUser.email))
+                          if (deletedBy.contains(_user.email))
                             continue;
                           String mess = message.data()['message'];
                           String senderEmail = message.data()['sender'];
@@ -359,7 +374,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                               messageList.add(
                                 GroupMessage(
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   senderName: senderName,
                                   senderEmail: senderEmail,
@@ -399,7 +414,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                               messageList.add(
                                 GroupMessage(
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   senderName: senderName,
                                   senderEmail: senderEmail,
@@ -461,7 +476,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                   },
                                   isSelected: selectedMessage.containsKey(id),
                                   message: mess,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   photoUrl: url,
                                   id: id,
@@ -494,7 +509,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                   id: id,
                                   senderEmail: senderEmail,
                                   senderName: senderName,
-                                  isMe: senderEmail == _auth.currentUser.email,
+                                  isMe: senderEmail == _user.email,
                                   time: time,
                                   photoUrl: url,
                                 ),
@@ -522,8 +537,24 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                           child: MessageField(
                             controller: controller,
                             imageButtonCallback: () async {
+                              final ImagePicker picker = ImagePicker();
+                              final PickedFile pickedImage = await picker
+                                  .getImage(source: ImageSource.gallery);
+                              if (pickedImage == null) return;
+                              final File imageFile = File(pickedImage.path);
+                              bool send = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ImagePreviewScreen(
+                                    imageFile: imageFile,
+                                    controller: imageMessageController,
+                                  ),
+                                ),
+                              );
                               //avoiding sending message if admin deleted group.
-                              if (await _firestore
+                              String message = imageMessageController.text;
+                              imageMessageController.clear();
+                              if (await _firebase.firestore
                                       .collection('groups')
                                       .doc(widget.groupId)
                                       .get()
@@ -544,23 +575,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                 Navigator.pop(context);
                                 return;
                               }
-                              final ImagePicker picker = ImagePicker();
-                              final PickedFile pickedImage = await picker
-                                  .getImage(source: ImageSource.gallery);
-                              if (pickedImage == null) return;
-                              final File imageFile = File(pickedImage.path);
-                              bool send = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ImagePreviewScreen(
-                                    imageFile: imageFile,
-                                    controller: imageMessageController,
-                                  ),
-                                ),
-                              );
                               if (send != null && send == true) {
                                 String imageId = Uuid().v4();
-                                final ref = FirebaseStorage.instance
+                                final ref = _firebase.storage
                                     .ref()
                                     .child(imageId + '.jpg');
                                 StorageUploadTask task = ref.putFile(imageFile);
@@ -570,41 +587,38 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                     await taskSnapshot.ref.getDownloadURL();
                                 String lastMessage;
                                 DateTime time = DateTime.now();
-                                if (imageMessageController.text == null ||
+                                if (message == null ||
                                     imageMessageController.text
                                         .trim()
                                         .isEmpty) {
                                   lastMessage = '';
                                 } else {
-                                  lastMessage = imageMessageController.text
+                                  lastMessage = message
                                               .trim()
                                               .length <=
                                           25
-                                      ? imageMessageController.text.trim()
-                                      : imageMessageController.text
+                                      ? message
+                                      :  message
+                                              .trim()
                                               .substring(0, 25) +
                                           "...";
                                 }
-                                int size = await _firestore
+                                int size = await _firebase.firestore
                                     .collection('groups')
                                     .doc(widget.groupId)
                                     .get()
                                     .then((value) => value.data()['size']);
                                 //setting image_share count
                                 String imageName = imageId + '.jpg';
-                                _firestore
+                                _firebase.firestore
                                     .collection('shared_images')
                                     .doc(imageName)
                                     .set({'count': size});
                                 String messageId = Uuid().v4();
 
-                                String myName = await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(_auth.currentUser.email)
-                                    .get()
-                                    .then((doc) => doc.data()['name']);
+                                String myName = Provider.of<LoggedInUser>(context, listen: false).name;
 
-                                _firestore
+                                _firebase.firestore
                                     .collection('groups')
                                     .doc(widget.groupId)
                                     .update(
@@ -615,7 +629,7 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                     'time': time,
                                   },
                                 );
-                                _firestore
+                                _firebase.firestore
                                     .collection('groups')
                                     .doc(widget.groupId)
                                     .collection('messages')
@@ -623,8 +637,8 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                     .set(
                                   {
                                     'message':
-                                        imageMessageController.text.trim(),
-                                    'sender': _auth.currentUser.email,
+                                        message,
+                                    'sender': _user.email,
                                     'time': time,
                                     'type': 'img',
                                     'image_url': url,
@@ -634,7 +648,6 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                                     'deleted_by': [],
                                   },
                                 );
-                                imageMessageController.clear();
                               }
                             },
                           ),
@@ -647,7 +660,9 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                         icon: Icons.send,
                         onPress: () async {
                           //avoiding sending message if admin deleted group.
-                          if (await _firestore
+                          String message = controller.text.trim();
+                          controller.clear();
+                          if (await _firebase.firestore
                                   .collection('groups')
                                   .doc(widget.groupId)
                                   .get()
@@ -668,21 +683,17 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                             Navigator.pop(context);
                             return;
                           }
-                          if (controller.text.trim().isEmpty) return;
+                          if (message.isEmpty) return;
                           DateTime time = DateTime.now();
                           String lastMessage =
-                              controller.text.trim().length <= 25
-                                  ? controller.text.trim()
-                                  : controller.text.substring(0, 25) + "...";
+                              message.length <= 25
+                                  ? message
+                                  : message.substring(0, 25) + "...";
 
                           String messageId = Uuid().v4();
-                          String myName = await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(_auth.currentUser.email)
-                              .get()
-                              .then((doc) => doc.data()['name']);
+                          String myName = Provider.of<LoggedInUser>(context, listen: false).name;
 
-                          _firestore
+                          _firebase.firestore
                               .collection('groups')
                               .doc(widget.groupId)
                               .update(
@@ -693,15 +704,15 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                               'time': time,
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('groups')
                               .doc(widget.groupId)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
-                              'message': controller.text.trim(),
-                              'sender': _auth.currentUser.email,
+                              'message': message,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
                               'name': myName,
@@ -709,7 +720,6 @@ class _GroupChatScreenState extends State<GroupChatRoom> {
                               'deleted_by': [],
                             },
                           );
-                          controller.clear();
                         },
                       )
                     ],

@@ -1,5 +1,7 @@
-import 'package:baatein/classes/SelectedUser.dart';
-import 'package:baatein/classes/message_info.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
+import 'package:baatein/helper/message_info.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/group_selection_card.dart';
 import 'package:baatein/customs/round_text_button.dart';
@@ -7,7 +9,6 @@ import 'package:baatein/customs/search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -21,8 +22,22 @@ class GroupForwardScreen extends StatefulWidget {
 }
 
 class _GroupForwardScreenState extends State<GroupForwardScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  LoggedInUser _user;
+  FirebaseService _firebase;
+
+  @override
+  void initState() {
+    super.initState();
+    initLoggedInUser();
+    initFirebaseService();
+  }
+
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+
   bool spin = false;
   String data1;
   String data2;
@@ -73,7 +88,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                             itemCount: list.length,
                             itemBuilder: (context, index) =>
                                 StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
+                              stream: _firebase.firestore
                                   .collection('profile_pic')
                                   .doc(list[index])
                                   .collection('image')
@@ -111,9 +126,9 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                       indent: 10,
                     ),
               StreamBuilder<QuerySnapshot>(
-                stream: _firestore
+                stream: _firebase.firestore
                     .collection('users')
-                    .doc(_auth.currentUser.email)
+                    .doc(_user.email)
                     .collection('groups')
                     .where('search_name', isGreaterThanOrEqualTo: data1)
                     .where('search_name', isLessThan: data2)
@@ -175,12 +190,9 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                       return;
                     }
                     //Data for chats required
-                    String myName = await _firestore
-                        .collection('users')
-                        .doc(_auth.currentUser.email)
-                        .get()
-                        .then((doc) => doc.data()['name']);
-                    String myEmail = _auth.currentUser.email;
+
+                    String myEmail = _user.email;
+                    String myName = _user.name;
                     List<String> chats =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getListChat();
@@ -196,7 +208,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                     Map<String, int> sizeOfGroup = {};
 
                     for (String id in groups)
-                      sizeOfGroup[id] = await _firestore
+                      sizeOfGroup[id] = await _firebase.firestore
                           .collection('groups')
                           .doc(id)
                           .get()
@@ -213,7 +225,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
                           //adding to current user database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(myEmail)
                               .collection('chats')
@@ -230,7 +242,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               'type': 'txt',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(myEmail)
                               .collection('chats')
@@ -247,7 +259,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                             },
                           );
                           //adding message to friend database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
@@ -263,7 +275,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               'type': 'txt',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
@@ -294,7 +306,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               : element.message.substring(0, 25) + '...';
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(myEmail)
                               .collection('chats')
@@ -311,7 +323,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               'type': 'img',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(myEmail)
                               .collection('chats')
@@ -330,7 +342,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                             },
                           );
                           //adding message to friend database
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
@@ -346,7 +358,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               'type': 'img',
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
@@ -378,7 +390,10 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
                           //adding to current user database
-                          _firestore.collection('groups').doc(groupId).update(
+                          _firebase.firestore
+                              .collection('groups')
+                              .doc(groupId)
+                              .update(
                             {
                               'last_message': lastMessage,
                               'read': [],
@@ -386,7 +401,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               'time': time,
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('groups')
                               .doc(groupId)
                               .collection('messages')
@@ -394,7 +409,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': _auth.currentUser.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
                               'name': myName,
@@ -417,7 +432,10 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               : element.message.substring(0, 25) + '...';
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
-                          _firestore.collection('groups').doc(groupId).update(
+                          _firebase.firestore
+                              .collection('groups')
+                              .doc(groupId)
+                              .update(
                             {
                               'last_message': lastMessage,
                               'read': [],
@@ -425,7 +443,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               'time': time,
                             },
                           );
-                          _firestore
+                          _firebase.firestore
                               .collection('groups')
                               .doc(groupId)
                               .collection('messages')
@@ -433,7 +451,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': _auth.currentUser.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'img',
                               'image_url': element.url,
@@ -448,13 +466,13 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                     }
 
                     imageCount.forEach((key, counter) async {
-                      int count = await _firestore
+                      int count = await _firebase.firestore
                           .collection('shared_images')
                           .doc(key)
                           .get()
                           .then((value) => value.data()['count']);
                       count += counter;
-                      _firestore
+                      _firebase.firestore
                           .collection('shared_images')
                           .doc(key)
                           .set({'count': count});

@@ -9,9 +9,11 @@ import 'package:baatein/chat/request_search_screen.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:baatein/login_reg/signin_screen.dart';
+import 'package:baatein/provider/firebase_service.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'profile_pic_edit.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,40 +30,34 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController _tabController;
-  String name = '';
-  final myEmail = FirebaseAuth.instance.currentUser.email;
+  LoggedInUser _user;
+  FirebaseService _firebase;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _tabController = new TabController(vsync: this, length: 4);
-    getMyName();
+    initLoggedInUser();
+    initFirebaseService();
     setMeOnline(true);
   }
 
+  void initFirebaseService() =>
+      _firebase = Provider.of<FirebaseService>(context, listen: false);
+
+  void initLoggedInUser() =>
+      _user = Provider.of<LoggedInUser>(context, listen: false);
+
   Future<void> setMeOnline(bool value) async {
-    await FirebaseFirestore.instance
+    await _firebase.firestore
         .collection('presence')
-        .doc(myEmail)
+        .doc(_user.email)
         .collection('status')
         .doc('is_online')
         .update({'is_online': value});
-  }
-
-  Future<void> getMyName() async {
-    String myName = await _firestore
-        .collection('users')
-        .doc(myEmail)
-        .get()
-        .then((value) => value.data()['name']);
-    setState(() {
-      name = myName;
-    });
   }
 
   @override
@@ -96,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
         );
         if (ok != null && ok == true) {
           await setMeOnline(false);
-          await _auth.signOut();
+          await _firebase.auth.signOut();
           Navigator.pushNamedAndRemoveUntil(
               context, SignInScreen.routeId, (Route<dynamic> route) => false);
           return true;
@@ -141,15 +137,15 @@ class _HomeScreenState extends State<HomeScreen>
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ProfileEditScreen(
-                                    docId: myEmail,
+                                    docId: _user.email,
                                   ),
                                 ),
                               );
                             },
                             child: StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
+                              stream: _firebase.firestore
                                   .collection('profile_pic')
-                                  .doc(myEmail)
+                                  .doc(_user.email)
                                   .collection('image')
                                   .snapshots(),
                               builder: (context, snapshot) {
@@ -175,9 +171,9 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ),
                           StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
+                            stream: _firebase.firestore
                                 .collection('presence')
-                                .doc(myEmail)
+                                .doc(_user.email)
                                 .collection('status')
                                 .snapshots(),
                             builder: (context, snapshot) {
@@ -209,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen>
                               color: Colors.black,
                             ),
                             title: Text(
-                              name,
+                              _user.name,
                               style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 10,
@@ -224,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen>
                               color: Colors.black,
                             ),
                             title: Text(
-                              myEmail,
+                              _user.email,
                               style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 10,
@@ -245,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen>
                             icon: Icons.input,
                             onPress: () async {
                               await setMeOnline(false);
-                              await _auth.signOut();
+                              await _firebase.auth.signOut();
                               Navigator.pushNamedAndRemoveUntil(
                                   context,
                                   SignInScreen.routeId,
@@ -274,9 +270,9 @@ class _HomeScreenState extends State<HomeScreen>
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
+                stream: _firebase.firestore
                     .collection('profile_pic')
-                    .doc(myEmail)
+                    .doc(_user.email)
                     .collection('image')
                     .snapshots(),
                 builder: (context, snapshot) {

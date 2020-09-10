@@ -1,6 +1,6 @@
 import 'package:baatein/chat/chat_forward_screen.dart';
 import 'package:baatein/chat/group_forward_screen.dart';
-import 'package:baatein/classes/message_info.dart';
+import 'package:baatein/helper/message_info.dart';
 import 'package:flutter/material.dart';
 
 
