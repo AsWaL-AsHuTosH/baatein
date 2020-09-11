@@ -1,11 +1,13 @@
 import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/constants/constants.dart';
 import 'package:baatein/customs/sign_up_form.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   static const String routeId = 'sign_up_screen';
@@ -136,8 +138,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   nameController.clear();
                                   emailController.clear();
                                   passwordController.clear();
-                                  Navigator.popAndPushNamed(
-                                      context, HomeScreen.routeId);
+                                  await Provider.of<LoggedInUser>(context,
+                                          listen: false)
+                                      .initUser();
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      HomeScreen.routeId,
+                                      (Route<dynamic> route) => false);
                                 } catch (e) {
                                   if (e.toString() == kEmailInUse) {
                                     otherEmailError = true;

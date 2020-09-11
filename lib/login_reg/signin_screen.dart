@@ -1,8 +1,10 @@
 import 'package:baatein/customs/elivated_form.dart';
 import 'package:baatein/login_reg/forgot_password.dart';
+import 'package:baatein/provider/logged_in_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:baatein/customs/round_text_button.dart';
+import 'package:provider/provider.dart';
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:baatein/chat/home_screen.dart';
@@ -145,7 +147,10 @@ class _SignInScreenState extends State<SignInScreen> {
                                   });
                                   emailController.clear();
                                   passwordController.clear();
-                                  Navigator.pushNamed(
+                                  await Provider.of<LoggedInUser>(context,
+                                          listen: false)
+                                      .initUser();
+                                  Navigator.popAndPushNamed(
                                       context, HomeScreen.routeId);
                                 } catch (e) {
                                   if (e.toString() == kInvalidUser) {
@@ -173,7 +178,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 icon: Icons.person_add,
                                 color: Colors.green,
                                 margin: 20,
-                                onPress: () => Navigator.popAndPushNamed(
+                                onPress: () => Navigator.pushNamed(
                                     context, SignUpScreen.routeId),
                               ),
                             ),

@@ -93,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen>
         if (ok != null && ok == true) {
           await setMeOnline(false);
           await _firebase.auth.signOut();
+          _user.clear();
           Navigator.pushNamedAndRemoveUntil(
               context, SignInScreen.routeId, (Route<dynamic> route) => false);
           return true;
@@ -242,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen>
                             onPress: () async {
                               await setMeOnline(false);
                               await _firebase.auth.signOut();
+                               _user.clear();
                               Navigator.pushNamedAndRemoveUntil(
                                   context,
                                   SignInScreen.routeId,

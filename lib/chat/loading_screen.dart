@@ -2,7 +2,6 @@ import 'package:baatein/chat/home_screen.dart';
 import 'package:baatein/login_reg/signin_screen.dart';
 import 'package:baatein/provider/firebase_service.dart';
 import 'package:baatein/provider/logged_in_user.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
@@ -22,17 +21,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void checkLastUser() async {
     FirebaseService firebase = Provider.of<FirebaseService>(context, listen:  false);
+    LoggedInUser user = Provider.of<LoggedInUser>(context, listen: false);
     await firebase.initServices();
-    if (firebase.auth.currentUser != null) {
-      await Provider.of<LoggedInUser>(context, listen: false).initUser(
-          email: firebase.auth.currentUser.email,
-          name: await FirebaseFirestore.instance
-              .collection('users')
-              .doc(firebase.auth.currentUser.email)
-              .get()
-              .then((value) => value.data()['name']));
+    if (await user.initUser()) 
       Navigator.popAndPushNamed(context, HomeScreen.routeId);
-    } else
+     else
       Navigator.popAndPushNamed(context, SignInScreen.routeId);
   }
 
