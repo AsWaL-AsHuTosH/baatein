@@ -47,6 +47,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        heroTag: 'groupListTag',
         backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
           Icons.group,
