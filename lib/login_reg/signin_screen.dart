@@ -142,14 +142,15 @@ class _SignInScreenState extends State<SignInScreen> {
                                     email: emailController.text,
                                     password: passwordController.text,
                                   );
-                                  setState(() {
-                                    spin = false;
-                                  });
-                                  emailController.clear();
-                                  passwordController.clear();
+
                                   await Provider.of<LoggedInUser>(context,
                                           listen: false)
                                       .initUser();
+                                  emailController.clear();
+                                  passwordController.clear();
+                                  setState(() {
+                                    spin = false;
+                                  });
                                   Navigator.popAndPushNamed(
                                       context, HomeScreen.routeId);
                                 } catch (e) {

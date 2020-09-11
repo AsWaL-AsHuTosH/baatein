@@ -132,15 +132,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       .collection('status')
                                       .doc('is_online')
                                       .set({'is_online': false});
-                                  setState(() {
-                                    spin = false;
-                                  });
-                                  nameController.clear();
-                                  emailController.clear();
-                                  passwordController.clear();
                                   await Provider.of<LoggedInUser>(context,
                                           listen: false)
                                       .initUser();
+                                  nameController.clear();
+                                  emailController.clear();
+                                  passwordController.clear();
+                                  setState(() {
+                                    spin = false;
+                                  });
                                   Navigator.pushNamedAndRemoveUntil(
                                       context,
                                       HomeScreen.routeId,
