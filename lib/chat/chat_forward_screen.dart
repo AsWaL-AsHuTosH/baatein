@@ -27,7 +27,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
   String data2;
   LoggedInUser _user;
   FirebaseService _firebase;
-  
+
   @override
   void initState() {
     super.initState();
@@ -186,7 +186,6 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                       return;
                     }
                     //Data for chats required
-                    LoggedInUser user = Provider.of<LoggedInUser>(context);
                     List<String> chats =
                         Provider.of<SelectedUser>(context, listen: false)
                             .getListChat();
@@ -221,7 +220,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           //adding to current user database
                           _firebase.firestore
                               .collection('users')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .set(
@@ -238,7 +237,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           );
                           _firebase.firestore
                               .collection('users')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .collection('messages')
@@ -246,7 +245,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': user.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
                               'id': messageId,
@@ -257,12 +256,12 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .set(
                             {
-                              'email': user.email,
-                              'name': user.name,
-                              'search_name': user.name.toLowerCase(),
+                              'email': _user.email,
+                              'name': _user.name,
+                              'search_name': _user.name.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': true,
                               'time': time,
@@ -273,13 +272,13 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
                               'message': element.message,
-                              'sender': user.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'txt',
                               'id': messageId,
@@ -302,7 +301,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           String messageId = Uuid().v4();
                           _firebase.firestore
                               .collection('users')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .set(
@@ -319,7 +318,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           );
                           _firebase.firestore
                               .collection('users')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .collection('chats')
                               .doc(friendEmail)
                               .collection('messages')
@@ -327,7 +326,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .set(
                             {
                               'message': element.message,
-                              'sender': user.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'img',
                               'id': messageId,
@@ -340,12 +339,12 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .set(
                             {
-                              'email': user.email,
-                              'name': user.name,
-                              'search_name': user.name.toLowerCase(),
+                              'email': _user.email,
+                              'name': _user.name,
+                              'search_name': _user.name.toLowerCase(),
                               'last_message': lastMessage,
                               'new_message': true,
                               'time': time,
@@ -356,13 +355,13 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               .collection('users')
                               .doc(friendEmail)
                               .collection('chats')
-                              .doc(user.email)
+                              .doc(_user.email)
                               .collection('messages')
                               .doc(messageId)
                               .set(
                             {
                               'message': element.message,
-                              'sender': user.email,
+                              'sender': _user.email,
                               'time': time,
                               'type': 'img',
                               'id': messageId,
@@ -384,7 +383,10 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
                           //adding to current user database
-                          _firebase.firestore.collection('groups').doc(groupId).update(
+                          _firebase.firestore
+                              .collection('groups')
+                              .doc(groupId)
+                              .update(
                             {
                               'last_message': lastMessage,
                               'read': [],
@@ -403,7 +405,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               'sender': _user.email,
                               'time': time,
                               'type': 'txt',
-                              'name': user.name,
+                              'name': _user.name,
                               'id': messageId,
                               'deleted_by': [],
                             },
@@ -423,7 +425,10 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               : element.message.substring(0, 25) + '...';
                           DateTime time = DateTime.now();
                           String messageId = Uuid().v4();
-                          _firebase.firestore.collection('groups').doc(groupId).update(
+                          _firebase.firestore
+                              .collection('groups')
+                              .doc(groupId)
+                              .update(
                             {
                               'last_message': lastMessage,
                               'read': [],
@@ -443,7 +448,7 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                               'time': time,
                               'type': 'img',
                               'image_url': element.url,
-                              'name': user.name,
+                              'name': _user.name,
                               'id': messageId,
                               'image_name': element.imageName,
                               'deleted_by': [],
@@ -467,25 +472,15 @@ class _ChatForwardScreenState extends State<ChatForwardScreen> {
                     });
 
                     await Flushbar(
-                      message: "Sending.",
-                      backgroundGradient:
-                          LinearGradient(colors: [Colors.orange, Colors.red]),
-                      icon: Icon(
-                        Icons.flight_takeoff,
-                        color: Colors.red[800],
-                        size: 20,
-                      ),
+                      message: "Sending",
                       margin: EdgeInsets.all(8),
                       borderRadius: 8,
-                      backgroundColor: Colors.red,
-                      duration: Duration(seconds: 2),
-                      boxShadows: [
-                        BoxShadow(
-                          color: Colors.lightBlueAccent,
-                          offset: Offset(0.0, 2.0),
-                          blurRadius: 3.0,
-                        )
-                      ],
+                      icon: Icon(
+                        Icons.send,
+                        color: Colors.blue[300],
+                        size: 20,
+                      ),
+                      duration: Duration(seconds: 1),
                     ).show(context);
                     await Provider.of<SelectedUser>(context, listen: false)
                         .clearChat();

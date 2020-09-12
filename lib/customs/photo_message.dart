@@ -47,10 +47,10 @@ class PhotoMessage extends StatelessWidget {
                       bottomLeft: Radius.circular(0.0),
                       bottomRight: Radius.circular(10.0),
                     ),
-              boxShadow: <BoxShadow>[
+                boxShadow: <BoxShadow>[
                 BoxShadow(
-                    color: Colors.black,
-                    blurRadius: 2.5,
+                    color: Colors.grey,
+                    blurRadius: 5.0,
                     offset: Offset(0.0, 1.0))
               ],
             ),

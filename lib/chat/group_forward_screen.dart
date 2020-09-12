@@ -478,7 +478,7 @@ class _GroupForwardScreenState extends State<GroupForwardScreen> {
                           .set({'count': count});
                     });
                     await Flushbar(
-                      message: "Sending.",
+                      message: "Sending",
                       margin: EdgeInsets.all(8),
                       borderRadius: 8,
                       icon: Icon(

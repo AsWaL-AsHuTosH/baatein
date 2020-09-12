@@ -235,88 +235,82 @@ class _ChatRoomState extends State<ChatRoom> {
               )
             : AppBar(
                 elevation: 10,
-                titleSpacing: 0,
                 centerTitle: false,
-                actions: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProfileView(
-                            friendEmail: widget.friendEmail,
-                            friendName: widget.friendName,
-                            isFriend: true,
-                          ),
+                title: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfileView(
+                          friendEmail: widget.friendEmail,
+                          friendName: widget.friendName,
+                          isFriend: true,
                         ),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        StreamBuilder<QuerySnapshot>(
-                          stream: _firebase.firestore
-                              .collection('profile_pic')
-                              .doc(widget.friendEmail)
-                              .collection('image')
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            String url;
-                            if (snapshot.hasData) {
-                              final image = snapshot.data.docs;
-                              url = image[0].data()['url'];
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _firebase.firestore
+                            .collection('profile_pic')
+                            .doc(widget.friendEmail)
+                            .collection('image')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          String url;
+                          if (snapshot.hasData) {
+                            final image = snapshot.data.docs;
+                            url = image[0].data()['url'];
+                          }
+                          if (url == null) url = kNoProfilePic;
+                          return CircleAvatar(
+                            backgroundImage: NetworkImage(url),
+                          );
+                        },
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        widget.friendName,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _firebase.firestore
+                            .collection('presence')
+                            .doc(widget.friendEmail)
+                            .collection('status')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          bool isOnline = false;
+                          try {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              isOnline =
+                                  snapshot.data.docs[0].data()['is_online'];
                             }
-                            if (url == null) url = kNoProfilePic;
-                            return CircleAvatar(
-                              backgroundImage: NetworkImage(url),
-                            );
-                          },
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          widget.friendName,
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                        ),
-                        StreamBuilder<QuerySnapshot>(
-                          stream: _firebase.firestore
-                              .collection('presence')
-                              .doc(widget.friendEmail)
-                              .collection('status')
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            bool isOnline = false;
-                            try {
-                              if (snapshot.hasData && snapshot.data != null) {
-                                isOnline =
-                                    snapshot.data.docs[0].data()['is_online'];
-                              }
-                            } catch (e) {
-                              isOnline = false;
-                            }
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: isOnline
-                                  ? Icon(
-                                      Icons.fiber_manual_record,
-                                      color: Colors.green,
-                                      size: 12,
-                                    )
-                                  : Container(
-                                      width: 0,
-                                      height: 0,
-                                    ),
-                            );
-                          },
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5,
-                        )
-                      ],
-                    ),
+                          } catch (e) {
+                            isOnline = false;
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: isOnline
+                                ? Icon(
+                                    Icons.fiber_manual_record,
+                                    color: Colors.green,
+                                    size: 12,
+                                  )
+                                : Container(
+                                    width: 0,
+                                    height: 0,
+                                  ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
         body: ModalProgressHUD(
           inAsyncCall: spin,
