@@ -35,7 +35,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: ModalProgressHUD(
         inAsyncCall: spin,
         child: Column(
