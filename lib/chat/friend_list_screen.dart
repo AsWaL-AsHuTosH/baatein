@@ -48,7 +48,7 @@ class FriendListScreen extends StatelessWidget {
                   .collection('users')
                   .doc(myEmail)
                   .collection('friends')
-                  .orderBy('name', descending: false)
+                  .orderBy('search_name', descending: false)
                   .snapshots(),
               builder: (context, snaps) {
                 List<FriendTile> friendList = [];

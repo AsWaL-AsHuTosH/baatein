@@ -33,7 +33,7 @@ class GroupProfileView extends StatefulWidget {
 class _GroupProfileViewState extends State<GroupProfileView> {
   LoggedInUser _user;
   FirebaseService _firebase;
-  
+
   @override
   void initState() {
     super.initState();
@@ -69,10 +69,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
         .get()
         .then((value) => value.data()['count']);
     if (count - 1 <= 0) {
-      await _firebase.firestore
-          .collection('shared_images')
-          .doc(name)
-          .delete();
+      await _firebase.firestore.collection('shared_images').doc(name).delete();
       await _firebase.storage.ref().child(name).delete();
     } else {
       --count;
@@ -90,10 +87,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
         .get()
         .then((value) => value.data()['count']);
     if (count - widget.members.length <= 0) {
-      await _firebase.firestore
-          .collection('shared_images')
-          .doc(name)
-          .delete();
+      await _firebase.firestore.collection('shared_images').doc(name).delete();
       await _firebase.storage.ref().child(name).delete();
     } else {
       count -= widget.members.length;
@@ -130,8 +124,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap:_user.email ==
-                          widget.groupAdmin
+                  onTap: _user.email == widget.groupAdmin
                       ? () async {
                           Navigator.push(
                             context,
@@ -229,8 +222,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                 Expanded(
                   child: ListView.builder(
                     itemBuilder: (context, index) {
-                      if (_user.email ==
-                          widget.groupAdmin) {
+                      if (_user.email == widget.groupAdmin) {
                         if (widget.members[index] == widget.groupAdmin) {
                           return FriendTile(
                             friendName:
@@ -401,8 +393,7 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               setState(() {
                                 spin = true;
                               });
-                              String email =
-                                  _user.email;
+                              String email = _user.email;
 
                               var messages = await _firebase.firestore
                                   .collection('groups')
@@ -625,27 +616,18 @@ class _GroupProfileViewState extends State<GroupProfileView> {
                               setState(() {
                                 spin = false;
                               });
+
                               await Flushbar(
                                 message:
                                     "${widget.groupName} is no longer available.",
-                                backgroundGradient: LinearGradient(
-                                    colors: [Colors.red, Colors.orange]),
-                                icon: Icon(
-                                  Icons.directions_walk,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
                                 margin: EdgeInsets.all(8),
                                 borderRadius: 8,
-                                backgroundColor: Colors.red,
-                                duration: Duration(seconds: 2),
-                                boxShadows: [
-                                  BoxShadow(
-                                    color: Colors.lightBlueAccent,
-                                    offset: Offset(0.0, 2.0),
-                                    blurRadius: 3.0,
-                                  )
-                                ],
+                                icon: Icon(
+                                  Icons.directions_walk,
+                                  color: Colors.blue[300],
+                                  size: 20,
+                                ),
+                                duration: Duration(seconds: 1),
                               ).show(context);
 
                               Navigator.popUntil(context,

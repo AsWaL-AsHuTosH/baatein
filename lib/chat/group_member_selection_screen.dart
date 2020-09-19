@@ -14,15 +14,17 @@ import 'package:provider/provider.dart';
 class GroupMemberSelectionScreen extends StatefulWidget {
   static const String routeId = 'group_selection_screen';
   @override
-  _GroupMemberSelectionScreenState createState() => _GroupMemberSelectionScreenState();
+  _GroupMemberSelectionScreenState createState() =>
+      _GroupMemberSelectionScreenState();
 }
 
-class _GroupMemberSelectionScreenState extends State<GroupMemberSelectionScreen> {
+class _GroupMemberSelectionScreenState
+    extends State<GroupMemberSelectionScreen> {
   String data1;
   String data2;
   LoggedInUser _user;
   FirebaseService _firebase;
-  
+
   @override
   void initState() {
     super.initState();
@@ -79,7 +81,7 @@ class _GroupMemberSelectionScreenState extends State<GroupMemberSelectionScreen>
                           itemCount: list.length,
                           itemBuilder: (context, index) =>
                               StreamBuilder<QuerySnapshot>(
-                            stream:  _firebase.firestore
+                            stream: _firebase.firestore
                                 .collection('profile_pic')
                                 .doc(list[index])
                                 .collection('image')
@@ -181,11 +183,7 @@ class _GroupMemberSelectionScreenState extends State<GroupMemberSelectionScreen>
                                   .getListChat()),
                     ),
                   );
-                  if (ok == null || ok == false) {
-                    Navigator.pop(context, false);
-                  } else {
-                    Navigator.pop(context, true);
-                  }
+                  if (ok != null && ok == true) Navigator.pop(context, true);
                 },
               ),
             )

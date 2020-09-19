@@ -2,6 +2,7 @@ import 'package:baatein/chat/group_member_selection_screen.dart';
 import 'package:baatein/customs/group_chatcard_builder.dart';
 import 'package:baatein/provider/firebase_service.dart';
 import 'package:baatein/provider/logged_in_user.dart';
+import 'package:baatein/provider/selected_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class GroupChatScreen extends StatefulWidget {
 class _GroupChatScreenState extends State<GroupChatScreen> {
   LoggedInUser _user;
   FirebaseService _firebase;
-  
+
   @override
   void initState() {
     super.initState();
@@ -54,8 +55,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           color: Colors.white,
         ),
         onPressed: () async {
-          var ok =
-              await Navigator.pushNamed(context, GroupMemberSelectionScreen.routeId);
+          var ok = await Navigator.pushNamed(
+              context, GroupMemberSelectionScreen.routeId);
           if (ok != null && ok == true) {
             Flushbar(
               message: "Group created successfully.",
@@ -69,6 +70,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               duration: Duration(seconds: 1),
             ).show(context);
             return;
+          } else {
+            await Provider.of<SelectedUser>(context, listen: false).clearChat();
           }
         },
       ),
