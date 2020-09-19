@@ -90,7 +90,7 @@ class _GroupSetupState extends State<GroupSetup> {
                       radius: 30,
                     )
                   : CircleAvatar(
-                      backgroundImage: AssetImage(imageFile.path),
+                      backgroundImage: FileImage(imageFile),
                       radius: 30,
                     ),
             ),

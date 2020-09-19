@@ -15,7 +15,7 @@ class ImagePreviewScreen extends StatelessWidget {
         children: [
           Expanded(
             child: PhotoView(
-              imageProvider: AssetImage(imageFile.path),
+              imageProvider: FileImage(imageFile),
             ),
           ),
           Padding(
