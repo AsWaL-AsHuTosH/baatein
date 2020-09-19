@@ -31,7 +31,7 @@ class RequestTile extends StatelessWidget {
         ),
         child: Container(
           margin: EdgeInsets.all(1.0),
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(5.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
